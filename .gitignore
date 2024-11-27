@@ -49,10 +49,6 @@ build/
 .DS_Store
 Thumbs.db
 
-# Spring Boot properties and secrets
-*.properties
-*.yml
-*.yaml
 
 # Sensitive files (customize as needed)
 secrets/
