@@ -1,0 +1,102 @@
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# Eclipse specific files
+.project
+.classpath
+.settings/
+bin/
+tmp/
+
+# IntelliJ IDEA specific files
+.idea/
+*.iml
+*.iws
+out/
+
+
+
+# Maven specific files
+target/
+.mvn/
+.mvn/**
+!mvn/wrapper
+!mvn/wrapper/**
+
+# Gradle specific files
+.gradle/
+build/
+
+
+# Eclipse specific files
+*.launch
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Spring Boot properties and secrets
+*.properties
+*.yml
+*.yaml
+
+# Sensitive files (customize as needed)
+secrets/
+
+# Test reports
+surefire-reports/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+
+# Docker files
+**/.dockerignore
+**/Dockerfile
+**/Dockerfile-*
+
+
+# NetBeans specific files
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# VS Code specific files
+.vscode/
+
+
+# Maven specific files
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+
+# Other
+!gradle/wrapper/gradle-wrapper.jar
+
+# Ignore generated Javadoc files
+/target/site/apidocs/
+
+# Local environment files
+.env
+**/application-dev.properties
