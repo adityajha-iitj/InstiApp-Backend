@@ -5,6 +5,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
+import java.util.Date;
+
 public class MenuOverride {
 
     @Id
@@ -14,7 +16,7 @@ public class MenuOverride {
     @ManyToOne
     private MessMenu messMenu;
 
-    private Integer day;
+    private Date date;
 
     private MenuItem menuItem;
 }

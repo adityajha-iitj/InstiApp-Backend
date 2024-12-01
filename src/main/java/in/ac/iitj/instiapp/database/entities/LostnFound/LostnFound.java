@@ -1,8 +1,11 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.LostnFound;
 
+import in.ac.iitj.instiapp.database.entities.Media;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
+
+import javax.xml.stream.Location;
 
 
 @Entity
@@ -10,7 +13,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "lostnfound")
 public class LostnFound {
 
     @Id
@@ -18,15 +20,18 @@ public class LostnFound {
     Long Id;
 
     @ManyToOne
-    @JoinColumn(name = "finder_id", nullable = true)
+    @JoinColumn(name = "finder_id", nullable = false)
     User finder;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = true)
     User owner;
 
-    @Column( nullable = false)
-    String Location;
+    @ManyToOne
+    Locations Landmark;
+
+    @Column( nullable = true)
+    String extraInfo;
 
     @Column( nullable = false)
     Boolean status;

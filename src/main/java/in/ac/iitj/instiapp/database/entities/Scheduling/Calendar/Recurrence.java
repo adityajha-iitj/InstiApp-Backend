@@ -3,6 +3,8 @@ package in.ac.iitj.instiapp.database.entities.Scheduling.Calendar;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Date;
+
 
 @Entity
 @Getter
@@ -17,19 +19,16 @@ public class Recurrence {
     Long Id;
 
     @Enumerated(EnumType.STRING)
-    @Column( nullable = false)
+    @Column( nullable = true)
     CalendarFrequency Frequency;
 
-    @Column(nullable = false)
+    @Column( nullable = false)
+    Date until;
+
+    @Column(nullable = true)
     Integer count;
 
-    @Column( nullable = false)
-    Integer until;
-
-    @Column( nullable = false)
+    @Column( nullable = true)
     Integer interval;
 
-    @Enumerated(EnumType.STRING)
-    @Column( nullable = false)
-    WeekDay BYDAY;
 }

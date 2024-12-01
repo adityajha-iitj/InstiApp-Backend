@@ -1,5 +1,6 @@
 package in.ac.iitj.instiapp.database.entities;
 
+import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,12 +27,14 @@ public class Grievance {
     User userFrom;
 
 
-    //To be implemented using organisation
+    //To be implemented permission > read
     @ManyToOne
-    User userTo;
+    OrganisationRole organisationRole;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    Boolean resolved;
 
     @ManyToOne
-    @JoinColumn(name = "media_id", nullable = true)
+     @JoinColumn(name = "media_id", nullable = true)
     Media media;
 }

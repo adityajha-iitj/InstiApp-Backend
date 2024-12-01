@@ -10,7 +10,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "wellBeingMember")
 public class WellBeingMember {
 
     @Id
@@ -18,7 +17,6 @@ public class WellBeingMember {
     Long Id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false) // Foreign key in Media table
     User user;
 
     @Column(nullable = false)
