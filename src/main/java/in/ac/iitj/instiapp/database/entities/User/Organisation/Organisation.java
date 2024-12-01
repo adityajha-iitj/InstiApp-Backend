@@ -1,5 +1,7 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.User.Organisation;
 
+import in.ac.iitj.instiapp.database.entities.Media;
+import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +11,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "organisation")
 public class Organisation {
 
     @Id
@@ -17,23 +18,20 @@ public class Organisation {
     Long Id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
     User user;
 
     @ManyToOne
     Organisation parentOrganisation;
 
-    @OneToOne
-    @JoinColumn(name = "type", nullable = false)
+    @ManyToOne
     OrganisationType type;
 
     @Column(nullable = false)
     String Description;
 
-    @ManyToOne
-    @JoinColumn(name = "IntroMedia", nullable = false)
+    @OneToOne
     Media media;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     String Website;
 }

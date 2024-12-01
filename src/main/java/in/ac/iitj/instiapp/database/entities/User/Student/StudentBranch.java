@@ -1,5 +1,6 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.User.Student;
 
+import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,7 +21,7 @@ public class StudentBranch {
     String name;
 
     @ManyToOne
-    Organisation   organisation;
+    Organisation organisation;
 
 
     @Column(name = "opening_year",nullable = false,columnDefinition = "INTEGER CHECK (opening_year >= 2007 AND opening_year <= 2200)")

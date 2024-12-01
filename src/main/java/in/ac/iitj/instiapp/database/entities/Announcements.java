@@ -1,14 +1,20 @@
 package in.ac.iitj.instiapp.database.entities;
 
+import in.ac.iitj.instiapp.database.entities.User.Groups;
+import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
+import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "announcements")
 public class Announcements {
 
     @Id
@@ -25,10 +31,15 @@ public class Announcements {
     @Column( nullable = true)
     String Description;
 
-    @ManyToOne
-    @JoinColumn(name = "Media[]", nullable = true)
-    Media media;
+    @Column(nullable = false)
+    Date dateOfAnnouncement;
 
-    @Column( nullable = false)
-    String targetGroup;
+    @OneToMany
+    Set<Media> media;
+
+    @OneToMany
+    List<Groups> groupsList;
+
+    @OneToMany
+    List<User> users;
 }

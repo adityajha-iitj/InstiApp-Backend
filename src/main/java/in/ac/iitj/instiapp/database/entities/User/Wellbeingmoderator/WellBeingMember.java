@@ -1,5 +1,6 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.User.Wellbeingmoderator;
 
+import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 

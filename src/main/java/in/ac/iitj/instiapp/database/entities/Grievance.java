@@ -1,5 +1,6 @@
 package in.ac.iitj.instiapp.database.entities;
 
+import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +10,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "grievance")
 public class Grievance {
 
     @Id
@@ -23,8 +23,13 @@ public class Grievance {
     String Description;
 
     @ManyToOne
-    @JoinColumn(name = "por_id", nullable = true)
-    POR toPor;
+    User userFrom;
+
+
+    //To be implemented using organisation
+    @ManyToOne
+    User userTo;
+
 
     @ManyToOne
     @JoinColumn(name = "media_id", nullable = true)

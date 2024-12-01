@@ -1,7 +1,10 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.Scheduling.Buses;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.sql.Time;
+import java.util.List;
 
 
 @Entity
@@ -9,13 +12,18 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "busLocation")
-public class BusLocation {
-    
+public class BusSchedule {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
     @Column( nullable = false)
-    String name;
+    Integer busNumber;
+
+    @OneToMany
+    List<BusRun> runs;
+
+
+
 }

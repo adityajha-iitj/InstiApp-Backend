@@ -1,5 +1,6 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.Scheduling.Calendar;
 
+import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +20,6 @@ public class Calendar {
     @Column( nullable = false)
     String public_id;
 
-    @Column( nullable = false)
-    Integer userId;
+    @OneToOne(mappedBy = "calendar")
+    User user;
 }

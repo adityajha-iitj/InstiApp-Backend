@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.Scheduling.Calendar;
 
 public enum WeekDay {
     SUNDAY,

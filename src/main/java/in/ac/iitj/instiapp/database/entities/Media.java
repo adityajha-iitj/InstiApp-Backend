@@ -8,7 +8,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "media")
 public class Media {
 
     @Id
@@ -20,11 +19,11 @@ public class Media {
     Mediatype type;
 
     @Column( nullable = false)
-    String public_id ;
+    String publicId ;
 
     @Column( nullable = false)
-    String asset_id;
+    String assetId;
 
     @Column( nullable = false)
-    String public_url ;
+    String publicUrl ;
 }

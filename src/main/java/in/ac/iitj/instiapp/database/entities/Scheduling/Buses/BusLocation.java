@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.Scheduling.Buses;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,9 +9,8 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "organisation_type")
-public class OrganisationType {
-
+public class BusLocation {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;

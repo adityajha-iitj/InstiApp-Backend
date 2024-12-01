@@ -1,5 +1,6 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.User.Student;
 
+import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +10,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "student")
 public class Student {
 
     @Id
@@ -17,15 +17,12 @@ public class Student {
     Long Id;
 
     @OneToOne
-    @JoinColumn(name= "user_id", nullable = false)
     User user;
 
     @ManyToOne
-    @JoinColumn(name = "program", nullable = false)
     StudentProgram program;
 
     @ManyToOne
-    @JoinColumn(name = "branch", nullable = false)
     StudentBranch branch;
 
     @Column( nullable = false)

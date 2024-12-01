@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "messmenu")
 public class MessMenu {
 
     @Id
@@ -22,18 +21,8 @@ public class MessMenu {
     @Column(nullable = false)
     Integer month;
 
-    @Column( nullable = false)
+    @Column( nullable = true)
     Integer day;
 
-    @Column( nullable = false)
-    String breakfast;
-
-    @Column( nullable = false)
-    String lunch;
-
-    @Column( nullable = false)
-    String snacks;
-
-    @Column( nullable = false)
-    String dinner;
+    MenuItem menuItem;
 }

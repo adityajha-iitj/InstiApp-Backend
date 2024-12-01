@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.User.Organisation;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,8 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentProgram {
+@Table(name = "organisation_type")
+public class OrganisationType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

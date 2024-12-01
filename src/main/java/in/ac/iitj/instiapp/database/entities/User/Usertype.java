@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.User;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_type")
 public class Usertype {
 
     @Id
