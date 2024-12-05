@@ -3,57 +3,49 @@ package in.ac.iitj.instiapp.Tests.Repostiory;
 import in.ac.iitj.instiapp.Repository.LostnFoundRepository;
 import in.ac.iitj.instiapp.Repository.impl.LostnFoundRepositoryImpl;
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Component;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJpaTest
 @Import({LostnFoundRepositoryImpl.class})
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LostnFoundTests {
-
 
     @Autowired
     private LostnFoundRepository lostnFoundRepository;
 
-    @Test
-    public void testGetListOfLocations() {
-        // Create and persist mock data
+    @BeforeEach
+    public void save(){
         Locations location1 = new Locations();
-        location1.setName("Location1");
+        location1.setName("LHC");
         Locations location2 = new Locations();
-        location2.setName("Location2");
+        location2.setName("PHC");
+        lostnFoundRepository.saveLocation(location1);
+        lostnFoundRepository.saveLocation(location2);
+    }
 
-        lostnFoundRepository.save(location1);
-        lostnFoundRepository.save(location2);
-
-        // Define pageable
+    @Test
+    @Order(1)
+    public void testGetListOfLocations() {
         Pageable pageable = PageRequest.of(0, 10);
+        List<String> locations = lostnFoundRepository.getListOfLocationsName(pageable);
+        Assertions.assertThat(locations).containsExactlyInAnyOrder("LHC", "PHC");
+    }
 
-        // Call the method under test
-        List<Map<String, Object>> locations = lostnFoundRepository.getListOfLocations(pageable);
-//
-        // Assertions
-        assertNotNull(locations);
-        assertEquals(2, locations.size());
-        assertEquals("Location1", locations.get(0).get("name"));
-        assertEquals("Location2", locations.get(1).get("name"));
+    @Test
+    @Order(2)
+    public void testDeleteLocationByName(){
+        lostnFoundRepository.deleteLocationByName("PHC");
+        Pageable pageable = PageRequest.of(0, 10);
+        List<String> locations = lostnFoundRepository.getListOfLocationsName(pageable);
+        System.out.println(locations);
+        Assertions.assertThat(locations).containsExactlyInAnyOrder("LHC");
     }
 }
