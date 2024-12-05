@@ -50,4 +50,6 @@ public class Events {
     @ManyToOne
     @JoinColumn(name = "recurrence_rule", nullable = true)
     Recurrence recurrence;
+
+    Boolean isHide;
 }

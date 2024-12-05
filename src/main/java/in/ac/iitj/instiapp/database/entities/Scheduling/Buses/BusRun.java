@@ -1,11 +1,19 @@
 package in.ac.iitj.instiapp.database.entities.Scheduling.Buses;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.sql.Time;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class BusRun {
 
     @jakarta.persistence.Id

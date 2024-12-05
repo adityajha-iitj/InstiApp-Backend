@@ -4,13 +4,14 @@ import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "calendar")
 public class Calendar {
 
     @Id
@@ -22,4 +23,7 @@ public class Calendar {
 
     @OneToOne(mappedBy = "calendar")
     User user;
+
+    @OneToMany(mappedBy = "calendar")
+    List<Events> events;
 }

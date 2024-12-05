@@ -23,7 +23,4 @@ public class BusSchedule {
 
     @OneToMany
     List<BusRun> runs;
-
-
-
 }
