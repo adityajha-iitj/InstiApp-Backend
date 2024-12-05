@@ -1,13 +1,11 @@
 package in.ac.iitj.instiapp.database.entities.User;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 
 import java.util.Set;
 
 @Entity
+@Table(name = "groups")
 public class Groups {
 
     @jakarta.persistence.Id

@@ -15,6 +15,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "announcements")
 public class Announcements {
 
     @Id
@@ -38,8 +39,9 @@ public class Announcements {
     Set<Media> media;
 
     @OneToMany
-    List<Groups> groupsList;
+    @JoinTable(name = "announcements_groups_list")
+    Set<Groups> groupsList;
 
     @OneToMany
-    List<User> users;
+    Set<User> users;
 }

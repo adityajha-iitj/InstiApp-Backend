@@ -4,6 +4,7 @@ import in.ac.iitj.instiapp.database.entities.Media;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
 
 import javax.xml.stream.Location;
 
@@ -13,6 +14,7 @@ import javax.xml.stream.Location;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "lostnfound")
 public class LostnFound {
 
     @Id

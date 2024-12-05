@@ -1,8 +1,22 @@
 package in.ac.iitj.instiapp.Repository;
 
-import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusLocation;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.repository.Repository;
+import org.springframework.data.domain.Pageable;
 
-public interface BusLocationRepository extends Repository<BusLocation, Long>, JpaSpecificationExecutor<BusLocation> {
+import java.util.List;
+
+public interface BusRepository  {
+
+
+    void saveBusLocation(String name);
+    void deleteBusLocation(String name);
+    List<String> getListOfBusLocations(Pageable pageable);
+
+
+
+    void saveBusSchedule(String busNumber);
+    void deleteBusSchedule(String busNumber);
+    void updateBusSchedule(String oldBusNumber,String newBusNumber);
+
+
+
 }

@@ -12,12 +12,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "locations")
 public class Locations {
 
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
     Long Id;
 
-    @Column(nullable = false)
-    String Name;
+    @Column(nullable = false, unique = true)
+    String name;
 }

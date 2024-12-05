@@ -1,9 +1,9 @@
-
 package in.ac.iitj.instiapp.Tests.Service;
-import in.ac.iitj.instiapp.Tests.BaseTestConfig;
+
 import in.ac.iitj.instiapp.config.CloudinaryConfig;
 import in.ac.iitj.instiapp.services.CloudinaryService;
 import in.ac.iitj.instiapp.services.impl.CloudinaryServiceImpl;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ContextConfiguration(classes = { TestConfig.class, BaseTestConfig.class})
+@ContextConfiguration(classes = {TestConfig.class})
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CloudinaryServiceTest {
@@ -27,20 +27,24 @@ public class CloudinaryServiceTest {
     @Autowired
     CloudinaryService cloudinaryService;
 
-    private static Map uploadedFileInfo;
+    private static Map uploadedFileInfo;  // Make this static so it's shared across all tests
 
     @BeforeAll
     static void setUp(@Autowired CloudinaryService cloudinaryService) {
-        try {
-            ClassPathResource resource = new ClassPathResource("image.jpg");
-            byte[] fileContent = Files.readAllBytes(resource.getFile().toPath());
-            uploadedFileInfo = cloudinaryService.uploadFile(fileContent, "tests");
-        } catch (Exception e) {
-            fail("Failed to setup test: " + e.getMessage());
+        if (uploadedFileInfo == null) {
+            try {
+                // Load the image only once before any tests run
+                ClassPathResource resource = new ClassPathResource("img.png");  // Ensure this image exists in src/test/resources
+                byte[] fileContent = Files.readAllBytes(resource.getFile().toPath());
+                uploadedFileInfo = cloudinaryService.uploadFile(fileContent, "tests");
+            } catch (Exception e) {
+                fail("Failed to setup test: " + e.getMessage());
+            }
         }
     }
 
     @Test
+    @Order(1)
     @DisplayName("Verify Upload Result")
     void verifyUploadResult() {
         assertAll(
@@ -53,6 +57,7 @@ public class CloudinaryServiceTest {
     }
 
     @Test
+    @Order(2)
     @DisplayName("Delete Image")
     void deleteUploadedFile() {
         Map response = cloudinaryService.deleteFile(uploadedFileInfo.get("public_id").toString());
@@ -61,7 +66,7 @@ public class CloudinaryServiceTest {
 
     @AfterAll
     static void cleanup(@Autowired CloudinaryService cloudinaryService) {
-        // In case test fails before deletion
+        // Cleanup after all tests are done
         if (uploadedFileInfo != null && uploadedFileInfo.get("public_id") != null) {
             try {
                 cloudinaryService.deleteFile(uploadedFileInfo.get("public_id").toString());
@@ -72,17 +77,16 @@ public class CloudinaryServiceTest {
     }
 }
 
-
-
-
-
-
 @TestConfiguration
 @Import(CloudinaryConfig.class)
-class TestConfig{
+class TestConfig {
+    @Bean
+    public CloudinaryService cloudinaryService() {
+        return new CloudinaryServiceImpl();
+    }
 
     @Bean
-    public  CloudinaryService cloudinaryService(){
-        return  new CloudinaryServiceImpl();
+    public Dotenv dotenv() {
+        return Dotenv.load();
     }
 }

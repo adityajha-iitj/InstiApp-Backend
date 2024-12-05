@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 
 @Entity
@@ -12,6 +13,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "calendar")
 public class Calendar {
 
     @Id
@@ -25,5 +27,5 @@ public class Calendar {
     User user;
 
     @OneToMany(mappedBy = "calendar")
-    List<Events> events;
+    Set<Events> events;
 }

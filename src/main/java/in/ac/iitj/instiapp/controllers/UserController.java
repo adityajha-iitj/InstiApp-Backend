@@ -22,7 +22,7 @@ public class UserController {
      @GetMapping("/")
     public ResponseEntity<?> test(){
          Pageable pageable = PageRequest.of(0,10);
-        return  new ResponseEntity<>(lostnFoundRepository.getListOfLocations(pageable), HttpStatus.OK);
+        return  new ResponseEntity<>(lostnFoundRepository.getListOfLocationsName(pageable), HttpStatus.OK);
     }
 
 

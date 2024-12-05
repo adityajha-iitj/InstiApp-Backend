@@ -13,6 +13,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "bus_override")
 public class BusOverride {
 
     @jakarta.persistence.Id

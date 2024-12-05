@@ -8,12 +8,14 @@ import lombok.Setter;
 
 import java.sql.Time;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "bus_run")
 public class BusRun {
 
     @jakarta.persistence.Id
@@ -36,5 +38,5 @@ public class BusRun {
     private ScheduleType scheduleType;
 
    @OneToMany(mappedBy = "busRun")
-   List<BusOverride> busOverrideList;
+   Set<BusOverride> busOverrideList;
 }
