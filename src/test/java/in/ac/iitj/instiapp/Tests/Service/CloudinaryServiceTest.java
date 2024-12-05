@@ -16,6 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.nio.file.Files;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,21 +25,40 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CloudinaryServiceTest {
 
+    private static Map uploadedFileInfo;  // Make this static so it's shared across all tests
     @Autowired
     CloudinaryService cloudinaryService;
-
-    private static Map uploadedFileInfo;  // Make this static so it's shared across all tests
 
     @BeforeAll
     static void setUp(@Autowired CloudinaryService cloudinaryService) {
         if (uploadedFileInfo == null) {
+
+            // Load the image only once before any tests run
             try {
-                // Load the image only once before any tests run
+
+
                 ClassPathResource resource = new ClassPathResource("img.png");  // Ensure this image exists in src/test/resources
                 byte[] fileContent = Files.readAllBytes(resource.getFile().toPath());
-                uploadedFileInfo = cloudinaryService.uploadFile(fileContent, "tests");
+                Optional<Map<Object, Object>> uploadedFileInfoOptional = cloudinaryService.uploadFile(fileContent, "tests").get();
+                if (uploadedFileInfoOptional.isEmpty()) {
+                   fail();
+                }
+                uploadedFileInfoOptional.ifPresent(map -> uploadedFileInfo = map);
             } catch (Exception e) {
-                fail("Failed to setup test: " + e.getMessage());
+                e.printStackTrace();
+                fail();
+            }
+        }
+    }
+
+    @AfterAll
+    static void cleanup(@Autowired CloudinaryService cloudinaryService) {
+        // Cleanup after all tests are done
+        if (uploadedFileInfo != null && uploadedFileInfo.get("public_id") != null) {
+            try {
+                cloudinaryService.deleteFileAsync(uploadedFileInfo.get("public_id").toString());
+            } catch (Exception e) {
+                System.err.println("Cleanup failed: " + e.getMessage());
             }
         }
     }
@@ -60,19 +80,16 @@ public class CloudinaryServiceTest {
     @Order(2)
     @DisplayName("Delete Image")
     void deleteUploadedFile() {
-        Map response = cloudinaryService.deleteFile(uploadedFileInfo.get("public_id").toString());
-        assertEquals("ok", response.get("result"));
-    }
-
-    @AfterAll
-    static void cleanup(@Autowired CloudinaryService cloudinaryService) {
-        // Cleanup after all tests are done
-        if (uploadedFileInfo != null && uploadedFileInfo.get("public_id") != null) {
-            try {
-                cloudinaryService.deleteFile(uploadedFileInfo.get("public_id").toString());
-            } catch (Exception e) {
-                System.err.println("Cleanup failed: " + e.getMessage());
-            }
+        try {
+            Optional<Map<Object, Object>> response = cloudinaryService.deleteFileAsync(uploadedFileInfo.get("public_id").toString()).get();
+            response.ifPresentOrElse(objectObjectMap -> {
+                assertEquals("ok", objectObjectMap.get("result"));
+            }, () -> {
+                assert false;
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+           fail();
         }
     }
 }
