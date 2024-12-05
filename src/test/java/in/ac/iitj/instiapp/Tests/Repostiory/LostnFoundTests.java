@@ -1,21 +1,32 @@
-package in.ac.iitj.instiapp.Tests;
+package in.ac.iitj.instiapp.Tests.Repostiory;
 
 import in.ac.iitj.instiapp.Repository.LostnFoundRepository;
+import in.ac.iitj.instiapp.Repository.impl.LostnFoundRepositoryImpl;
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.xml.stream.Location;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest
+@DataJpaTest
+@Import({LostnFoundRepositoryImpl.class})
 public class LostnFoundTests {
 
 
