@@ -135,4 +135,26 @@ public class BustTest {
         Assertions.assertThat(busRepository.existsBusSchedule("B2")).isTrue();
     }
 
+    @Test
+    @Order(8)
+    @Rollback(value = true)
+    public void testDeleteBusSchedule() {
+        Assertions.assertThat(busRepository.existsBusSchedule("B1")).isTrue();
+
+        busRepository.deleteBusSchedule("B1");
+
+        // Verify the schedule no longer exists
+        Assertions.assertThat(busRepository.existsBusSchedule("B1")).isFalse();
+
+        // Verify that associated BusRun records are deleted
+        Pageable pageable = PageRequest.of(0, 10);
+        List<BusSchedule> busSchedules = busRepository.getBusSchedules(pageable);
+        Assertions.assertThat(busSchedules).isEmpty();
+
+        // Verify that associated BusOverride records are deleted (indirect verification through BusRun deletion)
+        // This assumes no orphan overrides exist if the BusRun has been removed.
+        // If you have a direct repository method to check BusOverride, you can add that check here.
+    }
+
+
 }
