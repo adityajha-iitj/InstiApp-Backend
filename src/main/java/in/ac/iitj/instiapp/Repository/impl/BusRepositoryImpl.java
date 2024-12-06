@@ -9,6 +9,7 @@ import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.ScheduleType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
@@ -134,51 +135,35 @@ public class BusRepositoryImpl implements BusRepository {
     @Override
     @Transactional
     public void deleteBusSchedule(String busNumber) {
-        try {
-            // Step 1: Fetch the BusSchedule by busNumber
-            BusSchedule busSchedule = entityManager.createQuery(
-                            "SELECT bs FROM BusSchedule bs WHERE bs.busNumber = :busNumber", BusSchedule.class)
-                    .setParameter("busNumber", busNumber)
-                    .getSingleResult();
 
-            if (busSchedule == null) {
-                throw new EntityNotFoundException("BusSchedule with busNumber " + busNumber + " not found.");
-            }
+       if(! existsBusSchedule(busNumber)){
+           throw new DataIntegrityViolationException("Bus schedule with bus_number " + busNumber + " not found");
+       }
+        // Step 1: Fetch the BusSchedule by busNumber
+        List<Long> busRunsId = entityManager.createQuery(
+                        "SELECT br.id FROM BusRun br WHERE br.busSchedule.busNumber = :busNumber",Long.class)
+                .setParameter("busNumber", busNumber)
+                .getResultList();
 
-            // Step 2: Fetch and delete associated BusOverride records
-            List<Long> busRunIds = entityManager.createQuery(
-                            "SELECT br.Id FROM BusRun br WHERE br.busSchedule = :busSchedule", Long.class)
-                    .setParameter("busSchedule", busSchedule)
-                    .getResultList();
-
-            if (!busRunIds.isEmpty()) {
-                entityManager.createQuery("DELETE FROM BusOverride bo WHERE bo.busRun.Id IN :busRunIds")
-                        .setParameter("busRunIds", busRunIds)
-                        .executeUpdate();
-            }
-
-            // Step 3: Delete associated BusRun records
-            entityManager.createQuery("DELETE FROM BusRun br WHERE br.busSchedule = :busSchedule")
-                    .setParameter("busSchedule", busSchedule)
+        if (!busRunsId.isEmpty()) {
+            entityManager.createQuery("DELETE FROM BusOverride bo WHERE bo.busRun.Id IN :busRunIds")
+                    .setParameter("busRunIds",busRunsId)
                     .executeUpdate();
 
-            // Step 4: Delete the BusSchedule
-            entityManager.createQuery("DELETE FROM BusSchedule bs WHERE bs.busNumber = :busNumber")
-                    .setParameter("busNumber", busNumber)
+            entityManager.createQuery("DELETE FROM BusRun  br where br.id IN :busRunIds")
+                    .setParameter("busRunIds",busRunsId)
                     .executeUpdate();
-
-            log.info("Successfully deleted BusSchedule, BusRun, and BusOverride records for busNumber: {}", busNumber);
-        } catch (EntityNotFoundException e) {
-            log.error("Error: {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("Failed to delete BusSchedule with busNumber: {}. Exception: {}", busNumber, e.getMessage());
-            throw new RuntimeException("Failed to delete BusSchedule with cascading deletions.", e);
         }
+        // Step 4: Delete the BusSchedule
+        entityManager.createQuery("DELETE FROM BusSchedule bs WHERE bs.busNumber = :busNumber")
+                .setParameter("busNumber", busNumber)
+                .executeUpdate();
+
+        log.info("Successfully deleted BusSchedule, BusRun, and BusOverride records for busNumber: {}", busNumber);
+
     }
 
 
-    //    TODO
     @Override
     public void updateBusSchedule(String oldBusNumber, String newBusNumber) {
         if(existsBusSchedule(newBusNumber)){
