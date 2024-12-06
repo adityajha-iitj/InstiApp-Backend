@@ -22,7 +22,6 @@ public class BusLocation {
     Long Id;
 
 
-
-    @Column( nullable = false,unique = true)
+    @Column(nullable = false, unique = true)
     String name;
 }

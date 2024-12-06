@@ -14,6 +14,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import jakarta.persistence.EntityNotFoundException;
 
 import java.sql.Time;
 import java.util.List;
@@ -130,11 +131,52 @@ public class BusRepositoryImpl implements BusRepository {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS(SELECT 1 FROM bus_schedule WHERE bus_number = ?)", Boolean.class, busNumber));
     }
 
-    //    TODO
     @Override
+    @Transactional
     public void deleteBusSchedule(String busNumber) {
-        jdbcTemplate.update("delete from bus_schedule where bus_number=?", busNumber);
+        try {
+            // Step 1: Fetch the BusSchedule by busNumber
+            BusSchedule busSchedule = entityManager.createQuery(
+                            "SELECT bs FROM BusSchedule bs WHERE bs.busNumber = :busNumber", BusSchedule.class)
+                    .setParameter("busNumber", busNumber)
+                    .getSingleResult();
+
+            if (busSchedule == null) {
+                throw new EntityNotFoundException("BusSchedule with busNumber " + busNumber + " not found.");
+            }
+
+            // Step 2: Fetch and delete associated BusOverride records
+            List<Long> busRunIds = entityManager.createQuery(
+                            "SELECT br.Id FROM BusRun br WHERE br.busSchedule = :busSchedule", Long.class)
+                    .setParameter("busSchedule", busSchedule)
+                    .getResultList();
+
+            if (!busRunIds.isEmpty()) {
+                entityManager.createQuery("DELETE FROM BusOverride bo WHERE bo.busRun.Id IN :busRunIds")
+                        .setParameter("busRunIds", busRunIds)
+                        .executeUpdate();
+            }
+
+            // Step 3: Delete associated BusRun records
+            entityManager.createQuery("DELETE FROM BusRun br WHERE br.busSchedule = :busSchedule")
+                    .setParameter("busSchedule", busSchedule)
+                    .executeUpdate();
+
+            // Step 4: Delete the BusSchedule
+            entityManager.createQuery("DELETE FROM BusSchedule bs WHERE bs.busNumber = :busNumber")
+                    .setParameter("busNumber", busNumber)
+                    .executeUpdate();
+
+            log.info("Successfully deleted BusSchedule, BusRun, and BusOverride records for busNumber: {}", busNumber);
+        } catch (EntityNotFoundException e) {
+            log.error("Error: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to delete BusSchedule with busNumber: {}. Exception: {}", busNumber, e.getMessage());
+            throw new RuntimeException("Failed to delete BusSchedule with cascading deletions.", e);
+        }
     }
+
 
     //    TODO
     @Override
