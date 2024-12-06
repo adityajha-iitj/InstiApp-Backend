@@ -37,6 +37,14 @@ public class BusRun {
     @Enumerated(EnumType.STRING)
     private ScheduleType scheduleType;
 
-   @OneToMany(mappedBy = "busRun")
+   @OneToMany(mappedBy = "busRun",fetch = FetchType.LAZY)
    Set<BusOverride> busOverrideList;
+
+   public BusRun(BusSchedule busSchedule, Time timeOfDeparture, BusLocation fromLocation, BusLocation toLocation,ScheduleType scheduleType) {
+       this.busSchedule = busSchedule;
+       this.timeOfDeparture = timeOfDeparture;
+       this.fromLocation = fromLocation;
+       this.toLocation = toLocation;
+       this.scheduleType = scheduleType;
+   }
 }

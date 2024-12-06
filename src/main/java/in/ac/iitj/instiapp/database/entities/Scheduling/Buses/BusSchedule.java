@@ -19,9 +19,13 @@ public class BusSchedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
-    @Column( nullable = false, unique = true )
+    @Column( nullable = false, unique = true , name = "bus_number")
     String busNumber;
 
-    @OneToMany(mappedBy = "busSchedule")
+    @OneToMany(mappedBy = "busSchedule",fetch = FetchType.EAGER)
     Set<BusRun> runs;
+
+    public BusSchedule(String busNumber) {
+        this.busNumber = busNumber;
+    }
 }

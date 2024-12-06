@@ -3,6 +3,7 @@ package in.ac.iitj.instiapp.Repository.impl;
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -25,14 +26,15 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
     @Override
     public List<String> getListOfLocationsName(Pageable pageable) {
-       Query query =  entityManager.createQuery("select t.name from Locations t", String.class);
-       query.setFirstResult((int) pageable.getOffset());
-       query.setMaxResults(pageable.getPageSize());
+        Query query = entityManager.createQuery("select t.name from Locations t", String.class);
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
 
-       return query.getResultList();
+        return query.getResultList();
     }
 
-     @Override
+    @Transactional
+    @Override
     public void saveLocation(Locations locations) {
         entityManager.persist(locations);
     }

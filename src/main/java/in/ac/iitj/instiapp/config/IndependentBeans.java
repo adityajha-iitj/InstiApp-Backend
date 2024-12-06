@@ -19,5 +19,4 @@ public class IndependentBeans {
     public Dotenv getDotEnv(){
         return  Dotenv.load();
     }
-
 }

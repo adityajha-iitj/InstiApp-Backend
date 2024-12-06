@@ -4,7 +4,6 @@ package in.ac.iitj.instiapp.services.impl;
 import com.cloudinary.Cloudinary;
 import in.ac.iitj.instiapp.services.CloudinaryService;
 import jakarta.annotation.Resource;
-import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 

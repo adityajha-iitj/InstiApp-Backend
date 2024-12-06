@@ -21,4 +21,5 @@ public class Locations {
 
     @Column(nullable = false, unique = true)
     String name;
+
 }
