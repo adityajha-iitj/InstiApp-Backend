@@ -14,10 +14,10 @@ public interface MessRepository {
     void saveOverrideMessMenu(MenuOverride menuOverride );
     List<MessMenu> getMessMenu(int year, int month);
     MenuOverride getOverrideMessMenu(Date date);
-    boolean messMenuExists(int year, int month);
-    void deleteMessMenu(int year, int month);
-    void deleteOverrideMessMenu (Date date);
+    boolean messMenuExists(int year, int month , int day);
     boolean menuOverrideExists(Date date);
+    void deleteMessMenu(int year, int month, int day);
+    void deleteOverrideMessMenu (Date date);
     void updateMessMenu(int year , int month  , int day , MenuItem menuItem);
     void updateOverrideMessMenu(MenuOverride menuOverride);
 
