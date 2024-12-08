@@ -26,4 +26,10 @@ public class MenuOverride {
     private Date date;
 
     private MenuItem menuItem;
+    
+    public MenuOverride(Date date, MenuItem menuItem){
+        this.date = date;
+        this.menuItem = menuItem;
+    }
+
 }

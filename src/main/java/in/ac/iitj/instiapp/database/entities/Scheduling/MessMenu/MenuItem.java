@@ -1,13 +1,15 @@
 package in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.awt.*;
 @Getter
 @Setter
 @Embeddable
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
 public class MenuItem {
 
 
@@ -15,6 +17,8 @@ public class MenuItem {
     private String lunch;
     private String snacks;
     private String dinner;
+
+
 
 
 }

@@ -22,8 +22,16 @@ public class MessMenu {
     @Column(nullable = false)
     Integer month;
 
+//    min 0 max 6
     @Column( nullable = true)
     Integer day;
 
     MenuItem menuItem;
+
+    public MessMenu(Integer year, Integer month, Integer day, MenuItem menuItem) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.menuItem = menuItem;
+    }
 }
