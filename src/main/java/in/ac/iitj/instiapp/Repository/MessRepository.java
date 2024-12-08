@@ -5,6 +5,7 @@ import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuOverride;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;
 
 
+import java.awt.*;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +20,6 @@ public interface MessRepository {
     void deleteMessMenu(int year, int month, int day);
     void deleteOverrideMessMenu (Date date);
     void updateMessMenu(int year , int month  , int day , MenuItem menuItem);
-    void updateOverrideMessMenu(MenuOverride menuOverride);
+    void updateOverrideMessMenu(MenuItem menuItem , Date date);
 
 }

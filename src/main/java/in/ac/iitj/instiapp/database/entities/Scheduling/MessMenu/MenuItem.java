@@ -5,10 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
-
-@Embeddable
 @Getter
 @Setter
+@Embeddable
 public class MenuItem {
 
 

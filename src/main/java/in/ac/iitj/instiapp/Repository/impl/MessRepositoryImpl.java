@@ -91,27 +91,26 @@ public class MessRepositoryImpl implements in.ac.iitj.instiapp.Repository.MessRe
     @Transactional
     public void updateMessMenu(int year, int month , int day , MenuItem menuItem) {
 
-        Boolean exists = entityManager.createQuery(
-                        "SELECT (COUNT(m) > 0) " +
-                                "FROM mess_meu m WHERE m.year = :year AND m.month = :month AND m.day = :day",
-                        Boolean.class)
-                .setParameter("year", year)
-                .setParameter("month", month)
-                .setParameter("day", day)
-                .getSingleResult();
+        String sql = "SELECT CASE WHEN EXISTS (SELECT 1 FROM mess_menu WHERE year = ? AND month = ? AND day = ?) THEN TRUE ELSE FALSE END";
 
-        if(!exists){
+        Boolean exists = jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                year, month, day
+        );
+
+
+        if(Boolean.FALSE.equals(exists)){
             throw new DataIntegrityViolationException("mess menu for year" + year + "month" + month + "day" + day + " doesn't exists");
         }
 
-        Long id = entityManager.createQuery(
-                        "SELECT menu.id FROM mess_menu menu WHERE menu.year = :year AND menu.month = :month AND menu.day = :day",
-                        Long.class
-                )
-                .setParameter("year", year)
-                .setParameter("month", month)
-                .setParameter("day", day)
-                .getSingleResult();
+        String sql2 = "SELECT menu.id FROM mess_menu menu WHERE menu.year = ? AND menu.month = ? AND menu.day = ?";
+
+        Long id = jdbcTemplate.queryForObject(
+                sql2,
+                Long.class,
+                year, month, day
+        );
 
         MessMenu menu_new= entityManager.getReference(MessMenu.class, id);
         menu_new.setMenuItem(menuItem);
@@ -119,26 +118,36 @@ public class MessRepositoryImpl implements in.ac.iitj.instiapp.Repository.MessRe
     }
 
 
-    public void updateOverrideMessMenu(MenuOverride menuOverride) {
-        Boolean exists = entityManager.createQuery("SELECT EXISTS(SELECT 1 FROM menu_override mo WHERE mo.date = :date)", Boolean.class)
-                .setParameter("date", menuOverride.getDate())
-                .getSingleResult();
+    public void updateOverrideMessMenu(MenuItem menuItem , Date date) {
 
-        if (!exists) {
-            throw new DataIntegrityViolationException("override menu for date" + menuOverride.getDate() + " doesn't exists");
+        String existsSql = "SELECT EXISTS (SELECT 1 FROM menu_override mo WHERE mo.date = ?)";
+
+        Boolean exists = jdbcTemplate.queryForObject(
+                existsSql,
+                Boolean.class,
+                date
+        );
+
+        if (Boolean.FALSE.equals(exists)) {
+            throw new DataIntegrityViolationException("Override menu for date " + date + " doesn't exist");
         } else {
-            Long Id = entityManager.createQuery("select menu.id from menu_override menu where menu.date = :date" , Long.class)
-                    .setParameter("date" , menuOverride.getDate())
-                    .getSingleResult();
 
-            MenuOverride menu_new = entityManager.getReference(MenuOverride.class, Id);
-            menu_new.setMenuItem(menuOverride.getMenuItem());
-            entityManager.merge(menu_new);
+            String menuIdSql = "SELECT menu.id FROM menu_override menu WHERE menu.date = ?";
+
+            Long id = jdbcTemplate.queryForObject(
+                    menuIdSql,
+                    Long.class,
+                    date
+            );
+            MenuOverride menuOverride = entityManager.getReference(MenuOverride.class, id);
+            menuOverride.setMenuItem(menuItem);
+            entityManager.merge(menuOverride);
         }
     }
 
-
-
 }
+
+
+
 
 

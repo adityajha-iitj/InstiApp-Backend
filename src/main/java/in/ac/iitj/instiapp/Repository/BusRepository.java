@@ -4,12 +4,9 @@ import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusLocation;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusRun;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusSchedule;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.ScheduleType;
-import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuOverride;
-import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;
 import org.springframework.data.domain.Pageable;
 
 import java.sql.Time;
-import java.util.Date;
 import java.util.List;
 
 public interface BusRepository  {
@@ -33,12 +30,5 @@ public interface BusRepository  {
     void updateBusSchedule(String oldBusNumber,String newBusNumber);
 
 
-    interface MessRepository {
-        void saveMessMenu (MessMenu messMenu);
-        List<MessMenu> getMessMenu (int year , int month);
-        void overrideMessMenu (MenuOverride menuOverride);
-        MenuOverride getMenuOverride (Date date);
-        void updateMessMenu (MessMenu messMenu);
-        void updateOverrideMessMenu (MenuOverride menuOverride);
-    }
+
 }

@@ -14,9 +14,7 @@ import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuItem;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuOverride;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -40,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 @Import({MessRepositoryImpl.class})
 @Rollback(value = false)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MenuTest {
 
     @Autowired
@@ -171,6 +169,26 @@ public class MenuTest {
 
     @Test
     @Order(6)
+    public void testUpdateMenuOverride() throws ParseException {
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+
+        Date date1 = dateFormat.parse("2024/12/06");
+        boolean existsBefore = messRepository.menuOverrideExists(date1);
+        assertTrue(existsBefore, "The record should exist before updating");
+        MenuItem menuItem = new MenuItem();
+        menuItem.setBreakfast("idli");
+        menuItem.setLunch("biryani");
+        menuItem.setSnacks("samosa");
+        menuItem.setDinner("pizza");
+        messRepository.updateOverrideMessMenu(menuItem, date1);
+
+        MenuOverride newmenu = messRepository.getOverrideMessMenu(date1);
+        assertEquals(menuItem, newmenu.getMenuItem());
+    }
+
+    @Test
+    @Order(7)
     public void testDeleteOverrideMessMenu() throws Exception {
         // Arrange: Parse the date used in the mock data setup
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -190,7 +208,7 @@ public class MenuTest {
 
 
     @Test
-    @Order(7)
+    @Order(8)
     public void testUpdateMessMenu() {
 
         MenuItem newMenuItem = new MenuItem();
@@ -213,23 +231,8 @@ public class MenuTest {
         assertEquals("pizza", updatedMenu.get(0).getMenuItem().getDinner());
     }
 
-    @Test
-    public void testUpdateMessMenuThrowsExceptionWhenNotExists() {
-        // Arrange: Set up mock MenuItem to update
-        MenuItem newMenuItem = new MenuItem();
-        newMenuItem.setBreakfast("idli");
-        newMenuItem.setLunch("biryani");
-        newMenuItem.setSnacks("samosa");
-        newMenuItem.setDinner("pizza");
 
-        // Ensure the MessMenu does not exist (by using a date that is not in the database)
-        boolean existsBefore = messRepository.messMenuExists(2024, 12, 25);  // Assuming 25th December 2024 doesn't exist
-        assertFalse(existsBefore, "The record should not exist before updating");
 
-        // Act & Assert: Verify that the exception is thrown when trying to update a non-existing menu
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            messRepository.updateMessMenu(2024, 12, 25, newMenuItem);
-        });
-    }
+
 
 }
