@@ -96,3 +96,6 @@ release.properties
 # Local environment files
 .env
 **/application-dev.properties
+**/application-test.properties
+
+..bfg-report
