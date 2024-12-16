@@ -1,6 +1,6 @@
 package in.ac.iitj.instiapp.database.entities.User.Organisation;
 
-import in.ac.iitj.instiapp.database.entities.Media;
+import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;

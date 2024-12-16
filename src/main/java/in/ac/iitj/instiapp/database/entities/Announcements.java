@@ -1,13 +1,12 @@
 package in.ac.iitj.instiapp.database.entities;
 
+import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.Groups;
-import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 @Entity

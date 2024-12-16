@@ -1,5 +1,6 @@
 package in.ac.iitj.instiapp.database.entities;
 
+import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;

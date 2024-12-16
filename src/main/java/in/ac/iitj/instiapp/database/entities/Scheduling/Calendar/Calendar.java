@@ -28,4 +28,9 @@ public class Calendar {
 
     @OneToMany(mappedBy = "calendar")
     Set<Events> events;
+
+
+    public Calendar(String public_id) {
+        this.public_id = public_id;
+    }
 }

@@ -1,12 +1,9 @@
 package in.ac.iitj.instiapp.database.entities.LostnFound;
 
-import in.ac.iitj.instiapp.database.entities.Media;
+import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-
-import javax.xml.stream.Location;
 
 
 @Entity

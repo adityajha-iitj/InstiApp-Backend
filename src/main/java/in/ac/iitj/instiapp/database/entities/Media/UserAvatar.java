@@ -1,22 +1,26 @@
-package in.ac.iitj.instiapp.database.entities;
+package in.ac.iitj.instiapp.database.entities.Media;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
+@Table(name = "user_avatar")
 @AllArgsConstructor
-@Table(name = "media")
-public class Media {
+@NoArgsConstructor
+public class UserAvatar {
 
-    @Id
+    @jakarta.persistence.Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
     @Enumerated(EnumType.STRING)
     @Column( nullable = false)
+//   In future provide user feature to upload videos
     Mediatype type;
 
     @Column( nullable = false)
@@ -27,4 +31,6 @@ public class Media {
 
     @Column( nullable = false)
     String publicUrl ;
+
+
 }
