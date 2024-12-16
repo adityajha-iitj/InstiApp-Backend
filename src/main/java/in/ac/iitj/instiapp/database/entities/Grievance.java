@@ -27,7 +27,6 @@ public class Grievance {
     @ManyToOne
     User userFrom;
 
-
     //To be implemented permission > read
     @ManyToOne
     OrganisationRole organisationRole;
