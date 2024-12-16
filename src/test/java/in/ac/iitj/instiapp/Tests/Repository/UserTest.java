@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.Tests.Repostiory;
+package in.ac.iitj.instiapp.Tests.Repository;
 
 
 import in.ac.iitj.instiapp.Repository.CalendarRepository;
@@ -9,9 +9,6 @@ import in.ac.iitj.instiapp.Repository.impl.CalendarRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.UserAvatarRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.UserTypeRepositoryImpl;
-import in.ac.iitj.instiapp.database.entities.Media.UserAvatar;
-import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
-import in.ac.iitj.instiapp.database.entities.User.User;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;

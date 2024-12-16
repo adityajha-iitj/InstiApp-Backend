@@ -1,13 +1,11 @@
-package in.ac.iitj.instiapp.Tests.Repostiory;
+package in.ac.iitj.instiapp.Tests.Repository;
 
 import in.ac.iitj.instiapp.Repository.GrievanceRepository;
 import in.ac.iitj.instiapp.Repository.impl.GrievanceRepositoryImpl;
-import in.ac.iitj.instiapp.Repository.impl.MessRepositoryImpl;
 import in.ac.iitj.instiapp.database.entities.Grievance;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
