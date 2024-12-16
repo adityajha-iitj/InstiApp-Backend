@@ -5,6 +5,7 @@ import in.ac.iitj.instiapp.Repository.impl.MessRepositoryImpl;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuItem;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuOverride;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;
+import jakarta.persistence.NoResultException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +105,7 @@ public class MenuTest {
 
 
         Assertions.assertThatThrownBy(() -> messRepository.getOverrideMessMenu(dateFormat.parse("2024/05/05")))
-                .isInstanceOf(EmptyResultDataAccessException.class);
+                .isInstanceOf(NoResultException.class);
     }
 
     @Test

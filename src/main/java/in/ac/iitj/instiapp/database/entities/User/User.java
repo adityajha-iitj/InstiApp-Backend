@@ -1,8 +1,9 @@
 package in.ac.iitj.instiapp.database.entities.User;
 
 
+import in.ac.iitj.instiapp.database.entities.Media.UserAvatar;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
-import in.ac.iitj.instiapp.database.entities.Media;
+import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
-public class User {
+public class User{
 
     @jakarta.persistence.Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,9 +47,16 @@ public class User {
 
     @OneToOne
     @JoinColumn(nullable = false)
-    Media avatar;
+    UserAvatar avatar;
 
     @OneToMany
     Set<OrganisationRole> organisationRoleSet;
+
+    public  User(String name, String userName, String email, String phoneNumber){
+        this.name = name;
+        this.userName = userName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+    }
 }
 
