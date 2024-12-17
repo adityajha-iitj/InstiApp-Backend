@@ -32,6 +32,33 @@ public class UserAvatarRepositoryImpl implements UserAvatarRepository {
         jdbcTemplate.update("DELETE FROM user_avatar WHERE id = ?", id);
     }
 
+    @Override
+    public String updateAvatar(String username , UserAvatar newUserAvatar){
+
+
+        String fetchOldAssetIdQuery = """
+            SELECT ua.asset_id
+            FROM users u
+            JOIN user_avatar ua ON u.user_avatar_id = ua.user_avatar_id
+            WHERE u.username = ?
+            """;
+
+        String oldAssetId = jdbcTemplate.queryForObject(fetchOldAssetIdQuery,String.class,username);
+
+
+
+        String updateAvatarQuery = """
+            UPDATE user_avatar ua
+            JOIN users u ON ua.user_avatar_id = u.user_avatar_id
+            SET ua.asset_id = ?, ua.public_id = ?, ua.public_url = ?
+            WHERE u.username = ?
+            """;
+
+        jdbcTemplate.update(updateAvatarQuery, newUserAvatar.getAssetId(), newUserAvatar.getPublicId(), newUserAvatar.getPublicUrl(), username);
+
+
+        return oldAssetId;
+    }
 
 
 }

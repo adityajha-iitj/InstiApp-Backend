@@ -4,12 +4,15 @@ import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.database.entities.Media.UserAvatar;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.User;
+import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.NoSuchElementException;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
@@ -65,6 +68,40 @@ public class UserRepositoryImpl implements UserRepository {
     public boolean existsByPhoneNumber(String phoneNumber) {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS (SELECT 1 FROM users WHERE phone_number = ?)", Boolean.class, phoneNumber));
     }
+
+    @Override
+    public boolean deleteByUsername(String username) {
+        return Boolean.TRUE.equals(jdbcTemplate.update("DELETE FROM users WHERE user_name = ?", username));
+    }
+
+    @Override
+    public boolean userExists(String username){
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS (SELECT 1 FROM users WHERE user_name = ?)", Boolean.class, username));
+    }
+    @Override
+    public void updatePhoneNumber(String phoneNumber, String username) {
+        if(userExists(username)){
+            String sql = "UPDATE users SET phone_number = ? WHERE user_name = ?";
+            jdbcTemplate.update(sql, phoneNumber, username);
+        }
+        throw new DataIntegrityViolationException("No user with the given username exists");
+    }
+
+    @Override
+    public void updateUserType(String username , String newusertype){
+        if(userExists(username)){
+            String sql = "UPDATE users u " +
+                    "JOIN user_type ut ON ut.name = ? " +
+                    "SET u.user_type_id = ut.id " +
+                    "WHERE u.user_name = ?";
+            jdbcTemplate.update(sql, newusertype, username);
+        }
+        else {
+            throw new NoSuchElementException("Student with username '" + username + "' not found.");
+        }
+    }
+
+
 
 
 }

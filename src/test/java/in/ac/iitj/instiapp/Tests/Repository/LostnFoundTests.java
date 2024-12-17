@@ -1,9 +1,8 @@
-package in.ac.iitj.instiapp.Tests.Repostiory;
+package in.ac.iitj.instiapp.Tests.Repository;
 
 import in.ac.iitj.instiapp.Repository.LostnFoundRepository;
 import in.ac.iitj.instiapp.Repository.impl.LostnFoundRepositoryImpl;
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
-import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFound;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

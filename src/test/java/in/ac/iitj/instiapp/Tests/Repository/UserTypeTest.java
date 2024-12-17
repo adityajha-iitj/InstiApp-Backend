@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.Tests.Repostiory;
+package in.ac.iitj.instiapp.Tests.Repository;
 
 
 import in.ac.iitj.instiapp.Repository.UserTypeRepository;

@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.Tests.Repostiory;
+package in.ac.iitj.instiapp.Tests.Repository;
 
 import in.ac.iitj.instiapp.Repository.BusRepository;
 import in.ac.iitj.instiapp.Repository.impl.BusRepositoryImpl;
@@ -23,6 +23,10 @@ import java.sql.Time;
 import java.time.LocalTime;
 import java.util.List;
 
+import static in.ac.iitj.instiapp.Tests.EntityTestData.BusLocationData.BUS_LOCATION_DATA1;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.BusLocationData.BUS_LOCATION_DATA2;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.BusScheduleData.BUS_SCHEDULE_DATA1;
+
 @DataJpaTest
 @Import({BusRepositoryImpl.class})
 @Rollback(value = false)
@@ -33,10 +37,10 @@ public class BustTest {
 
     @BeforeAll
     public static void setUp(@Autowired BusRepository busRepository) {
-        busRepository.saveBusLocation("MBM College");
-        busRepository.saveBusLocation("IIT Jodhpur");
+        busRepository.saveBusLocation(BUS_LOCATION_DATA1.toEntity().getName());
+        busRepository.saveBusLocation(BUS_LOCATION_DATA2.toEntity().getName());
 
-        busRepository.saveBusSchedule(new BusSchedule("B1"));
+        busRepository.saveBusSchedule(BUS_SCHEDULE_DATA1.toEntity());
 
         BusRun busRun = new BusRun();
         busRun.setBusSchedule(busRepository.getBusSchedule("B1"));
