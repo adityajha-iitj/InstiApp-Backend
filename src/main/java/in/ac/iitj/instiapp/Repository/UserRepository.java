@@ -1,6 +1,7 @@
 package in.ac.iitj.instiapp.Repository;
 
 import in.ac.iitj.instiapp.database.entities.User.User;
+import in.ac.iitj.instiapp.database.entities.User.Usertype;
 
 public interface UserRepository {
 
@@ -11,4 +12,10 @@ public interface UserRepository {
     boolean existsByUsername(String username);
     boolean existsByPhoneNumber(String phoneNumber);
     boolean deleteByUsername(String username);
+    boolean userExists(String username);
+    void updatePhoneNumber(String phoneNumber, String username);
+    void updateUserType(String username , String newusertype);
+
+
+
 }

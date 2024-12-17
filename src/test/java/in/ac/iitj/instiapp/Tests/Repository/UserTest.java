@@ -68,7 +68,30 @@ public class UserTest {
         Assertions.assertThat(userRepository.existsByEmail(USER4.email)).isFalse();
     }
 
+    @Test
+    @Order(2)
+    public void testExistByUsername(){
+        Assertions.assertThat(userRepository.existsByUsername(USER1.email)).isTrue();
+        Assertions.assertThat(userRepository.existsByUsername(USER4.email)).isFalse();
+    }
 
+    @Test
+    @Order(3)
+    public void testExistByPhoneNumber(){
+        Assertions.assertThat(userRepository.existsByPhoneNumber(USER1.phoneNumber)).isTrue();
+        Assertions.assertThat(userRepository.existsByPhoneNumber(USER4.phoneNumber)).isFalse();
+    }
+
+    @Test
+    @Order(4)
+    public void testUpdatePhoneNumber(){
+        String newPhoneNumber = "111111111";
+        String username = USER1.userName;
+
+        userRepository.updatePhoneNumber(newPhoneNumber, username);
+        Assertions.assertThat(userRepository.existsByPhoneNumber(newPhoneNumber)).isTrue();
+        Assertions.assertThat(userRepository.existsByPhoneNumber(USER1.phoneNumber)).isFalse();
+    }
 
 
 
