@@ -1,7 +1,9 @@
 package in.ac.iitj.instiapp.Tests.Repostiory;
 
-import in.ac.iitj.instiapp.Repository.JWTRefreshTokenRepository;
+import in.ac.iitj.instiapp.Repository.*;
 import in.ac.iitj.instiapp.Repository.impl.JWTRefreshTokenRepositoryImpl;
+import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
+import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.database.entities.Auth.JWTRefreshToken;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
@@ -18,10 +20,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.transaction.annotation.Transactional;
 
+import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.USER1;
+
 @DataJpaTest
-@Import({JWTRefreshTokenRepositoryImpl.class})
+@Import({InitialiseEntities.InitialiseUser.class,JWTRefreshTokenRepositoryImpl.class })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Transactional
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class JWTRefreshTokenTest {
 
@@ -33,15 +36,19 @@ public class JWTRefreshTokenTest {
     TestEntityManager testEntityManager;
 
     @BeforeAll
-    @Transactional
-    public void setUp(@Autowired JWTRefreshTokenRepository jwtRefreshTokenRepository, @Autowired TestEntityManager testEntityManager) {
+    public static void setUp(@Autowired JWTRefreshTokenRepository jwtRefreshTokenRepository,
+                             @Autowired InitialiseEntities.Initialise initialiseUser) {
+
+        initialiseUser.initialise();
 
 
         JWTRefreshToken jwtRefreshToken = new JWTRefreshToken();
         jwtRefreshToken.setRefreshToken("TEST");
         jwtRefreshToken.setDeviceId("TEST");
+        User u = new User();
+        u.setUserName(USER1.userName);
+        jwtRefreshToken.setUser(u);
 
-        testEntityManager.persist(new User(null, "John Doe", "johndoe123", "johndoe@123", "+911234567890", new Usertype(null, "Student"), null, null, null));
 
         jwtRefreshTokenRepository.save(jwtRefreshToken);
 
@@ -51,6 +58,6 @@ public class JWTRefreshTokenTest {
     @Test
     @Order(2)
     public void test() {
-        Assertions.assertThat(jwtRefreshTokenRepository.existsByUserNameAndDeviceId("TEST", "TEST")).isTrue();
+        Assertions.assertThat(jwtRefreshTokenRepository.existsByUserNameAndDeviceId(USER1.userName, "TEST")).isTrue();
     }
 }
