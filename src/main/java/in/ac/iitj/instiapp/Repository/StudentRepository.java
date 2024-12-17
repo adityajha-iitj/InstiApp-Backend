@@ -11,7 +11,7 @@ public interface StudentRepository {
     Student getStudent(String username);
     void updateStudent(Student student);
     void deleteStudent(Student student);
-    boolean StudentExists(String username);
+    boolean studentExists(String username);
     void updateStudentBranch(StudentBranch studentBranch , String username);
 
 
