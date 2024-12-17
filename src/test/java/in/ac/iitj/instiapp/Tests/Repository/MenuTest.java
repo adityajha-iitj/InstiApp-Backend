@@ -31,8 +31,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) //  Cannot be removed as the repository uses postgres specific schema for queries
 public class MenuTest {
 
-
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
     @Autowired
     MessRepository messRepository;
 
@@ -95,7 +93,7 @@ public class MenuTest {
                 .isEqualTo(MESS_OVERRIDE1.toEntity());
 
 
-        Assertions.assertThatThrownBy(() -> messRepository.getOverrideMessMenu(dateFormat.parse("2024/05/05")))
+        Assertions.assertThatThrownBy(() -> messRepository.getOverrideMessMenu(MESS_OVERRIDE2.date))
                 .isInstanceOf(NoResultException.class);
     }
 
