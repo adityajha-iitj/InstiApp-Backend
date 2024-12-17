@@ -8,7 +8,6 @@ import in.ac.iitj.instiapp.Repository.impl.CalendarRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.UserAvatarRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.UserTypeRepositoryImpl;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;

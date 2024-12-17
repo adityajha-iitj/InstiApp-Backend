@@ -23,9 +23,9 @@ import java.sql.Time;
 import java.time.LocalTime;
 import java.util.List;
 
-import static in.ac.iitj.instiapp.Tests.EntityTestData.BusLocationData.BUS_LOCATION_DATA1;
-import static in.ac.iitj.instiapp.Tests.EntityTestData.BusLocationData.BUS_LOCATION_DATA2;
-import static in.ac.iitj.instiapp.Tests.EntityTestData.BusScheduleData.BUS_SCHEDULE_DATA1;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.BusLocationData.*;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.BusScheduleData.BUS_SCHEDULE1;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.BusScheduleData.BUS_SCHEDULE2;
 
 @DataJpaTest
 @Import({BusRepositoryImpl.class})
@@ -37,15 +37,15 @@ public class BustTest {
 
     @BeforeAll
     public static void setUp(@Autowired BusRepository busRepository) {
-        busRepository.saveBusLocation(BUS_LOCATION_DATA1.toEntity().getName());
-        busRepository.saveBusLocation(BUS_LOCATION_DATA2.toEntity().getName());
+        busRepository.saveBusLocation(BUS_LOCATION1.toEntity().getName());
+        busRepository.saveBusLocation(BUS_LOCATION2.toEntity().getName());
 
-        busRepository.saveBusSchedule(BUS_SCHEDULE_DATA1.toEntity());
+        busRepository.saveBusSchedule(BUS_SCHEDULE1.toEntity());
 
         BusRun busRun = new BusRun();
-        busRun.setBusSchedule(busRepository.getBusSchedule("B1"));
-        busRun.setFromLocation(busRepository.getBusLocation("MBM College"));
-        busRun.setToLocation(busRepository.getBusLocation("IIT Jodhpur"));
+        busRun.setBusSchedule(busRepository.getBusSchedule(BUS_SCHEDULE1.busname));
+        busRun.setFromLocation(busRepository.getBusLocation(BUS_LOCATION1.name));
+        busRun.setToLocation(busRepository.getBusLocation(BUS_LOCATION2.name));
         busRun.setTimeOfDeparture(Time.valueOf(LocalTime.of(5, 30)));
         busRun.setScheduleType(ScheduleType.WEEKDAY);
 
@@ -59,23 +59,23 @@ public class BustTest {
 
         Pageable pageable = PageRequest.of(0, 10);
         List<String> locations = busRepository.getListOfBusLocations(pageable);
-        Assertions.assertThat(locations).containsExactlyInAnyOrder("MBM College", "IIT Jodhpur");
+        Assertions.assertThat(locations).containsExactlyInAnyOrder(BUS_LOCATION1.name,BUS_LOCATION2.name);
     }
 
     @Test
     @Order(2)
     @Rollback(value = true)
     public void testDeleteBusLocation() {
-        busRepository.deleteBusLocation("MBM College");
+        busRepository.deleteBusLocation(BUS_LOCATION1.name);
         List<String> locations = busRepository.getListOfBusLocations(PageRequest.of(0, 10));
-        Assertions.assertThat(locations).containsExactlyInAnyOrder("IIT Jodhpur");
+        Assertions.assertThat(locations).containsExactlyInAnyOrder(BUS_LOCATION2.name);
     }
 
     @Test
     @Order(3)
     public void testExistsBusLocation() {
-        Assertions.assertThat(busRepository.isBusLocationExists("MBM College")).isTrue();
-        Assertions.assertThat(busRepository.isBusLocationExists("Railway Station")).isFalse();
+        Assertions.assertThat(busRepository.isBusLocationExists(BUS_LOCATION1.name)).isTrue();
+        Assertions.assertThat(busRepository.isBusLocationExists(BUS_LOCATION3.name)).isFalse();
 
     }
 
@@ -87,10 +87,10 @@ public class BustTest {
         BusSchedule busSchedule = busSchedules.get(0);
         BusRun busRun = busSchedule.getRuns().stream().findFirst().get();
         org.junit.jupiter.api.Assertions.assertAll(
-                () -> Assertions.assertThat(busSchedule.getBusNumber()).isEqualTo("B1"),
+                () -> Assertions.assertThat(busSchedule.getBusNumber()).isEqualTo(BUS_SCHEDULE1.busname),
                 () -> Assertions.assertThat(busRun.getScheduleType()).isEqualTo(ScheduleType.WEEKDAY),
-                () -> Assertions.assertThat(busRun.getFromLocation().getName()).isEqualTo("MBM College"),
-                () -> Assertions.assertThat(busRun.getToLocation().getName()).isEqualTo("IIT Jodhpur"),
+                () -> Assertions.assertThat(busRun.getFromLocation().getName()).isEqualTo(BUS_LOCATION1.name),
+                () -> Assertions.assertThat(busRun.getToLocation().getName()).isEqualTo(BUS_LOCATION2.name),
                 () -> Assertions.assertThat(busRun.getTimeOfDeparture().toLocalTime()).isEqualTo(LocalTime.of(5, 30))
         );
     }
@@ -102,21 +102,21 @@ public class BustTest {
     public void testUpdateBusScheduleRun() {
         BusRun br = new BusRun();
         br.setScheduleType(ScheduleType.WEEKDAY);
-        br.setFromLocation(busRepository.getBusLocation("IIT Jodhpur"));
-        br.setToLocation(busRepository.getBusLocation("MBM College"));
+        br.setFromLocation(busRepository.getBusLocation(BUS_LOCATION2.name));
+        br.setToLocation(busRepository.getBusLocation(BUS_LOCATION1.name));
         br.setTimeOfDeparture(Time.valueOf(LocalTime.of(11, 30)));
 
-        busRepository.updateBusScheduleRun("B1",ScheduleType.WEEKDAY,Time.valueOf(LocalTime.of(5,30)),br);
+        busRepository.updateBusScheduleRun(BUS_SCHEDULE1.busname, ScheduleType.WEEKDAY,Time.valueOf(LocalTime.of(5,30)),br);
 
         Pageable pageable = PageRequest.of(0, 10);
         List<BusSchedule> busSchedules = busRepository.getBusSchedules(pageable);
         BusSchedule busSchedule = busSchedules.get(0);
         BusRun busRun = busSchedule.getRuns().stream().findFirst().get();
         org.junit.jupiter.api.Assertions.assertAll(
-                () -> Assertions.assertThat(busSchedule.getBusNumber()).isEqualTo("B1"),
+                () -> Assertions.assertThat(busSchedule.getBusNumber()).isEqualTo(BUS_SCHEDULE1.busname),
                 () -> Assertions.assertThat(busRun.getScheduleType()).isEqualTo(ScheduleType.WEEKDAY),
-                () -> Assertions.assertThat(busRun.getFromLocation().getName()).isEqualTo("IIT Jodhpur"),
-                () -> Assertions.assertThat(busRun.getToLocation().getName()).isEqualTo("MBM College"),
+                () -> Assertions.assertThat(busRun.getFromLocation().getName()).isEqualTo(BUS_LOCATION2.name),
+                () -> Assertions.assertThat(busRun.getToLocation().getName()).isEqualTo(BUS_LOCATION1.name),
                 () -> Assertions.assertThat(busRun.getTimeOfDeparture().toLocalTime()).isEqualTo(LocalTime.of(11, 30))
         );
     }
@@ -125,8 +125,8 @@ public class BustTest {
     @Test
     @Order(6)
     public  void testBusScheduleExists(){
-        Assertions.assertThat(busRepository.existsBusSchedule("B1")).isTrue();
-        Assertions.assertThat(busRepository.existsBusSchedule("B2")).isFalse();
+        Assertions.assertThat(busRepository.existsBusSchedule(BUS_SCHEDULE1.busname)).isTrue();
+        Assertions.assertThat(busRepository.existsBusSchedule(BUS_SCHEDULE2.busname)).isFalse();
     }
 
 
@@ -134,20 +134,20 @@ public class BustTest {
     @Order(7)
     @Rollback(value = true)
     public  void testUpdateBusSchedule(){
-        Assertions.assertThatThrownBy(() -> busRepository.updateBusSchedule("B1","B1")).isInstanceOf(DataIntegrityViolationException.class);
-        busRepository.updateBusSchedule("B1","B2");
-        Assertions.assertThat(busRepository.existsBusSchedule("B2")).isTrue();
+        Assertions.assertThatThrownBy(() -> busRepository.updateBusSchedule(BUS_SCHEDULE1.busname, BUS_SCHEDULE1.busname)).isInstanceOf(DataIntegrityViolationException.class);
+        busRepository.updateBusSchedule(BUS_SCHEDULE1.busname, BUS_SCHEDULE2.busname);
+        Assertions.assertThat(busRepository.existsBusSchedule(BUS_SCHEDULE2.busname)).isTrue();
     }
 
     @Test
     @Order(8)
     @Rollback(value = true)
     public void testDeleteBusSchedule() {
-        Assertions.assertThat(busRepository.existsBusSchedule("B1")).isTrue();
+        Assertions.assertThat(busRepository.existsBusSchedule(BUS_SCHEDULE1.busname)).isTrue();
 
-        busRepository.deleteBusSchedule("B1");
+        busRepository.deleteBusSchedule(BUS_SCHEDULE1.busname);
         // Verify the schedule no longer exists
-        Assertions.assertThat(busRepository.existsBusSchedule("B1")).isFalse();
+        Assertions.assertThat(busRepository.existsBusSchedule(BUS_SCHEDULE1.busname)).isFalse();
     }
 
 
