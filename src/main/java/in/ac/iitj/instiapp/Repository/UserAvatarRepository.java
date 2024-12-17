@@ -13,5 +13,6 @@ public interface UserAvatarRepository {
 
     void deleteById(Long id);
 
+    String updateAvatar(String username,UserAvatar userAvatar);
 
 }

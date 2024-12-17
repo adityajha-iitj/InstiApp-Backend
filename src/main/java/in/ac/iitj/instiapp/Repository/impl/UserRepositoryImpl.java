@@ -12,6 +12,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.NoSuchElementException;
+
 @Repository
 public class UserRepositoryImpl implements UserRepository {
 
@@ -92,10 +94,11 @@ public class UserRepositoryImpl implements UserRepository {
                     "JOIN user_type ut ON ut.name = ? " +
                     "SET u.user_type_id = ut.id " +
                     "WHERE u.user_name = ?";
-
             jdbcTemplate.update(sql, newusertype, username);
         }
-        throw new DataIntegrityViolationException("No user with the given username exists");
+        else {
+            throw new NoSuchElementException("Student with username '" + username + "' not found.");
+        }
     }
 
 

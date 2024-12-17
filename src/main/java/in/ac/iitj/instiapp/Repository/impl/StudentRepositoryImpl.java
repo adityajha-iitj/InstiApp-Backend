@@ -27,6 +27,7 @@ public class StudentRepositoryImpl {
         this.entityManager = entityManager;
     }
 
+
     void save(User user,Student student, StudentBranch studentBranch, StudentProgram studentProgram, int admission) {
         StudentBranch studentBranch1 = entityManager.getReference(StudentBranch.class, studentBranch.getId());
         StudentProgram studentProgram1 = entityManager.getReference(StudentProgram.class, studentProgram.getId());
@@ -58,4 +59,24 @@ public class StudentRepositoryImpl {
     void delete(Student student) {
         entityManager.remove(student);
     }
+
+    Boolean studentExists(String username) {
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("select exists from student where username=?", Boolean.class, username));
+    }
+
+    void updateStudentBranch(StudentBranch studentBranch , String username) {
+        if(studentExists(username)) {
+            String sql = "UPDATE users u " +
+                    "JOIN student_branch sb ON u.user_name = ? " +
+                    "SET u.branch_id = sb.branch_id " +
+                    "WHERE sb.branch_name = ?";
+
+            jdbcTemplate.update(sql, username, studentBranch.getName());
+        }
+        else {
+            throw new NoSuchElementException("Student with username '" + username + "' not found.");
+        }
+    }
+
+
 }
