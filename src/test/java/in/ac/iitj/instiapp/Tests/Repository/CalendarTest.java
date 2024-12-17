@@ -16,6 +16,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.test.annotation.Rollback;
 
+import static in.ac.iitj.instiapp.Tests.EntityTestData.CalendarData.CALENDAR1;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.CalendarData.CALENDAR2;
+
 @DataJpaTest
 @Import({CalendarRepositoryImpl.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -29,14 +32,14 @@ public class CalendarTest {
 
     @BeforeAll
     public static void setUp(@Autowired CalendarRepository calendarRepository){
-        calendarRepository.save(new Calendar("some_random_public_id_based_on_username"));
+        calendarRepository.save(CALENDAR1.toEntity());
     }
 
     @Test
     @Order(1)
     public  void testCalendarExists(){
-        Assertions.assertThat(calendarRepository.calendarExists("some_random_public_id_based_on_username")).isTrue();
-        Assertions.assertThat(calendarRepository.calendarExists("some_random_public_id_based_on_username_not_in_database")).isFalse();
+        Assertions.assertThat(calendarRepository.calendarExists(CALENDAR1.publicId)).isTrue();
+        Assertions.assertThat(calendarRepository.calendarExists(CALENDAR2.publicId)).isFalse();
     }
 
 }
