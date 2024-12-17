@@ -1,11 +1,12 @@
 package in.ac.iitj.instiapp.Tests.EntityTestData;
 
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuItem;
-import in.ac.iitj.instiapp.database.entities.User.User;
 
 public enum MenuItemData {
-    MENU_ITEM_DATA1("poha", "rajma", "Samosa", "chole bhature"),
-    MENU_ITEM_DATA2("dosa", "paneer", "pani puri", "shamiyana");
+    MENU_ITEM1("poha", "rajma", "Samosa", "chole bhature"),
+    MENU_ITEM2("dosa", "paneer", "pani puri", "shamiyana"),
+    MENU_ITEM3("upma","jalebi","fafda","samosa"),
+    MENU_ITEM4("papad","paratha","BhelPuri","manchurian");
 
     public final String breakfast;
     public final String lunch;

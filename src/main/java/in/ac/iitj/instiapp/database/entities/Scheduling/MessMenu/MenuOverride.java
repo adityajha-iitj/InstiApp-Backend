@@ -1,10 +1,7 @@
 package in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 
@@ -14,11 +11,12 @@ import java.util.Date;
 @Getter
 @Setter
 @Table(name = "menu_override")
+@EqualsAndHashCode
 public class MenuOverride {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    Long Id;
 
     @ManyToOne
     private MessMenu messMenu;

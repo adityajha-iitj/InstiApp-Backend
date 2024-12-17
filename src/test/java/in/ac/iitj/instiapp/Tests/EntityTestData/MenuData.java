@@ -4,8 +4,10 @@ import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;
 
 public enum MenuData {
 
-    MENU_DATA1(2024, 6, 6, MenuItemData.MENU_ITEM_DATA1),
-    MENU_DATA2(2024, 6, 4, MenuItemData.MENU_ITEM_DATA1);
+    MENU1(2024, 6, 6, MenuItemData.MENU_ITEM1),
+    MENU2(2024, 6, 4, MenuItemData.MENU_ITEM2),
+    MENU3(2024,8,2,MenuItemData.MENU_ITEM3),
+    MENU4(2024,9,1,MenuItemData.MENU_ITEM4);
 
     public final int year;
     public final int month;
