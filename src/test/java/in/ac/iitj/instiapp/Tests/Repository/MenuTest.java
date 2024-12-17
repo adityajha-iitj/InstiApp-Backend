@@ -2,6 +2,7 @@ package in.ac.iitj.instiapp.Tests.Repository;
 
 import in.ac.iitj.instiapp.Repository.MessRepository;
 import in.ac.iitj.instiapp.Repository.impl.MessRepositoryImpl;
+import in.ac.iitj.instiapp.Tests.EntityTestData.MenuItemData;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuItem;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuOverride;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;
@@ -19,6 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import static in.ac.iitj.instiapp.Tests.EntityTestData.MenuData.*;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.OverrideMenudata.MESS_OVERRIDE_DATA;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
@@ -36,23 +39,15 @@ public class MenuTest {
     @BeforeAll
     public static void setUp(@Autowired MessRepository messRepository) throws ParseException {
 
-        MessMenu menu1 = new MessMenu(2024, 6, 6,
-                new MenuItem("poha", "rajma", "Samosa", "chole bhature"));
+        MessMenu menu1 = MENU_DATA1.toEntity();
+        MessMenu menu2 = MENU_DATA2.toEntity();
 
-        MessMenu menu2 = new MessMenu(2024, 6, 4,
-                new MenuItem("poha", "rajma", "Samosa", "chole bhature"));
-
-
-        // Save the mess entity to the repository (ensure it's saved for the test)
         messRepository.saveMessMenu(menu1);
         messRepository.saveMessMenu(menu2);
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        MenuOverride menuoverride1 = MESS_OVERRIDE_DATA.toEntity();
 
-        MenuOverride menuOverride = new MenuOverride(dateFormat.parse("2024/06/06"),
-                new MenuItem("dosa", "paneer", "pani puri", "shamiyana"));
-
-        messRepository.saveOverrideMessMenu(menuOverride);
+        messRepository.saveOverrideMessMenu(menuoverride1);
     }
 
     @Test
