@@ -1,13 +1,12 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
-import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusLocation;
+import in.ac.iitj.instiapp.Repository.StudentRepository;
 import in.ac.iitj.instiapp.database.entities.User.Student.Student;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentProgram;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.util.NoSuchElementException;
 
 @Repository
-public class StudentRepositoryImpl {
+public class StudentRepositoryImpl implements StudentRepository {
 
     private  final JdbcTemplate jdbcTemplate;
     private  final EntityManager entityManager;
@@ -27,8 +26,8 @@ public class StudentRepositoryImpl {
         this.entityManager = entityManager;
     }
 
-
-    void save(User user,Student student, StudentBranch studentBranch, StudentProgram studentProgram, int admission) {
+    @Override
+    public void save(User user,Student student, StudentBranch studentBranch, StudentProgram studentProgram, int admission) {
         StudentBranch studentBranch1 = entityManager.getReference(StudentBranch.class, studentBranch.getId());
         StudentProgram studentProgram1 = entityManager.getReference(StudentProgram.class, studentProgram.getId());
         User user1 = entityManager.getReference(User.class, user.getId());
@@ -38,7 +37,8 @@ public class StudentRepositoryImpl {
         entityManager.persist(student);
     }
 
-    Student getStudent(String username) {
+    @Override
+    public Student getStudent(String username) {
         Student student;
         try {
             Long studentId = jdbcTemplate.queryForObject("select id from student where username=?", Long.class, username);
@@ -52,19 +52,23 @@ public class StudentRepositoryImpl {
         }
     }
 
-    void update(Student student) {
+    @Override
+    public void updateStudent(Student student) {
         entityManager.merge(student);
     }
 
-    void delete(Student student) {
+    @Override
+    public void deleteStudent(Student student) {
         entityManager.remove(student);
     }
 
-    Boolean studentExists(String username) {
+    @Override
+    public boolean studentExists(String username) {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject("select exists from student where username=?", Boolean.class, username));
     }
 
-    void updateStudentBranch(StudentBranch studentBranch , String username) {
+    @Override
+    public void updateStudentBranch(StudentBranch studentBranch , String username) {
         if(studentExists(username)) {
             String sql = "UPDATE users u " +
                     "JOIN student_branch sb ON u.user_name = ? " +
