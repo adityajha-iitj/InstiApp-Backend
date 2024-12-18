@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Time;
 import java.util.Date;
 
 @Entity
@@ -17,11 +18,15 @@ import java.util.Date;
 public class BusOverride {
 
     @jakarta.persistence.Id
-            @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
     @ManyToOne
-    private BusRun busRun;
+    private BusSchedule busSchedule;
+
+
+    BusSnippet busSnippet;
+
 
     private Date overrideDate;
 

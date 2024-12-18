@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.Tests.EntityTestData;
+package in.ac.iitj.instiapp.Tests.EntityTestData.Scheduling.Buses;
 
 import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusLocation;
 

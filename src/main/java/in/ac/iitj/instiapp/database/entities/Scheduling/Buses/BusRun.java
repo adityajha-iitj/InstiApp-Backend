@@ -25,26 +25,16 @@ public class BusRun {
     @ManyToOne
     private BusSchedule busSchedule;
 
-    @Column(nullable = false)
-    private Time timeOfDeparture;
+    BusSnippet busSnippet;
 
-    @ManyToOne
-    private BusLocation fromLocation;
-
-    @ManyToOne
-    private BusLocation toLocation;
 
     @Enumerated(EnumType.STRING)
     private ScheduleType scheduleType;
 
-   @OneToMany(mappedBy = "busRun",fetch = FetchType.LAZY)
-   Set<BusOverride> busOverrideList;
 
-   public BusRun(BusSchedule busSchedule, Time timeOfDeparture, BusLocation fromLocation, BusLocation toLocation,ScheduleType scheduleType) {
+   public BusRun(BusSchedule busSchedule, BusSnippet busSnippet,ScheduleType scheduleType) {
        this.busSchedule = busSchedule;
-       this.timeOfDeparture = timeOfDeparture;
-       this.fromLocation = fromLocation;
-       this.toLocation = toLocation;
+       this.busSnippet = busSnippet;
        this.scheduleType = scheduleType;
    }
 }
