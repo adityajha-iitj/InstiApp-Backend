@@ -2,10 +2,12 @@ package in.ac.iitj.instiapp.services.impl;
 
 import in.ac.iitj.instiapp.Repository.LostnFoundRepository;
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
+import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
 import in.ac.iitj.instiapp.services.LostnFoundService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
 
 import java.util.List;
 
@@ -20,7 +22,7 @@ public class LostnFoundServiceImpl implements LostnFoundService {
     }
 
     @Override
-    public List<String> getListOfLocationsName(Pageable pageable) {
+    public List<LostnFoundDto> getListOfLocationsName(Pageable pageable) {
         return lostnFoundRepository.getListOfLocationsName(pageable);
     }
 

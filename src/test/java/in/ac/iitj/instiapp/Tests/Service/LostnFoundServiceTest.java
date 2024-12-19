@@ -11,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,18 +37,28 @@ public class LostnFoundServiceTest {
     public void testGetListOfLocationsName() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
-        List<String> expectedLocations = Arrays.asList("LHC", "PHC");
 
-        when(lostnFoundRepository.getListOfLocationsName(pageable))
-                .thenReturn(expectedLocations);
+        // Prepare the expected result (a list of LostnFoundDto objects with sample locations)
+        List<LostnFoundDto> expectedLocations = Arrays.asList(
+                new LostnFoundDto(null, null, null, null, null, null, null, null, "LHC", null, null, null),  // LHC
+                new LostnFoundDto(null, null, null, null, null, null, null, null, "PHC", null, null, null),  // PHC
+                new LostnFoundDto(null, null, null, null, null, null, null, null, "SAC", null, null, null),  // SAC
+                new LostnFoundDto(null, null, null, null, null, null, null, null, "CIC", null, null, null),  // CIC
+                new LostnFoundDto(null, null, null, null, null, null, null, null, "JGC", null, null, null)   // JGC
+        );
+
+        // Mock the repository call to return the expected result
+        when(lostnFoundRepository.getListOfLocationsName(pageable)).thenReturn(expectedLocations);
 
         // Act
-        List<String> actualLocations = lostnFoundService.getListOfLocationsName(pageable);
+        List<LostnFoundDto> actualLocations = lostnFoundService.getListOfLocationsName(pageable);
 
         // Assert
         assertEquals(expectedLocations, actualLocations);
         verify(lostnFoundRepository).getListOfLocationsName(pageable);
     }
+
+
 
     @Test
     public void testSaveLocation() {

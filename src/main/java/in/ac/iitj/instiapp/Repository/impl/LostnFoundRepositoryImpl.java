@@ -26,7 +26,7 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
     }
 
     @Override
-    public List<String> getListOfLocationsName(Pageable pageable) {
+    public List<LostnFoundDto> getListOfLocationsName(Pageable pageable) {
         Query query = entityManager.createQuery(
                 "SELECT new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto( " +
                         "    null, null, null, null, " +       // Finder details as null
