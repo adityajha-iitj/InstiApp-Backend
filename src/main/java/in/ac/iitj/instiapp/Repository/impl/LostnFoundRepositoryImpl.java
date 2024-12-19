@@ -1,6 +1,7 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
+import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
@@ -26,7 +27,14 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
     @Override
     public List<String> getListOfLocationsName(Pageable pageable) {
-        Query query = entityManager.createQuery("select t.name from Locations t", String.class);
+        Query query = entityManager.createQuery(
+                "SELECT new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto( " +
+                        "    null, null, null, null, " +       // Finder details as null
+                        "    null, null, null, null, " +       // Owner details as null
+                        "    t.Landmark.name, null, null, null " + // Only populate landmarkName
+                        ") FROM LostnFound t",
+                LostnFoundDto.class
+        );
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
 

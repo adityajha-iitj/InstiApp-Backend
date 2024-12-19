@@ -3,7 +3,7 @@ package in.ac.iitj.instiapp.database.entities.Scheduling.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.util.Date;
 import java.sql.Time;
 
 
@@ -33,7 +33,7 @@ public class Events {
     String Description;
 
     @Column( nullable = false)
-    Integer Date;
+    Date Date;
 
     @Column( nullable = false)
     Time startTime;

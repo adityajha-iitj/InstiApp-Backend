@@ -17,7 +17,7 @@ public class EventsDto implements Serializable {
     String calendarUserUserName;
     String Title;
     String Description;
-    Integer Date;
+    Date Date;
     Time startTime;
     Time Duration;
     Boolean isAllDay;

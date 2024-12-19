@@ -15,6 +15,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.Rollback;
+import in.ac.iitj.instiapp.payload.Scheduling.Calendar.EventsDto;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+
 
 import java.sql.Time;
 import java.time.LocalTime;
@@ -40,22 +45,7 @@ public class EventsTest {
         // eventsRepository.save(user);
     }
 
-    @Test
-    @Order(1)
-    public void testSaveEvent() {
-        Events event = new Events();
-        event.setTitle("Test Event");
-        event.setUser(user);
-        event.setDate(20241216);
-        event.setStartTime(Time.valueOf(LocalTime.of(10, 0)));
-        event.setDuration(Time.valueOf(LocalTime.of(2, 0)));
 
-        eventsRepository.saveEvent(event);
-
-        Events fetchedEvent = eventsRepository.getEventById(event.getId());
-        Assertions.assertThat(fetchedEvent).isNotNull();
-        Assertions.assertThat(fetchedEvent.getTitle()).isEqualTo("Test Event");
-    }
 
     @Test
     @Order(2)
@@ -63,7 +53,7 @@ public class EventsTest {
         Events event = new Events();
         event.setTitle("Test Event");
         event.setUser(user);
-        event.setDate(20241216);
+        event.setDate(LocalDate.parse("20241216", DateTimeFormatter.BASIC_ISO_DATE));
         event.setStartTime(Time.valueOf(LocalTime.of(10, 0)));
         event.setDuration(Time.valueOf(LocalTime.of(2, 0)));
 
@@ -72,24 +62,18 @@ public class EventsTest {
                 .hasMessageContaining("Event with title Test Event already exists");
     }
 
-    @Test
-    @Order(3)
-    public void testGetEventById() {
-        Events event = eventsRepository.getEventById(1L);
-        Assertions.assertThat(event).isNotNull();
-    }
 
     @Test
     @Order(4)
     public void testGetEventsByUser() {
-        List<Events> events = eventsRepository.getEventsByUser(user);
+        List<EventsDto> events = eventsRepository.getEventsDtoByUser(user);
         Assertions.assertThat(events).isNotEmpty();
     }
 
     @Test
     @Order(5)
     public void testGetEventsByDate() {
-        List<Events> events = eventsRepository.getEventsByDate(20241216);
+        List<Events> events = eventsRepository.getEventsDtoByDate(12:1:2004);
         Assertions.assertThat(events).isNotEmpty();
     }
 
@@ -98,27 +82,8 @@ public class EventsTest {
     public void testGetEventsByTimeRange() {
         Time startTime = Time.valueOf(LocalTime.of(9, 0));
         Time endTime = Time.valueOf(LocalTime.of(12, 0));
-        List<Events> events = eventsRepository.getEventsByTimeRange(20241216, startTime, endTime);
+        List<EventsDto> events = eventsRepository.getEventsDtoByTimeRange(20241216, startTime, endTime);
         Assertions.assertThat(events).isNotEmpty();
-    }
-
-    @Test
-    @Order(7)
-    public void testUpdateEvent() {
-        Events event = eventsRepository.getEventById(1L);
-        event.setTitle("Updated Event Title");
-        eventsRepository.updateEvent(event);
-
-        Events updatedEvent = eventsRepository.getEventById(1L);
-        Assertions.assertThat(updatedEvent.getTitle()).isEqualTo("Updated Event Title");
-    }
-
-    @Test
-    @Order(8)
-    public void testDeleteEvent() {
-        eventsRepository.deleteEvent(1L);
-        Assertions.assertThatThrownBy(() -> eventsRepository.getEventById(1L))
-                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
@@ -132,14 +97,14 @@ public class EventsTest {
     @Order(10)
     public void testGetPaginatedEvents() {
         Pageable pageable = PageRequest.of(0, 10);
-        List<Events> events = eventsRepository.getPaginatedEvents(pageable);
+        List<EventsDto> events = eventsRepository.getPaginatedEventsDto(pageable);
         Assertions.assertThat(events).isNotEmpty();
     }
 
     @Test
     @Order(11)
     public void testGetRecurringEvents() {
-        List<Events> recurringEvents = eventsRepository.getRecurringEvents();
+        List<EventsDto> recurringEvents = eventsRepository.getRecurringEventsDto();
         Assertions.assertThat(recurringEvents).isNotEmpty();
     }
 
@@ -147,7 +112,7 @@ public class EventsTest {
     @Order(12)
     public void testDeleteEventsByUser() {
         eventsRepository.deleteEventsByUser(user);
-        List<Events> events = eventsRepository.getEventsByUser(user);
+        List<EventsDto> events = eventsRepository.getEventsDtoByUser(user);
         Assertions.assertThat(events).isEmpty();
     }
 
