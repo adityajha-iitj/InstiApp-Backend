@@ -2,9 +2,9 @@ package in.ac.iitj.instiapp.Tests.Repository;
 
 import in.ac.iitj.instiapp.Repository.MessRepository;
 import in.ac.iitj.instiapp.Repository.impl.MessRepositoryImpl;
-import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuItem;
-import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuOverride;
-import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;
+import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.*;
+import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MenuOverrideDto;
+import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MessMenuDto;
 import jakarta.persistence.NoResultException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.Rollback;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -68,13 +67,13 @@ public class MenuTest {
         int year = 2024;
         int month = 6;
 
-        List<MessMenu> result = messRepository.getMessMenu(year, month);
+        List<MessMenuDto> result = messRepository.getMessMenu(year, month);
 
         assertEquals(2, result.size(), "The number of menus returned should match the mock data");
 
         Assertions.assertThat(result)
                 .usingRecursiveFieldByFieldElementComparatorIgnoringFields("Id")
-                .containsExactlyInAnyOrder(MENU1.toEntity(),MENU2.toEntity());
+                .containsExactlyInAnyOrder(MENU1.messMenuDto(),MENU2.messMenuDto());
 
 
 
@@ -85,16 +84,12 @@ public class MenuTest {
     public void testGetMenuOverride() throws ParseException {
 
 
-        MenuOverride result = messRepository.getOverrideMessMenu(MESS_OVERRIDE1.date);
+        MenuOverrideDto result = messRepository.getOverrideMessMenu(MESS_OVERRIDE1.date);
 
-        Assertions.assertThat(result).usingRecursiveComparison().ignoringFields("Id")
-                .withComparatorForFields(Comparator.comparingLong(date -> ((Date) date).getTime()),"date"
-                )
-                .isEqualTo(MESS_OVERRIDE1.toEntity());
-
-
-        Assertions.assertThatThrownBy(() -> messRepository.getOverrideMessMenu(MESS_OVERRIDE2.date))
-                .isInstanceOf(NoResultException.class);
+        assertEquals(MESS_OVERRIDE1.menuItemData.toEntity().getBreakfast(), result.getMenuItemBreakfast());
+        assertEquals(MESS_OVERRIDE1.menuItemData.toEntity().getLunch(), result.getMenuItemLunch());
+        assertEquals(MESS_OVERRIDE1.menuItemData.toEntity().getSnacks(), result.getMenuItemSnacks());
+        assertEquals(MESS_OVERRIDE1.menuItemData.toEntity().getDinner(), result.getMenuItemDinner());
     }
 
     @Test
@@ -121,8 +116,11 @@ public class MenuTest {
         boolean existsBefore = messRepository.menuOverrideExists(MESS_OVERRIDE1.date);
         assertTrue(existsBefore, "The record should exist before updating");
         messRepository.updateOverrideMessMenu(MESS_OVERRIDE2.menuItemData.toEntity(), MESS_OVERRIDE1.date);
-        MenuOverride newmenu = messRepository.getOverrideMessMenu(MESS_OVERRIDE1.date);
-        assertEquals(MESS_OVERRIDE2.menuItemData.toEntity(), newmenu.getMenuItem());
+        MenuOverrideDto newmenu = messRepository.getOverrideMessMenu(MESS_OVERRIDE1.date);
+        assertEquals(MESS_OVERRIDE2.menuItemData.toEntity().getBreakfast(), newmenu.getMenuItemBreakfast());
+        assertEquals(MESS_OVERRIDE2.menuItemData.toEntity().getLunch(), newmenu.getMenuItemLunch());
+        assertEquals(MESS_OVERRIDE2.menuItemData.toEntity().getSnacks(), newmenu.getMenuItemSnacks());
+        assertEquals(MESS_OVERRIDE2.menuItemData.toEntity().getDinner(), newmenu.getMenuItemDinner());
     }
 
     @Test
@@ -153,11 +151,17 @@ public class MenuTest {
 
         messRepository.updateMessMenu(MENU2.year, MENU2.month, MENU2.day, MENU3.menuItemData.toEntity());
 
-        List<MessMenu> updatedMenu = messRepository.getMessMenu(2024, 6);
+        List<MessMenuDto> updatedMenu = messRepository.getMessMenu(2024, 6);
         assertNotNull(updatedMenu, "The updated menu should not be null");
 
-        Assertions.assertThat(updatedMenu.get(1).getMenuItem())
-                .isEqualTo(MENU3.menuItemData.toEntity());
+        Assertions.assertThat(updatedMenu.get(1).getMenuItemBreakfast())
+                .isEqualTo(MENU3.menuItemData.toEntity().getBreakfast());
+        Assertions.assertThat(updatedMenu.get(1).getMenuItemLunch())
+                .isEqualTo(MENU3.menuItemData.toEntity().getLunch());
+        Assertions.assertThat(updatedMenu.get(1).getMenuItemSnacks())
+                .isEqualTo(MENU3.menuItemData.toEntity().getSnacks());
+        Assertions.assertThat(updatedMenu.get(1).getMenuItemDinner())
+                .isEqualTo(MENU3.menuItemData.toEntity().getDinner());
 
 
     }

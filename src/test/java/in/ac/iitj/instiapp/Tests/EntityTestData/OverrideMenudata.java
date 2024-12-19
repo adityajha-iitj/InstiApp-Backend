@@ -2,6 +2,8 @@ package in.ac.iitj.instiapp.Tests.EntityTestData;
 
 import in.ac.iitj.instiapp.Tests.Utilities.Conversions;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuOverride;
+import in.ac.iitj.instiapp.mappers.MessDtoMapper;
+import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MenuOverrideDto;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -28,5 +30,9 @@ public enum OverrideMenudata {
 
     public MenuOverride toEntity() {
         return new MenuOverride(this.date , this.menuItemData.toEntity());
+    }
+
+    public MenuOverrideDto toDto() {
+        return MessDtoMapper.INSTANCE.menuOverrideToMenuOverrideDto(this.toEntity());
     }
 }
