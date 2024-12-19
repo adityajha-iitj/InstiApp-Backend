@@ -191,7 +191,7 @@ public class BusRepositoryImpl implements BusRepository {
         Long fromLocationId = isBusLocationExists(busRun.getBusSnippet().getFromLocation().getName());
         Long toLocationId = isBusLocationExists(busRun.getBusSnippet().getToLocation().getName());
         if (fromLocationId.equals(-1L) || toLocationId.equals(-1L)) {
-            throw new DataIntegrityViolationException("From location or To location do not exist");
+            throw new EmptyResultDataAccessException("From location or To location do not exist", 1);
         }
         busRun.setBusSnippet(new BusSnippet(busRun.getBusSnippet().getTimeOfDeparture(),
                 entityManager.getReference(BusLocation.class, fromLocationId),
@@ -251,9 +251,22 @@ public class BusRepositoryImpl implements BusRepository {
             throw new DataIntegrityViolationException("Bus Run already exists");
         }
 
+        Long fromLocation = isBusLocationExists(newBusRun.getBusSnippet().getFromLocation().getName());
+        Long toLocation = isBusLocationExists(newBusRun.getBusSnippet().getToLocation().getName());
+        if (fromLocation.equals(-1L) || toLocation.equals(-1L)) {
+            throw new EmptyResultDataAccessException("From location or To location do not exist", 1);
+        }
+
+
         entityManager.createQuery("update BusRun  br set br.busSnippet = :busSnippet,br.scheduleType  = :scheduleType where br.publicId = :publicId")
-                .setParameter("busSnippet", newBusRun.getBusSnippet())
+                .setParameter("busSnippet",
+                        new BusSnippet(newBusRun.getBusSnippet().getTimeOfDeparture(),
+                                entityManager.getReference(BusLocation.class, fromLocation),
+                                entityManager.getReference(BusLocation.class, toLocation)
+                        )
+                )
                 .setParameter("scheduleType", newBusRun.getScheduleType())
+                .setParameter("publicId", publicId)
                 .executeUpdate();
 
     }
@@ -284,7 +297,7 @@ public class BusRepositoryImpl implements BusRepository {
         Long fromLocationId = isBusLocationExists(busOverride.getBusSnippet().getFromLocation().getName());
         Long toLocationId = isBusLocationExists(busOverride.getBusSnippet().getToLocation().getName());
         if (fromLocationId.equals(-1L) || toLocationId.equals(-1L)) {
-            throw new DataIntegrityViolationException("From location or To location do not exist");
+            throw new EmptyResultDataAccessException("From location or To location do not exist", 1);
         }
         busOverride.setBusSnippet(new BusSnippet(busOverride.getBusSnippet().getTimeOfDeparture(),
                 entityManager.getReference(BusLocation.class, fromLocationId),
@@ -350,9 +363,21 @@ public class BusRepositoryImpl implements BusRepository {
             throw new DataIntegrityViolationException("Bus Override already exists");
         }
 
+        Long fromLocationId = isBusLocationExists(newBusOverride.getBusSnippet().getFromLocation().getName());
+        Long toLocationId = isBusLocationExists(newBusOverride.getBusSnippet().getToLocation().getName());
+        if (fromLocationId.equals(-1L) || toLocationId.equals(-1L)) {
+            throw new EmptyResultDataAccessException("From location or To location do not exist", 1);
+        }
+
+        // Could be optimised
         entityManager.createQuery("update  BusOverride  bo set bo.description = :description, bo.busSnippet = :busSnippet, bo.overrideDate = :overrideDate where bo.publicId = :id")
                 .setParameter("description", newBusOverride.getDescription())
-                .setParameter("busSnippet", newBusOverride.getBusSnippet())
+                .setParameter("busSnippet",
+                        new BusSnippet(newBusOverride.getBusSnippet().getTimeOfDeparture(),
+                                entityManager.getReference(BusLocation.class, fromLocationId),
+                                entityManager.getReference(BusLocation.class, toLocationId)
+                        )
+                )
                 .setParameter("overrideDate", newBusOverride.getOverrideDate())
                 .setParameter("id", publicId)
                 .executeUpdate();
