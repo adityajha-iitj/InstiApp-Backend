@@ -36,5 +36,7 @@ public enum BusSnippetData {
 
     }
 
-    public BusSnippet toEntity()
+    public BusSnippet toEntity(){
+        return  new BusSnippet(this.timeOfDeparture, this.fromBusLocation.toEntity(), this.toBusLocation.toEntity());
+    }
 }

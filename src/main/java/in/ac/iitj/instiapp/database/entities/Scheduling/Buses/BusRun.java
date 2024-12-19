@@ -22,6 +22,9 @@ public class BusRun {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
 
+    @Column(nullable = false,unique = true)
+    private String publicId;
+
     @ManyToOne
     private BusSchedule busSchedule;
 
@@ -32,9 +35,10 @@ public class BusRun {
     private ScheduleType scheduleType;
 
 
-   public BusRun(BusSchedule busSchedule, BusSnippet busSnippet,ScheduleType scheduleType) {
-       this.busSchedule = busSchedule;
+   public BusRun(String publicId, BusSnippet busSnippet,ScheduleType scheduleType) {
+       this.publicId = publicId;
        this.busSnippet = busSnippet;
        this.scheduleType = scheduleType;
    }
+
 }

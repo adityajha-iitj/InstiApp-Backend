@@ -21,6 +21,9 @@ public class BusOverride {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
+    @Column(nullable = false,unique = true)
+    private String publicId;
+
     @ManyToOne
     private BusSchedule busSchedule;
 
@@ -31,4 +34,12 @@ public class BusOverride {
     private Date overrideDate;
 
     private String description;
+
+
+    public BusOverride(String publicId,BusSnippet busSnippet, Date overrideDate, String description) {
+        this.publicId = publicId;
+        this.busSnippet = busSnippet;
+        this.overrideDate = overrideDate;
+        this.description = description;
+    }
 }

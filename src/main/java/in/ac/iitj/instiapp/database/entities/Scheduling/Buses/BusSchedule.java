@@ -28,7 +28,9 @@ public class BusSchedule {
     @OneToMany(mappedBy = "busSchedule", fetch = FetchType.LAZY)
     Set<BusOverride> busOverrides;
 
+
     public BusSchedule(String busNumber) {
         this.busNumber = busNumber;
     }
+
 }

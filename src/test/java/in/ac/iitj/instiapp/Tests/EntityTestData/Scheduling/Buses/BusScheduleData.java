@@ -6,6 +6,7 @@ public enum BusScheduleData {
     BUS_SCHEDULE1("B1"),
     BUS_SCHEDULE2("B2"),
     BUS_SCHEDULE3("B3"),
+    BUS_SCHEDULE4("B4"),
     ;
 
 
