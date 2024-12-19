@@ -1,6 +1,8 @@
 package in.ac.iitj.instiapp.Tests.EntityTestData;
 
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;
+import in.ac.iitj.instiapp.mappers.MessDtoMapper;
+import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MessMenuDto;
 
 public enum MenuData {
 
@@ -25,6 +27,10 @@ public enum MenuData {
 
     public MessMenu toEntity(){
         return  new MessMenu(this.year,this.month,this.day, this.menuItemData.toEntity());
+    }
+
+    public MessMenuDto messMenuDto(){
+        return MessDtoMapper.INSTANCE.messMenuToDto(this.toEntity());
     }
 
 
