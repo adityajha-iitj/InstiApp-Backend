@@ -15,5 +15,6 @@ public class Groups {
     String name;
 
     @ManyToMany
+    @JoinTable(name = "groups_users")
     Set<User> users;
 }
