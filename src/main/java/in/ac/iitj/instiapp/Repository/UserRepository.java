@@ -15,6 +15,7 @@ public interface UserRepository {
     boolean userExists(String username);
     void updatePhoneNumber(String phoneNumber, String username);
     void updateUserType(String username , String newusertype);
+    long getUserId(String username);
 
 
 

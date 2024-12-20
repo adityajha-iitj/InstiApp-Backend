@@ -25,4 +25,9 @@ public class WellBeingMember {
 
     @Column( nullable = false)
     String availability;
+
+    public WellBeingMember(String qualification, String availability) {
+        this.qualification = qualification;
+        this.availability = availability;
+    }
 }

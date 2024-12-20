@@ -101,6 +101,16 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
+    @Override
+    public long getUserId(String username) {
+        if(userExists(username)){
+            String sql = "SELECT id FROM users WHERE user_name = ?";
+            return jdbcTemplate.queryForObject(sql, Long.class, username);
+        }
+        else {
+            throw new NoSuchElementException("Student with username '" + username + "' not found.");
+        }
+    }
 
 
 
