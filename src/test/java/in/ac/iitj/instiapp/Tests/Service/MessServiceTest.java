@@ -1,99 +1,126 @@
 package in.ac.iitj.instiapp.Tests.Service;
 
+
+import in.ac.iitj.instiapp.Repository.MessRepository;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuItem;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuOverride;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;
+import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MenuOverrideDto;
+import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MessMenuDto;
 import in.ac.iitj.instiapp.services.MessService;
+import in.ac.iitj.instiapp.services.impl.MessServiceImpl;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Import;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.MenuData.*;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.OverrideMenudata.MESS_OVERRIDE1;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.OverrideMenudata.MESS_OVERRIDE2;
 
 @SpringBootTest
-@Transactional
+@Import({MessServiceImpl.class})
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MessServiceTest {
-
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
     @Autowired
     private MessService messService;
 
-    private Date testDate;
-    private MenuItem testMenuItem;
+    @Autowired  // Add this if you want to mock the repository
+    private MessRepository messRepository;
 
-    @BeforeEach
-    public void setUp() throws ParseException {
-        testDate = dateFormat.parse("2024/06/06");
-        testMenuItem = new MenuItem("poha", "rajma", "Samosa", "chole bhature");
+
+    @BeforeAll
+    public static void init(@Autowired MessService messService) {
+        messService.saveMessMenu(MENU1.messMenuDto());
+        messService.saveMessMenu(MENU2.messMenuDto());
+        messService.saveOverrideMessMenu(MESS_OVERRIDE1.toDto());
     }
 
     @Test
     @Order(1)
-    public void testSaveAndGetMessMenu() {
-        MessMenu menu = new MessMenu(2024, 6, 6, testMenuItem);
-        messService.saveMessMenu(menu);
+    public void testGetMessMenu() {
+        List<MessMenuDto> messMenuDtos = messService.getMessMenu(MENU1.year , MENU1.month);
+        Assertions.assertEquals(2, messMenuDtos.size());
+        Assertions.assertEquals(MENU1.year, messMenuDtos.get(0).getYear());
+        Assertions.assertEquals(MENU1.month, messMenuDtos.get(0).getMonth());
+        Assertions.assertEquals(MENU1.day, messMenuDtos.get(0).getDay());
+        Assertions.assertEquals(MENU1.menuItemData.breakfast , messMenuDtos.get(0).getMenuItemBreakfast());
+        Assertions.assertEquals(MENU1.menuItemData.lunch , messMenuDtos.get(0).getMenuItemLunch());
 
-        List<MessMenu> retrievedMenus = messService.getMessMenu(2024, 6);
-        assertFalse(retrievedMenus.isEmpty());
-        assertEquals(menu.getMenuItem(), retrievedMenus.get(0).getMenuItem());
+        Assertions.assertEquals(MENU2.year, messMenuDtos.get(1).getYear());
+        Assertions.assertEquals(MENU2.month, messMenuDtos.get(1).getMonth());
+        Assertions.assertEquals(MENU2.day, messMenuDtos.get(1).getDay());
+        Assertions.assertEquals(MENU2.menuItemData.breakfast , messMenuDtos.get(1).getMenuItemBreakfast());
+        Assertions.assertEquals(MENU2.menuItemData.lunch , messMenuDtos.get(1).getMenuItemLunch());
+
     }
 
     @Test
     @Order(2)
-    public void testSaveAndGetOverrideMenu() throws ParseException {
-        MenuOverride menuOverride = new MenuOverride(testDate,
-                new MenuItem("dosa", "paneer", "pani puri", "shamiyana"));
-
-        messService.saveOverrideMessMenu(menuOverride);
-
-        MenuOverride retrievedOverride = messService.getOverrideMessMenu(testDate);
-        assertNotNull(retrievedOverride);
-        assertEquals("shamiyana", retrievedOverride.getMenuItem().getDinner());
+    public void testMessMenuExists(){
+        Assertions.assertTrue(messService.messMenuExists(MENU1.year,MENU1.month,MENU1.day));
+        Assertions.assertFalse(messService.messMenuExists(MENU3.year,MENU3.month,MENU3.day));
     }
 
     @Test
     @Order(3)
-    public void testUpdateMessMenu() {
-        MessMenu menu = new MessMenu(2024, 6, 4, testMenuItem);
-        messService.saveMessMenu(menu);
-
-        MenuItem updatedMenuItem = new MenuItem("idli", "biryani", "samosa", "pizza");
-        messService.updateMessMenu(2024, 6, 4, updatedMenuItem);
-
-        List<MessMenu> updatedMenus = messService.getMessMenu(2024, 6);
-        assertEquals(updatedMenuItem, updatedMenus.get(0).getMenuItem());
+    public void testUpdateMessMenu(){
+        messService.updateMessMenu(MENU1.year,MENU1.month,MENU1.day , MENU3.menuItemData.toEntity());
+        List<MessMenuDto> messMenuDtos = messService.getMessMenu(MENU1.year,MENU1.month);
+        Assertions.assertEquals(MENU3.menuItemData.breakfast , messMenuDtos.get(1).getMenuItemBreakfast());
+        Assertions.assertEquals(MENU3.menuItemData.lunch , messMenuDtos.get(1).getMenuItemLunch());
+        Assertions.assertEquals(MENU3.menuItemData.snacks, messMenuDtos.get(1).getMenuItemSnacks());
+        Assertions.assertEquals(MENU3.menuItemData.dinner , messMenuDtos.get(1).getMenuItemDinner());
     }
 
     @Test
     @Order(4)
-    public void testDeleteMessMenu() {
-        MessMenu menu = new MessMenu(2024, 6, 4, testMenuItem);
-        messService.saveMessMenu(menu);
-
-        assertTrue(messService.messMenuExists(2024, 6, 4));
-
-        messService.deleteMessMenu(2024, 6, 4);
-
-        assertFalse(messService.messMenuExists(2024, 6, 4));
+    public void testDeleteMessMenu(){
+        messService.deleteMessMenu(MENU1.year,MENU1.month,MENU1.day);
+        Assertions.assertFalse(messService.messMenuExists(MENU1.year,MENU1.month,MENU1.day));
     }
 
     @Test
     @Order(5)
-    public void testGetNonExistentOverrideMenu() throws ParseException {
-        Date nonExistentDate = dateFormat.parse("2025/06/05");
-
-        assertThrows(EmptyResultDataAccessException.class, () -> {
-            messService.getOverrideMessMenu(nonExistentDate);
-        });
+    public void testGetMenuOverride(){
+        MenuOverrideDto menuOverrideDto = messService.getOverrideMessMenu(MESS_OVERRIDE1.date);
+        Assertions.assertEquals(MESS_OVERRIDE1.date, menuOverrideDto.getDate());
+        Assertions.assertEquals(MESS_OVERRIDE1.menuItemData.breakfast , menuOverrideDto.getMenuItemBreakfast());
+        Assertions.assertEquals(MESS_OVERRIDE1.menuItemData.lunch , menuOverrideDto.getMenuItemLunch());
+        Assertions.assertEquals(MESS_OVERRIDE1.menuItemData.snacks , menuOverrideDto.getMenuItemSnacks());
+        Assertions.assertEquals(MESS_OVERRIDE1.menuItemData.dinner , menuOverrideDto.getMenuItemDinner());
     }
+
+    @Test
+    @Order(6)
+    public void testMenuOverrideExists(){
+        Assertions.assertTrue(messService.menuOverrideExists(MESS_OVERRIDE1.date));
+        Assertions.assertFalse(messService.menuOverrideExists(MESS_OVERRIDE2.date));
+    }
+
+    @Test
+    @Order(7)
+    public void testUpdateMenuOverride(){
+        messService.updateOverrideMessMenu(MESS_OVERRIDE2.toEntity().getMenuItem(), MESS_OVERRIDE1.date);
+        MenuOverrideDto menuOverrideDto = messService.getOverrideMessMenu(MESS_OVERRIDE1.date);
+        Assertions.assertEquals(MESS_OVERRIDE2.menuItemData.breakfast , menuOverrideDto.getMenuItemBreakfast());
+        Assertions.assertEquals(MESS_OVERRIDE2.menuItemData.lunch , menuOverrideDto.getMenuItemLunch());
+        Assertions.assertEquals(MESS_OVERRIDE2.menuItemData.snacks , menuOverrideDto.getMenuItemSnacks());
+        Assertions.assertEquals(MESS_OVERRIDE2.menuItemData.dinner , menuOverrideDto.getMenuItemDinner());
+    }
+
+    @Test
+    @Order(8)
+    public void testDeleteMenuOverride(){
+        messService.deleteOverrideMessMenu(MESS_OVERRIDE1.date);
+        Assertions.assertFalse(messService.menuOverrideExists(MESS_OVERRIDE1.date));
+    }
+
 }

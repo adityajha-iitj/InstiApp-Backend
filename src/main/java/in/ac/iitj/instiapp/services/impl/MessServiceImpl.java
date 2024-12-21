@@ -1,9 +1,13 @@
 package in.ac.iitj.instiapp.services.impl;
 
 import in.ac.iitj.instiapp.Repository.MessRepository;
+
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuItem;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuOverride;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;
+import in.ac.iitj.instiapp.mappers.Scheduling.MessMenu.MessDtoMapper;
+import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MenuOverrideDto;
+import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MessMenuDto;
 import in.ac.iitj.instiapp.services.MessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,23 +26,15 @@ public class MessServiceImpl implements MessService {
     }
 
     @Override
-    public void saveMessMenu(MessMenu menu) {
-        messRepository.saveMessMenu(menu);
+    public void saveMessMenu(MessMenuDto menu) {
+        MessMenu menuEntity = MessDtoMapper.INSTANCE.dtoToMessMenu(menu);
+        messRepository.saveMessMenu( menuEntity );
+
     }
 
     @Override
-    public void saveOverrideMessMenu(MenuOverride menuOverride) {
-        messRepository.saveOverrideMessMenu(menuOverride);
-    }
-
-    @Override
-    public List<MessMenu> getMessMenu(int year, int month) {
+    public List<MessMenuDto> getMessMenu(int year, int month) {
         return messRepository.getMessMenu(year, month);
-    }
-
-    @Override
-    public MenuOverride getOverrideMessMenu(Date date) {
-        return messRepository.getOverrideMessMenu(date);
     }
 
     @Override
@@ -47,8 +43,9 @@ public class MessServiceImpl implements MessService {
     }
 
     @Override
-    public boolean menuOverrideExists(Date date) {
-        return messRepository.menuOverrideExists(date);
+    public void updateMessMenu(int year, int month, int day, MenuItem menuItem) {
+        messRepository.updateMessMenu(year, month, day, menuItem);
+
     }
 
     @Override
@@ -57,13 +54,24 @@ public class MessServiceImpl implements MessService {
     }
 
     @Override
-    public void deleteOverrideMessMenu(Date date) {
-        messRepository.deleteOverrideMessMenu(date);
+    public void saveOverrideMessMenu(MenuOverrideDto menuOverride) {
+        MenuOverride menu = MessDtoMapper.INSTANCE.menuOverrideDtoToMenuOverride(menuOverride);
+        messRepository.saveOverrideMessMenu( menu );
     }
 
     @Override
-    public void updateMessMenu(int year, int month, int day, MenuItem menuItem) {
-        messRepository.updateMessMenu(year, month, day, menuItem);
+    public MenuOverrideDto getOverrideMessMenu(Date date) {
+        return messRepository.getOverrideMessMenu(date);
+    }
+
+    @Override
+    public boolean menuOverrideExists(Date date) {
+        return messRepository.menuOverrideExists(date);
+    }
+
+    @Override
+    public void deleteOverrideMessMenu(Date date) {
+        messRepository.deleteOverrideMessMenu(date);
     }
 
     @Override
