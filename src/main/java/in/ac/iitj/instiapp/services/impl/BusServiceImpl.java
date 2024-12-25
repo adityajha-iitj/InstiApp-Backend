@@ -1,25 +1,24 @@
 package in.ac.iitj.instiapp.services.impl;
 
+
 import in.ac.iitj.instiapp.Repository.BusRepository;
-import in.ac.iitj.instiapp.services.BusService;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusLocation;
+import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusOverride;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusRun;
-import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusSchedule;
-import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.ScheduleType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusOverrideDto;
+import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusScheduleDto;
+import in.ac.iitj.instiapp.services.BusService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Time;
 import java.util.List;
+
 
 @Service
 public class BusServiceImpl implements BusService {
 
-    private static final Logger log = LoggerFactory.getLogger(BusServiceImpl.class);
     private final BusRepository busRepository;
 
     @Autowired
@@ -29,84 +28,112 @@ public class BusServiceImpl implements BusService {
 
     @Override
     @Transactional
-    public void createBusLocation(String name) {
-        log.info("Creating bus location: {}", name);
+    public void saveBusLocation(String name) {
         busRepository.saveBusLocation(name);
     }
 
     @Override
-    @Transactional
-    public void removeBusLocation(String name) {
-        log.info("Removing bus location: {}", name);
-        busRepository.deleteBusLocation(name);
-    }
-
-    @Override
-    public BusLocation findBusLocation(String name) {
-        log.info("Finding bus location: {}", name);
-        return busRepository.getBusLocation(name);
-    }
-
-    @Override
-    public List<String> listBusLocations(Pageable pageable) {
-        log.info("Listing bus locations");
+    public List<String> getBusLocations(Pageable pageable) {
         return busRepository.getListOfBusLocations(pageable);
     }
 
     @Override
-    public boolean checkBusLocationExists(String name) {
+    public Long isBusLocationExist(String name) {
         return busRepository.isBusLocationExists(name);
     }
 
     @Override
-    @Transactional
-    public void createBusSchedule(BusSchedule busSchedule) {
-        log.info("Creating bus schedule: {}", busSchedule.getBusNumber());
-        busRepository.saveBusSchedule(busSchedule);
+    public void updateBusLocation(String oldName, String newName) {
+        busRepository.updateBusLocation(oldName, newName);
     }
 
     @Override
-    public BusSchedule findBusSchedule(String busNumber) {
-        log.info("Finding bus schedule: {}", busNumber);
+    @Transactional
+    public void deleteBusLocation(String name) {
+        busRepository.deleteBusLocation(name);
+
+    }
+
+    @Override
+    @Transactional
+    public void saveBusSchedule(String busNumber) {
+        busRepository.saveBusSchedule(busNumber);
+
+    }
+
+    @Override
+    public BusScheduleDto getBusSchedule(String busNumber) {
         return busRepository.getBusSchedule(busNumber);
     }
 
     @Override
-    public List<BusSchedule> listBusSchedules(Pageable pageable) {
-        log.info("Listing bus schedules");
-        return busRepository.getBusSchedules(pageable);
+    public List<String> getBusNumbers(Pageable pageable) {
+        return busRepository.getBusNumbers(pageable);
     }
 
     @Override
-    @Transactional
-    public void createBusRun(BusRun busRun) {
-        log.info("Creating bus run for schedule: {}", busRun.getBusSchedule().getBusNumber());
-        busRepository.saveBusRun(busRun);
-    }
-
-    @Override
-    @Transactional
-    public void updateBusScheduleRun(String busNumber, ScheduleType scheduleType, Time timeOfDeparture, BusRun busRun) {
-        log.info("Updating bus schedule run: {}, {}, {}", busNumber, scheduleType, timeOfDeparture);
-        busRepository.updateBusScheduleRun(busNumber, scheduleType, timeOfDeparture, busRun);
-    }
-
-    @Override
-    public boolean checkBusScheduleExists(String busNumber) {
+    public Long existsBusSchedule(String busNumber) {
         return busRepository.existsBusSchedule(busNumber);
     }
 
     @Override
-    @Transactional
-    public void removeBusSchedule(String busNumber) {
-        log.info("Removing bus schedule: {}", busNumber);
+    public void updateBusSchedule(String oldBusNumber, String newBusNumber) {
+        busRepository.updateBusSchedule(oldBusNumber, newBusNumber);
+    }
+
+    @Override
+    public void deleteBusSchedule(String busNumber) {
         busRepository.deleteBusSchedule(busNumber);
     }
 
     @Override
     @Transactional
-    public void updateBusScheduleNumber(String oldBusNumber, String newBusNumber) {
-        log.info("Updating bus schedule number from {} to {}", oldBusNumber, newBusNumber);
-        busRepository.updateBusSchedule(oldBusNumber, newBusNumber);
+    public void saveBusRun(BusRun busRun, String busNumber) {
+        busRepository.saveBusRun(busRun, busNumber);
+    }
+
+    @Override
+    public Boolean existsBusRunByPublicId(String publicId) {
+        return busRepository.existsBusRunByPublicId(publicId);
+    }
+
+    @Override
+    @Transactional
+    public void updateBusScheduleRun(String publicId, BusRun newBusRun) {
+        busRepository.updateBusScheduleRun(publicId, newBusRun);
+    }
+
+    @Override
+    @Transactional
+    public void deleteBusRuns(List<String> busRunPublicIds) {
+        busRepository.deleteBusRuns(busRunPublicIds);
+    }
+
+    @Override
+    @Transactional
+    public void saveBusOverride(String busNumber, BusOverride busOverride) {
+        busRepository.saveBusOverride(busNumber, busOverride);
+    }
+
+    @Override
+    public boolean existsBusOverrideByPublicId(String publicId) {
+        return busRepository.existsBusOverrideByPublicId(publicId);
+    }
+
+    @Override
+    public List<BusOverrideDto> getBusOverrideForYearAndMonth(int year, int month) {
+        return busRepository.getBusOverrideForYearAndMonth(year, month);
+    }
+
+    @Override
+    @Transactional
+    public void updateBusOverride(String publicId, BusOverride newBusOverride) {
+        busRepository.updateBusOverride(publicId, newBusOverride);
+    }
+
+    @Override
+    @Transactional
+    public void deleteBusOverride(List<String> busOverrideIds) {
+        busRepository.deleteBusOverride(busOverrideIds);
     }
 }
