@@ -1,9 +1,7 @@
 package in.ac.iitj.instiapp.database.entities.User;
 
 
-import in.ac.iitj.instiapp.database.entities.Media.UserAvatar;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
-import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -45,9 +43,8 @@ public class User{
     @JoinColumn(nullable = false)
     Calendar calendar;
 
-    @OneToOne
-    @JoinColumn(nullable = false)
-    UserAvatar avatar;
+    @Column(nullable = false)
+    String avatarUrl;
 
     @OneToMany
     Set<OrganisationRole> organisationRoleSet;

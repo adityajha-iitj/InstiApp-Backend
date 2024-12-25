@@ -1,5 +1,6 @@
 package in.ac.iitj.instiapp.database.entities.User.Student;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,4 +19,7 @@ public class StudentProgram {
 
     @Column( nullable = false)
     String name;
+
+    @Column(nullable = false)
+    boolean isActive;
 }

@@ -1,7 +1,6 @@
 package in.ac.iitj.instiapp.Tests.Utilities;
 
 import in.ac.iitj.instiapp.Repository.CalendarRepository;
-import in.ac.iitj.instiapp.Repository.UserAvatarRepository;
 import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.Repository.UserTypeRepository;
 import in.ac.iitj.instiapp.Repository.impl.CalendarRepositoryImpl;

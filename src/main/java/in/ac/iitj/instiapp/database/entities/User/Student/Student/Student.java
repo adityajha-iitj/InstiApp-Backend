@@ -1,5 +1,7 @@
-package in.ac.iitj.instiapp.database.entities.User.Student;
+package in.ac.iitj.instiapp.database.entities.User.Student.Student;
 
+import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
+import in.ac.iitj.instiapp.database.entities.User.Student.StudentProgram;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;

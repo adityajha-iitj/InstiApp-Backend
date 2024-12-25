@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.database.entities.User.Alumni;
+package in.ac.iitj.instiapp.database.entities.User.Student.Alumni;
 
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentProgram;

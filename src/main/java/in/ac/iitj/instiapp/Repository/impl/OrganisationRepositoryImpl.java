@@ -1,6 +1,6 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
-import in.ac.iitj.instiapp.Repository.OrganisationRepository;
+import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
 import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationType;

@@ -1,10 +1,8 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.Repository.UserRepository;
-import in.ac.iitj.instiapp.database.entities.Media.UserAvatar;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.User;
-import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;

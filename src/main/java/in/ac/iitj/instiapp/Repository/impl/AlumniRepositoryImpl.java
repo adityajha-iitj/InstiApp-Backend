@@ -1,7 +1,7 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
-import in.ac.iitj.instiapp.Repository.AlumniRepository;
-import in.ac.iitj.instiapp.database.entities.User.Alumni.Alumni;
+import in.ac.iitj.instiapp.Repository.User.Student.Alumni.AlumniRepository;
+import in.ac.iitj.instiapp.database.entities.User.Student.Alumni.Alumni;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentProgram;
 import in.ac.iitj.instiapp.database.entities.User.User;

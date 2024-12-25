@@ -21,7 +21,7 @@ public class Calendar {
     Long Id;
 
     @Column( nullable = false)
-    String public_id;
+    String publicId;
 
     @OneToOne(mappedBy = "calendar")
     User user;
@@ -30,7 +30,7 @@ public class Calendar {
     Set<Events> events;
 
 
-    public Calendar(String public_id) {
-        this.public_id = public_id;
+    public Calendar(String publicId) {
+        this.publicId = publicId;
     }
 }

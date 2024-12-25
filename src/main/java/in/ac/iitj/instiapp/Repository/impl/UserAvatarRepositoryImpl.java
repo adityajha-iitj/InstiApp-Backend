@@ -1,7 +1,5 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
-import in.ac.iitj.instiapp.Repository.UserAvatarRepository;
-import in.ac.iitj.instiapp.database.entities.Media.UserAvatar;
 import jakarta.persistence.EntityManager;
 import org.springframework.jdbc.core.JdbcTemplate;
 

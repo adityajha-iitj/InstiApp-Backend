@@ -1,5 +1,6 @@
 package in.ac.iitj.instiapp.database.entities.User.Faculty;
 
+import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,4 +22,7 @@ public class Faculty {
 
     @OneToOne
     User user;
+
+    @ManyToOne
+    Organisation organisation;
 }
