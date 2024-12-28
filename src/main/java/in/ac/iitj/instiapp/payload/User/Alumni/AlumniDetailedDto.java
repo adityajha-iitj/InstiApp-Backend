@@ -22,8 +22,5 @@ public class AlumniDetailedDto implements Serializable {
     Integer branchOpeningYear;
     Integer branchClosingYear;
     Integer admissionYear;
-
-
-    @JsonView(Views.Private.class)
     Integer passOutYear;
 }

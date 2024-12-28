@@ -17,7 +17,7 @@ public class WellBeingMember {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
-    @ManyToOne
+    @OneToOne
     User user;
 
     @Column(nullable = false)
