@@ -44,6 +44,17 @@ public class UserDetailedDto implements Serializable {
         this.organisationRoleSet = organisationRoleSet;
     }
 
+    public UserDetailedDto(String username) {
+        this.userName = username;
+        this.name = null;
+        this.email = null;
+        this.userTypeName = null;
+        this.avatarUrl = null;
+        this.organisationRoleSet = null;
+        this.phoneNumber = null;
+        this.calendarPublicId = null;
+    }
+
     @JsonView(Views.Private.class)
     String phoneNumber;
     String userTypeName;
