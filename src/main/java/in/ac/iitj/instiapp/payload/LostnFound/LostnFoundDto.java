@@ -7,6 +7,7 @@ import java.io.Serializable;
 /**
  * DTO for {@link in.ac.iitj.instiapp.database.entities.LostnFound.LostnFound}
  */
+
 @Value
 public class LostnFoundDto implements Serializable {
     String finderName;

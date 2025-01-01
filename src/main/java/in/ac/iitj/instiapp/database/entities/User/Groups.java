@@ -1,11 +1,13 @@
 package in.ac.iitj.instiapp.database.entities.User;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "groups")
+@Getter
 public class Groups {
 
     @jakarta.persistence.Id
