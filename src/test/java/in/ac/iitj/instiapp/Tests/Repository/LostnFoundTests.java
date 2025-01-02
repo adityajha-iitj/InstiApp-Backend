@@ -317,7 +317,7 @@ public class LostnFoundTests {
 
     @Test
     @Transactional
-    @Order(1)
+    @Order(7)
     public void testSaveLostnFoundDetails() {
         // Step 1: Create and persist related entities (User, Location, Media)
         User finder = new User("finderUserName", "finder@example.com", "1234567890");
@@ -366,7 +366,6 @@ public class LostnFoundTests {
         Assertions.assertThat(savedLostnFound.getStatus()).isFalse();
         Assertions.assertThat(savedLostnFound.getMedia().getPublicUrl()).isEqualTo("http://example.com/image.jpg");
     }
-
 
 
 }

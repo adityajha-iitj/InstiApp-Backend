@@ -1,6 +1,8 @@
 package in.ac.iitj.instiapp.payload;
 
 import in.ac.iitj.instiapp.database.entities.Media.Mediatype;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.Value;
 
 import java.io.Serializable;
