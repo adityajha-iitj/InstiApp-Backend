@@ -33,4 +33,8 @@ public class Calendar {
     public Calendar(String publicId) {
         this.publicId = publicId;
     }
+
+    public Calendar(Long Id){
+        this.Id = Id;
+    }
 }

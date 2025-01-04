@@ -24,7 +24,7 @@ public class CalendarRepositoryImpl implements CalendarRepository {
 
     @Override
     public Long save(Calendar calendar) {
-      return jdbcTemplate.queryForObject("INSERT into calendar (public_id) values(?) RETURNING id",Long.class,calendar.getPublic_id());
+      return jdbcTemplate.queryForObject("INSERT into calendar (public_id) values(?) RETURNING id",Long.class,calendar.getPublicId());
     }
 
 
