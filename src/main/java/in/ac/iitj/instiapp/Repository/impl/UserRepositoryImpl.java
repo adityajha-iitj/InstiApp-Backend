@@ -100,7 +100,7 @@ public class UserRepositoryImpl implements UserRepository {
                     .getSingleResult();
         }
         catch (NoResultException e) {
-            throw new NoSuchElementException("No user found with username " + username);
+            throw new EmptyResultDataAccessException("No user found with username " + username, 1);
         }
     }
 
@@ -166,7 +166,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void updateNameAndAvatarURL(String newName, String avatarURL, String userName) {
+    public void updateOauth2Info(String newName, String avatarURL, String userName) {
         if(usernameExists(userName) == -1L){
             throw new EmptyResultDataAccessException("No user found with username " + userName,1);
         }
@@ -193,7 +193,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void updatePhoneNumber(String username, String newPhoneNumber) {
-        Long userId = exists(username);
+        Long userId = usernameExists(username);
         if(userId == -1L){
             throw new EmptyResultDataAccessException("No user found with username " + username,1);
         }

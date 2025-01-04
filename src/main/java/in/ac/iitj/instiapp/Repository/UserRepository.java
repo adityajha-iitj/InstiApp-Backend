@@ -1,6 +1,5 @@
 package in.ac.iitj.instiapp.Repository;
 
-import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
@@ -132,7 +131,7 @@ public interface UserRepository {
      * for oauth2
      * @throws 
      */
-    void updateNameAndAvatarURL(String newName, String avatarURL,String userName);
+    void updateOauth2Info(String newName, String avatarURL, String userName);
 
 
     /**
