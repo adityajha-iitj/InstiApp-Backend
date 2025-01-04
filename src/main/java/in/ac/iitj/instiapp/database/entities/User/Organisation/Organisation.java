@@ -35,4 +35,8 @@ public class Organisation {
 
     @Column(nullable = true)
     String Website;
+
+    public String getTypeName() {
+        return type.getName();
+    }
 }
