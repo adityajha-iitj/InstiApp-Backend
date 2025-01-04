@@ -49,11 +49,12 @@ public class User{
     @OneToMany
     Set<OrganisationRole> organisationRoleSet;
 
-    public  User(String name, String userName, String email, String phoneNumber){
+    public  User(String name, String userName, String email, String phoneNumber, String avatarUrl){
         this.name = name;
         this.userName = userName;
         this.email = email;
         this.phoneNumber = phoneNumber;
+        this.avatarUrl = avatarUrl;
     }
 }
 

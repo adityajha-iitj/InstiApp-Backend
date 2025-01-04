@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.mappers;
+package in.ac.iitj.instiapp.mappers.Scheduling.MessMenu;
 
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuOverride;
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;

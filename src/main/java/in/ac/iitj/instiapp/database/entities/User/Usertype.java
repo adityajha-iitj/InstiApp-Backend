@@ -18,4 +18,9 @@ public class Usertype {
 
     @Column( nullable = false)
     String name;
+
+
+    public Usertype(Long id) {
+        this.Id = id;
+    }
 }

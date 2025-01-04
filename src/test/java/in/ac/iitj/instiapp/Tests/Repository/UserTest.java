@@ -12,9 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.test.annotation.Rollback;
 
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.USER1;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.USER4;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.UserTypeData.*;
 
 @DataJpaTest
 @Import({UserRepositoryImpl.class, InitialiseEntities.InitialiseUser.class})
@@ -39,35 +44,67 @@ public class UserTest {
 
     @Test
     @Order(1)
-    public void testExistByEmail() {
-        Assertions.assertThat(userRepository.existsByEmail(USER1.email)).isTrue();
-        Assertions.assertThat(userRepository.existsByEmail(USER4.email)).isFalse();
+    @Rollback(value = true)
+    public void testSaveUserType(){
+
+        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.exists(USER_TYPE4.name)).isEqualTo(-1L);
+
+        userRepository.save(USER_TYPE4.toEntity());
+
+        Assertions.assertThat(userRepository.exists(USER_TYPE4.name)).isNotNull().isNotEqualTo(-1L);
+
+
+        Assertions.assertThatThrownBy(() -> userRepository.save(USER_TYPE1.toEntity()))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
     @Order(2)
-    public void testExistByUsername() {
-        Assertions.assertThat(userRepository.existsByUsername(USER1.email)).isTrue();
-        Assertions.assertThat(userRepository.existsByUsername(USER4.email)).isFalse();
+    public void testGetAllUserTypes(){
+        Assertions.assertThat(userRepository.getAllUserTypes(PageRequest.of(0,10)))
+                .containsExactlyInAnyOrder(USER_TYPE1.name, USER_TYPE2.name,USER_TYPE3.name);
     }
 
     @Test
     @Order(3)
-    public void testExistByPhoneNumber() {
-        Assertions.assertThat(userRepository.existsByPhoneNumber(USER1.phoneNumber)).isTrue();
-        Assertions.assertThat(userRepository.existsByPhoneNumber(USER4.phoneNumber)).isFalse();
+    public void testExistsUsertype(){
+        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.exists(USER_TYPE2.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.exists(USER_TYPE3.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.exists(USER_TYPE4.name)).isEqualTo(-1L);
     }
 
     @Test
     @Order(4)
-    public void testUpdatePhoneNumber() {
-        String newPhoneNumber = "111111111";
-        String username = USER1.userName;
+    @Rollback(value = true)
+    public void testUpdateUserType(){
+        Assertions.assertThatThrownBy(() -> userRepository.update(USER_TYPE4.name,USER_TYPE1.name))
+                .isInstanceOf(EmptyResultDataAccessException.class);
+        Assertions.assertThatThrownBy(() -> userRepository.update(USER_TYPE1.name,USER_TYPE2.name))
+                .isInstanceOf(DataIntegrityViolationException.class);
 
-        userRepository.updatePhoneNumber(newPhoneNumber, username);
-        Assertions.assertThat(userRepository.existsByPhoneNumber(newPhoneNumber)).isTrue();
-        Assertions.assertThat(userRepository.existsByPhoneNumber(USER1.phoneNumber)).isFalse();
+
+        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.exists(USER_TYPE4.name)).isEqualTo(-1L);
+
+
+        userRepository.update(USER_TYPE1.name, USER_TYPE4.name);
+
+        Assertions.assertThat(userRepository.exists(USER_TYPE4.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isEqualTo(-1L);
     }
+
+    // TODO
+@Test
+@Order(5)
+    public void testDeleteUserType(){
+        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
+        userRepository.delete(USER_TYPE1.name);
+        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isEqualTo(-1L);
+    }
+
+
 
 
 }

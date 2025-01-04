@@ -7,6 +7,7 @@ public enum CalendarData {
     CALENDAR1("USER1"),
     CALENDAR2("USER2"),
     CALENDAR3("USER3"),
+    CALENDAR4("USER4"),
     ;
 
 
