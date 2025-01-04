@@ -15,7 +15,5 @@ public class OrganisationRoleDto implements Serializable {
 
     String organisationUsername;
     String roleName;
-
-    @JsonView(Views.Private.class)
     OrganisationPermission permission;
 }

@@ -14,15 +14,15 @@ import java.util.Optional;
 public interface UserRepository {
 
 
-    void save(User user, Long AvatarId, Long CalendarId,String MediaTypeName);
-
-    boolean existsByEmail(String email);
-    boolean existsByUsername(String username);
-    boolean existsByPhoneNumber(String phoneNumber);
-    boolean deleteByUsername(String username);
-    boolean userExists(String username);
-    void updateUserType(String username , String newusertype);
-    long getUserId(String username);
+//    void save(User user, Long AvatarId, Long CalendarId,String MediaTypeName);
+//
+//    boolean existsByEmail(String email);
+//    boolean existsByUsername(String username);
+//    boolean existsByPhoneNumber(String phoneNumber);
+//    boolean deleteByUsername(String username);
+//    boolean userExists(String username);
+//    void updateUserType(String username , String newusertype);
+//    long getUserId(String username);
 
 
 
@@ -113,6 +113,13 @@ public interface UserRepository {
     Optional<OrganisationRoleDto> getOrganisationPermission(String username, String organisationUsername);
 
 
+    /**
+     * to be used in combination with getUserDetailedDto
+     * @param username
+     * @return Empty list if user is not in any organisation
+     * @throws org.springframework.dao.EmptyResultDataAccessException if username doesn't exist
+     */
+    List<OrganisationRoleDto> getOrganisationRoleDTOsByUsername(String username, Pageable pageable);
 
 
     /**
@@ -125,16 +132,14 @@ public interface UserRepository {
      * for oauth2
      * @throws 
      */
-    void updateNameAndAvatarURL(String newName, String avatarURL, String userName);
+    void updateNameAndAvatarURL(String newName, String avatarURL,String userName);
 
 
     /**
-     * @param oldUserType -
      * @param newUserType -
-     * @throws org.springframework.dao.DataIntegrityViolationException if oldUserType == newUserType
-     * @throws org.springframework.dao.EmptyResultDataAccessException if oldUserType or newUserType or username doesn't exist
+     * @throws org.springframework.dao.EmptyResultDataAccessException if  newUserType or username doesn't exist
      */
-    void setUserType(String username,String oldUserType, String newUserType);
+    void setUserType(String username, String newUserType);
 
 
     /**
@@ -144,28 +149,5 @@ public interface UserRepository {
      * @throws org.springframework.dao.EmptyResultDataAccessException if username doesn't exist in database
      */
     void updatePhoneNumber(String username, String newPhoneNumber);
-
-
-
-    /**
-     * TODO
-     *
-     * @param username
-     * @param organisationRole Organisation Username should not be null.It verifies by that only
-     * @throws org.springframework.dao.EmptyResultDataAccessException if organisation Username  or user's username doesn't exist,If role doesn't exist
-     * @throws org.springframework.dao.DataIntegrityViolationException if User is already at some postion in the organisation
-     */
-    void setUserRoleSet(String username, OrganisationRole organisationRole);
-
-
-    /**
-     * @param username
-     * @param OrganisationUsername
-     * @throws org.springframework.dao.EmptyResultDataAccessException if either of the usernames do not exist, or user  isn't at any position in the organisation
-     */
-    void deleteUserRole(String username, String OrganisationUsername);
-
-
-
 
 }

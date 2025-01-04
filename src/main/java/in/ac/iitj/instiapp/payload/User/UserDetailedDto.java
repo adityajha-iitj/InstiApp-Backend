@@ -8,6 +8,7 @@ import in.ac.iitj.instiapp.payload.Views;
 import lombok.Value;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -21,19 +22,19 @@ public class UserDetailedDto implements Serializable {
 
 
     // Public Constructor
-    public UserDetailedDto(String name, String userName, String email, String userTypeName, String avatarUrl, Set<OrganisationRoleDto> organisationRoleSet) {
+    public UserDetailedDto(String name, String userName, String email, String userTypeName, String avatarUrl) {
         this.name = name;
         this.userName = userName;
         this.email = email;
         this.userTypeName = userTypeName;
         this.avatarUrl = avatarUrl;
-        this.organisationRoleSet = organisationRoleSet;
+        this.organisationRoleSet = new HashSet<>();
         this.phoneNumber = null;
         this.calendarPublicId = null;
     }
 
     // Private Constructor
-    public UserDetailedDto(String name, String userName, String email, String phoneNumber, String userTypeName, String calendarPublicId, String avatarUrl, Set<OrganisationRoleDto> organisationRoleSet) {
+    public UserDetailedDto(String name, String userName, String email, String phoneNumber, String userTypeName, String calendarPublicId, String avatarUrl) {
         this.name = name;
         this.userName = userName;
         this.email = email;
@@ -41,7 +42,7 @@ public class UserDetailedDto implements Serializable {
         this.userTypeName = userTypeName;
         this.calendarPublicId = calendarPublicId;
         this.avatarUrl = avatarUrl;
-        this.organisationRoleSet = organisationRoleSet;
+        this.organisationRoleSet = new HashSet<>();
     }
 
     public UserDetailedDto(String username) {

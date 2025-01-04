@@ -2,15 +2,25 @@ package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
+import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.User;
+import in.ac.iitj.instiapp.database.entities.User.Usertype;
+import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
+import in.ac.iitj.instiapp.payload.User.UserBaseDto;
+import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
@@ -26,90 +36,172 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
 
-    /**
-     * Media Type name check exists outside if it exists
-     */
     @Override
-    @Transactional
-    public void save(User user, Long avatarId, Long CalendarId, String MediaTypeName) {
-        if (existsByUsername(user.getUserName())){
-            throw new DataIntegrityViolationException("User name already exists");
+    public void save(Usertype userType) {
+        if(exists(userType.getName()) != -1L){
+            throw new DataIntegrityViolationException("Usertype already exists");
         }
-        if(existsByEmail(user.getEmail())){
-            throw new DataIntegrityViolationException("User email already exists");
-        }
-        if(existsByPhoneNumber(user.getPhoneNumber())){
-            throw new DataIntegrityViolationException("Phone number already exists");
-        }
-        UserAvatar userAvatar =  entityManager.getReference(UserAvatar.class,avatarId);
-        Calendar calendar =  entityManager.getReference(Calendar.class, CalendarId);
+        entityManager.persist(userType);
+    }
 
-        user.setAvatar(userAvatar);
-        user.setCalendar(calendar);
+    @Override
+    public List<String> getAllUserTypes(Pageable pageable) {
+        return entityManager.createQuery("select ut.name from Usertype ut ",String.class)
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+    }
 
+    @Override
+    public Long exists(String name) {
+        return jdbcTemplate.queryForObject("select COALESCE(MAX (id), -1) from user_type where name = ?  ",Long.class,name);
+    }
+
+    @Override
+    public void update(String oldName, String newName) {
+
+        if(exists(oldName) == -1L){
+            throw new EmptyResultDataAccessException("No usertype " + oldName + "exists",1);
+        }
+        if(exists(newName) != -1L){
+            throw new DataIntegrityViolationException("Usertype with name " + newName + " already exists");
+        }
+
+        entityManager.createQuery("update Usertype ut set ut.name = :newName where ut.name = :oldName")
+                .setParameter("newName", newName)
+                .setParameter("oldName", oldName)
+                .executeUpdate();
+    }
+
+    @Override
+    public void delete(String userTypeName) {
+            if (exists(userTypeName) == -1){
+                throw new EmptyResultDataAccessException("No usertype " + userTypeName + "exists",1);
+            }
+
+            //TODO
+    }
+
+    @Override
+    public Long save(User user) {
+        user.setUserType(entityManager.getReference(Usertype.class,user.getUserType().getId()));
+        user.setCalendar(entityManager.getReference(Calendar.class,user.getCalendar().getId()));
         entityManager.persist(user);
+        return user.getId();
     }
 
     @Override
-    public boolean existsByEmail(String email) {
+    public UserBaseDto getUserLimited(String username) {
+        try {
 
 
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS (SELECT 1 FROM users WHERE email = ?)", Boolean.class, email));
-    }
-
-    @Override
-    public boolean existsByUsername(String username) {
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS (SELECT 1 FROM users WHERE user_name = ?)", Boolean.class, username));
-    }
-
-    @Override
-    public boolean existsByPhoneNumber(String phoneNumber) {
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS (SELECT 1 FROM users WHERE phone_number = ?)", Boolean.class, phoneNumber));
-    }
-
-    @Override
-    public boolean deleteByUsername(String username) {
-        return Boolean.TRUE.equals(jdbcTemplate.update("DELETE FROM users WHERE user_name = ?", username));
-    }
-
-    @Override
-    public boolean userExists(String username){
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS (SELECT 1 FROM users WHERE user_name = ?)", Boolean.class, username));
-    }
-    @Override
-    public void updatePhoneNumber(String phoneNumber, String username) {
-        if(userExists(username)){
-            String sql = "UPDATE users SET phone_number = ? WHERE user_name = ?";
-            jdbcTemplate.update(sql, phoneNumber, username);
+            return entityManager.createQuery("select  new in.ac.iitj.instiapp.payload.User.UserBaseDto(u.name, u.userName, u.email, u.userType.name, u.avatarUrl) from User  u where u.userName = :username", UserBaseDto.class)
+                    .setParameter("username", username)
+                    .getSingleResult();
         }
-        throw new DataIntegrityViolationException("No user with the given username exists");
+        catch (NoResultException e) {
+            throw new NoSuchElementException("No user found with username " + username);
+        }
     }
 
     @Override
-    public void updateUserType(String username , String newusertype){
-        if(userExists(username)){
-            String sql = "UPDATE users u " +
-                    "JOIN user_type ut ON ut.name = ? " +
-                    "SET u.user_type_id = ut.id " +
-                    "WHERE u.user_name = ?";
-            jdbcTemplate.update(sql, newusertype, username);
+    public UserDetailedDto getUserDetailed(String username, boolean isPrivate) {
+
+        Long id = usernameExists(username);
+        if(id == -1){
+            throw new EmptyResultDataAccessException("No user found with username " + username,1);
+        }
+        if(isPrivate){
+            return
+                    entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.UserDetailedDto(u.name, u.userName,u.email,u.phoneNumber,u.userType.name, u.calendar.publicId,u.avatarUrl) from User  u where u.userName = :username",UserDetailedDto.class)
+                            .setParameter("username", username)
+                            .getSingleResult();
         }
         else {
-            throw new NoSuchElementException("Student with username '" + username + "' not found.");
+            return entityManager.createQuery("select  new in.ac.iitj.instiapp.payload.User.UserDetailedDto(u.name, u.userName, u.email, u.userType.name, u.avatarUrl) from User u where u.userName = :username",UserDetailedDto.class)
+                    .setParameter("username",username)
+                    .getSingleResult();
+        }
+    }
+
+
+
+
+    @Override
+    public List<UserBaseDto> getListUserLimitedByUsertype(String usertype, Pageable pageable) {
+        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.UserBaseDto(u.name, u.userName, u.email, u.userType.name,u.avatarUrl) from User  u where u.userType.name = :usertypename",UserBaseDto.class)
+                .setParameter("usertypename",usertype)
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+    }
+
+    @Override
+    public Optional<OrganisationRoleDto> getOrganisationPermission(String username, String organisationUsername) {
+        try {
+          return   Optional.of(
+                    entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto(uor.organisation.user.userName, uor.roleName, uor.permission) from User  u join u.organisationRoleSet  uor where uor.organisation.user.userName = :organisationUsername and u.userName = :userUsername",OrganisationRoleDto.class)
+                            .setParameter("organisationUsername",organisationUsername)
+                            .setParameter("userUsername",username)
+                            .getSingleResult()
+            );
+        }catch (NoResultException ignored){
+            return Optional.empty();
         }
     }
 
     @Override
-    public long getUserId(String username) {
-        if(userExists(username)){
-            String sql = "SELECT id FROM users WHERE user_name = ?";
-            return jdbcTemplate.queryForObject(sql, Long.class, username);
-        }
-        else {
-            throw new NoSuchElementException("Student with username '" + username + "' not found.");
-        }
+    public List<OrganisationRoleDto> getOrganisationRoleDTOsByUsername(String username, Pageable pageable) {
+        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto(uor.organisation.user.userName, uor.roleName, uor.permission) from User  u join u.organisationRoleSet uor where u.userName = :username",OrganisationRoleDto .class)
+                .setParameter("username",username)
+                .setMaxResults(pageable.getPageSize())
+                .setFirstResult((int)pageable.getOffset())
+                .getResultList();
     }
 
+
+    @Override
+    public Long usernameExists(String username) {
+        return jdbcTemplate.queryForObject("select coalesce(MAX(id), -1) from users where user_name = ?",Long.class,username);
+    }
+
+    @Override
+    public void updateNameAndAvatarURL(String newName, String avatarURL, String userName) {
+        if(usernameExists(userName) == -1L){
+            throw new EmptyResultDataAccessException("No user found with username " + userName,1);
+        }
+        entityManager.createQuery("update User u set u.name = :name, u.avatarUrl = :avatarUrl where u.userName = :username")
+                .setParameter("name",newName)
+                .setParameter("avatarUrl",avatarURL)
+                .setParameter("username",userName)
+                .executeUpdate();
+    }
+
+    @Override
+    public void setUserType(String username, String newUserType) {
+        Long newUserTypeId = exists(newUserType);
+        Long userId = usernameExists(username);
+        if(newUserTypeId == -1L || userId == -1L){
+            throw new EmptyResultDataAccessException("Usertype  " +newUserType + "not found",1);
+        }
+
+        entityManager.createNativeQuery("update users  set user_type_id = :newUserTypeId where id = :userId")
+                .setParameter("newUserTypeId",newUserTypeId)
+                .setParameter("userId",userId)
+                .executeUpdate();
+    }
+
+    @Override
+    public void updatePhoneNumber(String username, String newPhoneNumber) {
+        Long userId = exists(username);
+        if(userId == -1L){
+            throw new EmptyResultDataAccessException("No user found with username " + username,1);
+        }
+        entityManager.createQuery("update User u set u.phoneNumber = :newPhoneNumber where u.id = :userId")
+                .setParameter("newPhoneNumber",newPhoneNumber)
+                .setParameter("userId",userId)
+                .executeUpdate();
+    }
 
 
 }
