@@ -16,4 +16,11 @@ public class OrganisationRoleDto implements Serializable {
     String organisationUsername;
     String roleName;
     OrganisationPermission permission;
+
+    public OrganisationRoleDto(String organisationUsername, String roleName, OrganisationPermission permission) {
+        this.organisationUsername = organisationUsername;
+        this.roleName = roleName;
+        this.permission = permission;
+    }
 }
+

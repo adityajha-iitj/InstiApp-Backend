@@ -17,7 +17,7 @@ public interface OrganisationRoleRepository {
     void saveOrganisationRole(OrganisationRole organisationRole);
 
 
-    List<OrganisationRoleDto> getOrganisationRoles(String organisationName);
+    List<OrganisationRoleDto> getOrganisationRoles(String organisationName, Pageable pageable);
 
 
     Long existOrganisationRole(String organisationName, String roleName);
