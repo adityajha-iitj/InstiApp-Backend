@@ -36,6 +36,10 @@ public class Organisation {
     @Column(nullable = true)
     String Website;
 
+    public Organisation(Long organisationId) {
+        this.Id = organisationId;
+    }
+
     public String getTypeName() {
         return type.getName();
     }

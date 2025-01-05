@@ -7,7 +7,14 @@ public enum UserData {
     USER1("John Doe", "jdoe", "jdoe@example.com", "123-456-7890", "AVATAR1.com"),
     USER2("Jane Smith", "jsmith", "jsmith@example.com", "987-654-3210","AVATAR2.com"),
     USER3("Alice Johnson", "ajohnson", "alicej@example.com", "555-123-4567","AVATAR3.com"),
-    USER4("Bob Brown", "bbrown", "bob@example.com", "444-987-6543","AVATAR4.com");
+    USER4("Bob Brown", "bbrown", "bob@example.com", "444-987-6543","AVATAR4.com"),
+    USER5("tanmay", "tdaga", "tdaga@gmail.com","999-888-8888","AVATAR5.com"),
+    USER6("nayan", "nkute","nkute@gmail.com","888-9999-9999-1111","AVATAR6.com"),
+    USER7("adityajha","ajha","ajha@gmail.com","111-666-8899-09887","AVATAR7.com"),
+    USER8("rahul", "rsharma", "rsharma@gmail.com", "777-555-4444", "AVATAR8.com"),
+    USER9("sneha", "skulkarni", "skulkarni@gmail.com", "666-777-3333", "AVATAR9.com"),
+    USER10("ankita", "agupta", "agupta@gmail.com", "555-666-2222", "AVATAR10.com");
+    ;
 
     public final String name;
     public final String userName;

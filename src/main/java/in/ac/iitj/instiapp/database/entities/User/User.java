@@ -56,5 +56,9 @@ public class User{
         this.phoneNumber = phoneNumber;
         this.avatarUrl = avatarUrl;
     }
+
+    public User(Long userId) {
+        this.Id = userId;
+    }
 }
 

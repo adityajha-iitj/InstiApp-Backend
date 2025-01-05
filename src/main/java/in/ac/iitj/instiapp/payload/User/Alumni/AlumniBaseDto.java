@@ -21,4 +21,13 @@ public class AlumniBaseDto implements Serializable {
     String programName;
     StudentBranchDto studentBranchDto;
     Integer admissionYear;
+
+
+
+    public AlumniBaseDto(String username, String programName, String branchName, Integer admissionYear) {
+        this.user = new UserBaseDto(username);
+        this.programName = programName;
+        this.studentBranchDto = new StudentBranchDto(branchName);
+        this.admissionYear = admissionYear;
+    }
 }

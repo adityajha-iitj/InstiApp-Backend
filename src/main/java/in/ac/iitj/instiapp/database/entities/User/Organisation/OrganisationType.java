@@ -18,4 +18,8 @@ public class OrganisationType {
 
     @Column( nullable = false)
     String name;
+
+    public OrganisationType(Long Id) {
+        this.Id = Id;
+    }
 }

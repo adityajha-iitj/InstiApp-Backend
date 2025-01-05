@@ -27,4 +27,11 @@ public class Media {
 
     @Column( nullable = false)
     String publicUrl ;
+
+    public Media(String publicId, String publicUrl, String assetId, Mediatype mediatype) {
+        this.publicId = publicId;
+        this.publicUrl = publicUrl;
+        this.assetId = assetId;
+        this.type = mediatype;
+    }
 }

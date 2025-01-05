@@ -62,6 +62,14 @@ public interface AlumniRepository {
 
 
     /**
+     * @param username
+     * @return -1 if alumni doesn't exist
+     */
+    Long alumniExists(String username);
+
+
+
+    /**
      * Doesn't update userdetails
      * @assumptions admissionYear and passOutYear validity checked
      *              StudentProgram Existence checked

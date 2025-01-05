@@ -16,4 +16,13 @@ public class StudentDetailedDto implements Serializable {
     String programName;
     StudentBranchDto studentBranch;
     Integer admissionYear;
+
+
+
+    public StudentDetailedDto(String username, String programName, String studentBranchName, Integer admissionYear) {
+        this.user = new UserDetailedDto(username);
+        this.programName = programName;
+        this.studentBranch = new StudentBranchDto(studentBranchName);
+        this.admissionYear = admissionYear;
+    }
 }

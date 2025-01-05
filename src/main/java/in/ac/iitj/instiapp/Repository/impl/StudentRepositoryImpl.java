@@ -5,13 +5,13 @@ import in.ac.iitj.instiapp.database.entities.User.Student.Student.Student;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentProgram;
 import in.ac.iitj.instiapp.database.entities.User.User;
-import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto;
+
 import in.ac.iitj.instiapp.payload.User.Student.StudentBaseDto;
-import in.ac.iitj.instiapp.payload.User.Student.StudentBranchDto;
+
 import in.ac.iitj.instiapp.payload.User.Student.StudentDetailedDto;
-import in.ac.iitj.instiapp.payload.User.UserBaseDto;
-import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
+
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -50,172 +50,76 @@ public class StudentRepositoryImpl implements StudentRepository {
 
     @Override
     public StudentBaseDto getStudent(String username) {
-        if (!existStudent(username)) {
-            throw new EmptyResultDataAccessException("Student with username '" + username + "' not found", 1);
+        try {
+         return    entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Student.StudentBaseDto(s.user.userName, s.program.name, s.branch.name, s.admissionYear) from Student  s where s.user.userName = :username", StudentBaseDto.class)
+                    .setParameter("username", username)
+                    .getSingleResult();
         }
-
-        Student student = entityManager.createQuery(
-                        "SELECT s FROM Student s " +
-                                "JOIN FETCH s.user u " +
-                                "JOIN FETCH s.branch b " +
-                                "JOIN FETCH s.program p " +
-                                "JOIN FETCH b.organisation o " +
-                                "WHERE u.userName = :username",
-                        Student.class)
-                .setParameter("username", username)
-                .getSingleResult();
-
-        return new StudentBaseDto(
-                new UserBaseDto(
-                        student.getUser().getName(),
-                        student.getUser().getUserName(),
-                        student.getUser().getEmail(),
-                        student.getUser().getUserType().getName(),
-                        student.getUser().getAvatarUrl()
-                ),
-                student.getProgram().getName(),
-                new StudentBranchDto(
-                        student.getBranch().getName(),
-                        new OrganisationBaseDto(
-                                null,
-                                student.getBranch().getOrganisation().getParentOrganisation().getUser().getUserName(),
-                                student.getBranch().getOrganisation().getTypeName(),
-                                student.getBranch().getOrganisation().getDescription(),
-                                student.getBranch().getOrganisation().getWebsite()
-                        ),
-                        student.getBranch().getOpeningYear(),
-                        student.getBranch().getClosingYear()
-                ),
-                student.getAdmissionYear()
-        );
+        catch (NoResultException e) {
+            throw new EmptyResultDataAccessException("Student with username " + username +  "doesn't exist",1);
+        }
     }
 
     @Override
     public List<StudentBaseDto> getStudentByFilter(Optional<String> programName, Optional<String> branchName,
                                                    Optional<Integer> admissionYear, Pageable pageable) {
-        StringBuilder queryString = new StringBuilder(
-                "SELECT new in.ac.iitj.instiapp.payload.User.Student.StudentBaseDto(" +
-                        "new in.ac.iitj.instiapp.payload.User.UserBaseDto(" +
-                        "u.name, u.userName, u.email, u.userTypeName, u.avatarUrl), " +
-                        "s.program.name, " +
-                        "new in.ac.iitj.instiapp.payload.User.Student.StudentBranchDto(" +
-                        "s.branch.name, " +
-                        "new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto(" +
-                        "null, o.parentOrganisation.user.userName, o.typeName, o.description, o.website), " +
-                        "s.branch.openingYear, s.branch.closingYear), " +
-                        "s.admissionYear) " +
-                        "FROM Student s " +
-                        "JOIN s.user u " +
-                        "JOIN s.branch.organisation o " +
-                        "WHERE 1=1");
 
-        if (programName.isPresent()) {
-            queryString.append(" AND s.program.name = :programName");
-        }
-        if (branchName.isPresent()) {
-            queryString.append(" AND s.branch.name = :branchName");
-        }
-        if (admissionYear.isPresent()) {
-            queryString.append(" AND s.admissionYear = :admissionYear");
-        }
 
-        var query = entityManager.createQuery(queryString.toString(), StudentBaseDto.class);
-
-        if (programName.isPresent()) {
-            query.setParameter("programName", programName.get());
-        }
-        if (branchName.isPresent()) {
-            query.setParameter("branchName", branchName.get());
-        }
-        if (admissionYear.isPresent()) {
-            query.setParameter("admissionYear", admissionYear.get());
-        }
-
-        return query
+        return  entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Student.StudentBaseDto(st.user.userName, st.program.name, st.branch.name, st.admissionYear) from Student st where " +
+                "(:programName is NULL or st.program.name = :programName) and " +
+                "(:branchName is NULL or st.branch.name = :branchName) and " +
+                "(:admissionYear is NULL or st.admissionYear = :admissionYear)", StudentBaseDto.class)
+                .setParameter("programName",programName.orElse(null))
+                .setParameter("branchName",branchName.orElse(null))
+                .setParameter("admissionYear",admissionYear.orElse(null))
                 .setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();
+
     }
 
     @Override
-    public boolean existStudent(String username) {
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM student s JOIN users u ON u.id = s.user_id WHERE u.username = ?)",
-                Boolean.class,
-                username));
+    public Long existStudent(String username) {
+        return jdbcTemplate.queryForObject("select coalesce(max(s.id), -1) from student s join users u on u.id = s.user_id where u.user_name = ?", Long.class, username);
     }
 
     @Override
     public StudentDetailedDto getDetailedStudent(String username) {
-        if (!existStudent(username)) {
+        if (existStudent(username) == -1) {
             throw new EmptyResultDataAccessException("Student with username '" + username + "' not found", 1);
         }
 
-        Student student = entityManager.createQuery(
-                        "SELECT s FROM Student s " +
-                                "JOIN FETCH s.user u " +
-                                "JOIN FETCH s.branch b " +
-                                "JOIN FETCH s.program p " +
-                                "JOIN FETCH b.organisation o " +
-                                "JOIN FETCH u.usertype ut " +
-                                "WHERE u.userName = :username",
-                        Student.class)
+        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Student.StudentDetailedDto(:username,st.program.name, st.branch.name, st.admissionYear ) from Student st where st.user.userName = :username", StudentDetailedDto.class)
                 .setParameter("username", username)
                 .getSingleResult();
 
-        return new StudentDetailedDto(
-                new UserDetailedDto(
-                        student.getUser().getName(),
-                        student.getUser().getUserName(),
-                        student.getUser().getEmail(),
-                        student.getUser().getPhoneNumber(),
-                        student.getUser().getUserType().getName(),
-                        student.getUser().getCalendar(),
-                        student.getUser().getAvatarUrl(),
-                        student.getUser().getRoles()
-                ),
-                student.getProgram().getName(),
-                new StudentBranchDto(
-                        student.getBranch().getName(),
-                        new OrganisationBaseDto(
-                                new UserBaseDto(
-                                        student.getBranch().getOrganisation().getUser().getName(),
-                                        student.getBranch().getOrganisation().getUser().getUserName(),
-                                        student.getBranch().getOrganisation().getUser().getEmail(),
-                                        student.getBranch().getOrganisation().getUser().getUserType().getName(),
-                                        student.getBranch().getOrganisation().getUser().getAvatarUrl()
-                                ),
-                                student.getBranch().getOrganisation().getParentOrganisation().getUser().getUserName(),
-                                student.getBranch().getOrganisation().getTypeName(),
-                                student.getBranch().getOrganisation().getDescription(),
-                                student.getBranch().getOrganisation().getWebsite()
-                        ),
-                        student.getBranch().getOpeningYear(),
-                        student.getBranch().getClosingYear()
-                ),
-                student.getAdmissionYear()
-        );
+
     }
 
     @Transactional
     @Override
-    public void updateStudent(Student student) {
-        entityManager.createQuery(
-                        "UPDATE Student s SET " +
-                                "s.branch = :branch, " +
-                                "s.program = :program, " +
-                                "s.admissionYear = :admissionYear " +
-                                "WHERE s.user.id = :userId")
-                .setParameter("branch", entityManager.getReference(StudentBranch.class, student.getBranch().getId()))
-                .setParameter("program", entityManager.getReference(StudentProgram.class, student.getProgram().getId()))
-                .setParameter("admissionYear", student.getAdmissionYear())
-                .setParameter("userId", student.getUser().getId())
-                .executeUpdate();
+    public void updateStudent(String username, Student student) {
+
+      if ( existStudent(username) == -1L){
+          throw new EmptyResultDataAccessException("Student with username '" + username + "' not found", 1);
+      }
+
+
+        jdbcTemplate.update("update  student set " +
+                "branch_id = case when ? is null then branch_id else ? end," +
+                "program_id = case when ? is null then program_id else ? end, " +
+                "admission_year = case  when ? is null then admission_year else ? end where id = ?",
+                student.getBranch().getId(), student.getBranch().getId(),
+                student.getProgram().getId(), student.getProgram().getId(),
+                student.getAdmissionYear(), student.getAdmissionYear()
+                        ,student.getId()
+                );
+
     }
 
     @Override
     public Long deleteStudent(String username) {
-        if (!existStudent(username)) {
+        if (existStudent(username) == -1L) {
             throw new EmptyResultDataAccessException("Student with username '" + username + "' not found", 1);
         }
 
@@ -224,4 +128,5 @@ public class StudentRepositoryImpl implements StudentRepository {
                 Long.class,
                 username);
     }
+
 }

@@ -29,15 +29,15 @@ public interface StudentBranchRepository {
      * @param pageable should be valid
      * @return
      */
-    List<StudentBranchDto> geListOfStudentBranch(Pageable pageable);
+    List<StudentBranchDto> getListOfStudentBranch(Pageable pageable);
 
 
     /**
-     * @param id
+     * @param name
      * @return
      * @throws  org.springframework.dao.EmptyResultDataAccessException if it doesn't exist
      */
-    StudentBranchDto getStudentBranch(Integer id);
+    StudentBranchDto getStudentBranch(String name);
 
 
     /**
@@ -49,7 +49,7 @@ public interface StudentBranchRepository {
 
     /**
      * @param name
-     * @param studentBranch If organisation username is null it wouldn't be updated
+     * @param studentBranch If organisation id is null it wouldn't be updated
      * @assumptions year validates are checked
      * @throws org.springframework.dao.EmptyResultDataAccessException if name doesn't exist
      * @throws org.springframework.dao.DataIntegrityViolationException if newBranchName is in database and not equals to current branch name

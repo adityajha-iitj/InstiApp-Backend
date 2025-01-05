@@ -14,4 +14,20 @@ public class StudentBranchDto implements Serializable {
     OrganisationBaseDto organisation;
     Integer openingYear;
     Integer closingYear;
+
+
+    public StudentBranchDto(String name){
+        this.name = name;
+        this.openingYear = null;
+        this.closingYear = null;
+        this.organisation = null;
+    }
+
+    public StudentBranchDto(String name, String organisationUsername, Integer openingYear, Integer closingYear){
+        this.name = name;
+        this.organisation = new OrganisationBaseDto(organisationUsername);
+        this.openingYear = openingYear;
+        this.closingYear = closingYear;
+
+    }
 }

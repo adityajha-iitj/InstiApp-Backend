@@ -4,20 +4,53 @@ import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationType;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationDetailedDto;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OrganisationRepository {
-    void save(Organisation organisation, long userid , long parentOrganisationId, long  organisationType, Long mediaId );
-    boolean organisationExists(String username);
-    Organisation findByUsername(String username);
-    List<Organisation> findAll();
-    List<Organisation> findByOrganisationType(OrganisationType organisationType);
-    void updateDescription(String username, String description);
-    void updateWebsite(String username, String website);
+//    void save(Organisation organisation, long userid , long parentOrganisationId, long  organisationType, Long mediaId );
+//    boolean organisationExists(String username);
+//    Organisation findByUsername(String username);
+//    List<Organisation> findAll();
+//    List<Organisation> findByOrganisationType(OrganisationType organisationType);
+//    void updateDescription(String username, String description);
+//    void updateWebsite(String username, String website);
 
 
  // TODO - METHODS For organisation TYPE
+
+    /**
+     * @param organisationType
+     * @throws org.springframework.dao.DataIntegrityViolationException if OrganisationType with same Name exists
+     */
+void saveOrganisationType(OrganisationType organisationType);
+
+
+List<String> getAllOrganisationTypes(Pageable pageable);
+
+
+    /**
+     * @param name
+     * @return -1 if the name doesn't exist else Long ID
+     */
+Long existsOrganisationType(String name);
+
+
+    /**
+     * @param oldName
+     * @param newName
+     * @throws org.springframework.dao.EmptyResultDataAccessException if oldName doesn't Exist
+     * @throws org.springframework.dao.DataIntegrityViolationException if newName already exists in Database
+     */
+void updateOrganisationType(String oldName, String newName);
+
+    /**
+     * @param name
+     * @throws org.springframework.dao.EmptyResultDataAccessException if the organisationType doesn't exist
+     */
+void deleteOrganisationType(String name);
 
 
 
@@ -32,6 +65,7 @@ public interface OrganisationRepository {
      *                     If want to add organisation it's id shoudn't be null
      *                     Organisation Type Id shoudn't be null
      *                     Media Id can be null
+     *                     ParentOrganisationId can be null but it shouldn't be null
      * @throws org.springframework.dao.DataIntegrityViolationException If username with organisation already exist
      */
     void save(Organisation organisation);
@@ -45,13 +79,13 @@ public interface OrganisationRepository {
     OrganisationBaseDto getOrganisation(String username);
 
 
-    List<OrganisationBaseDto> getOrganisationByType(OrganisationType organisationType);
+    List<OrganisationBaseDto> getOrganisationByType(OrganisationType organisationType, Pageable pageable);
 
     /**
      * @param username
      * @return OrganisationDetailedDto - Only username filled in UserDetailedDto
-     *                                   If parent Organisation exist full OrganisationBaseDto filled else null
-     *                                   If Media exist then full MediaBaseDto else null
+     *                                   If parent Organisation exist full OrganisationBaseDto filled except the userBaseDto
+     *                                   If Media exist then only media publicId filled else id is null
      *                                   usersWithPors not filled and is nulled.Get it filled from OrganisationRoleDto
      * @throws org.springframework.dao.EmptyResultDataAccessException if username doesn't exist with organisation
      */
@@ -67,19 +101,18 @@ public interface OrganisationRepository {
 
     /**
      *
-     * @assumptions If parentOrganisationId not null its value exist in database
-     *              Organisation's User's username is taken from oauth and doesn't depend on user
+     * @assumptions Organisation's User's username is taken from oauth and doesn't depend on user
      * @implNote If Object not null put checks in query for update
-     * @param organisation UserId shouldn't be null
+     * @param organisation Organisation Id shouldn't be null
      *                     If parent organisation to be updated Its id shouldn't be null else Id should be null but object should exist
      *                     If organisationType should be updated Its Id shouldn't be null else Id should be null but object should exist
      *                     If Description to be updated it shouldn't be null else null
      *                     If Media to be updated Media Id should exist else mediaId should be null but object should exist
      *                     If website to be updated it shouldn't be null else null
      *
-     * @return oldMediaId
+     * @return oldMediaPublicId
      */
-    String updateOrganisation( Organisation organisation);
+    Optional<String> updateOrganisation(Organisation organisation);
 
 
     /**

@@ -53,9 +53,9 @@ public interface StudentRepository {
 
     /**
      * @param username
-     * @return false if it doesn't exist
+     * @return -1 if it doesn't exist
      */
-    boolean existStudent(String username);
+    Long existStudent(String username);
 
     /**
      * @param username
@@ -70,8 +70,10 @@ public interface StudentRepository {
      * @param student StudentProgram only new Id needed <br>
      *                StudentBranch only new Id needed <br>
      *                Doesn't update User Details <br>
+     *                user could be null
+     * @throws org.springframework.dao.EmptyResultDataAccessException if username doesn't exist
      */
-    void updateStudent(Student student);
+    void updateStudent(String username, Student student);
 
 
     /**

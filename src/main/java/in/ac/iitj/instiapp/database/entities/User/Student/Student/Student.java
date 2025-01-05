@@ -30,4 +30,6 @@ public class Student {
 
     @Column( nullable = false)
     Integer admissionYear;
+
+
 }

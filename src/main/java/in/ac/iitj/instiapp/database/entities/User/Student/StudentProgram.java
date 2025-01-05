@@ -22,4 +22,9 @@ public class StudentProgram {
 
     @Column(nullable = false)
     boolean isActive;
+
+    public StudentProgram(String name, boolean isActive) {
+        this.name = name;
+        this.isActive = isActive;
+    }
 }
