@@ -160,9 +160,9 @@ public class InitialiseEntities {
             user8.setCalendar(new Calendar(CALENDAR8Id));
             user9.setCalendar(new Calendar(CALENDAR9Id));
             user10.setCalendar(new Calendar(CALENDAR10Id));
-            user11.setCalender(new Calendar(CALENDAR11Id));
-            user12.setCalender(new Calendar(CALENDAR11Id));
-            user13.setCalender(new Calendar(CALENDAR11Id));
+            user11.setCalendar(new Calendar(CALENDAR11Id));
+            user12.setCalendar(new Calendar(CALENDAR12Id));
+            user13.setCalendar(new Calendar(CALENDAR13Id));
 
 //            For organisation
             user1.setUserType(new Usertype(UserType1Id));
