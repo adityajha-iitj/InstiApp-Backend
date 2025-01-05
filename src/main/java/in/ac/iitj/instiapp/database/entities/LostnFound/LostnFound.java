@@ -18,6 +18,7 @@ public class LostnFound {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
+    @Column(nullable = false , unique = true )
     String publicId;
 
     @ManyToOne

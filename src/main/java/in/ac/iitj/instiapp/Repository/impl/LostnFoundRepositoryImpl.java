@@ -1,10 +1,14 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
+import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
+import in.ac.iitj.instiapp.payload.User.Student.StudentBaseDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -13,6 +17,7 @@ import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.Media.Media;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.LostnFoundRepository {
@@ -27,110 +32,116 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
         this.entityManager = entityManager;
     }
 
-    @Override
-    public List<LostnFoundDto> getListOfLocationsName(Pageable pageable) {
-        Query query = entityManager.createQuery(
-                "SELECT new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto( " +
-                        "    null, null, null, null, " +       // Finder details as null
-                        "    null, null, null, null, " +       // Owner details as null
-                        "    t.Landmark.name, null, null, null " + // Only populate landmarkName
-                        ") FROM LostnFound t",
-                LostnFoundDto.class
-        );
-        query.setFirstResult((int) pageable.getOffset());
-        query.setMaxResults(pageable.getPageSize());
 
-        return query.getResultList();
+    @Override
+    public Long existLocation(String locationName) {
+        return jdbcTemplate.queryForObject("select coalesce(max(id), -1) from locations where locationName = ?", Long.class, locationName);
     }
 
-    @Transactional
     @Override
     public void saveLocation(Locations locations) {
-        entityManager.persist(locations);
+        if(existLocation(locations.getName()) != -1L){
+            throw new DataIntegrityViolationException("location already exists with name " + locations.getName());
+        }
+
+        this.entityManager.persist(locations);
+
+    }
+
+    @Override
+    public List<String> getListOfLocationsName(Pageable pageable) {
+        return entityManager.createQuery("select lo.name from Locations lo",String.class)
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+    }
+
+    @Override
+    public void updateLocation(String oldLocationName, Locations locations) {
+        if(existLocation(oldLocationName) == -1L){
+            throw new EmptyResultDataAccessException("location already exists with name " + oldLocationName,1);
+        }
+        else if(existLocation(locations.getName()) != -1L){
+            throw new DataIntegrityViolationException("location already exists with name " + locations.getName());
+        }
+        else{
+            String sql = "update locations set locationName = ? where locationName = ?";
+            jdbcTemplate.update(sql, locations.getName(), oldLocationName);
+        }
+
     }
 
     @Override
     public void deleteLocationByName(String locationName) {
-        jdbcTemplate.update("delete from locations where name = ?", locationName);
-    }
-
-
-    @Override
-    public List<LostnFoundDto> getLostnFoundByStatus(Boolean status, Pageable pageable) {
-        Query query = entityManager.createQuery(
-                "SELECT new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto( " +
-                        "    t.finder.name, t.finder.userName, t.finder.email, t.finder.phoneNumber, " +
-                        "    t.owner.name, t.owner.userName, t.owner.email, t.owner.phoneNumber, " +
-                        "    t.Landmark.name, t.extraInfo, t.status, t.media.publicUrl " +  // Fill only relevant fields
-                        ") FROM LostnFound t " +
-                        "WHERE t.status = :status",
-                LostnFoundDto.class
-        );
-        query.setParameter("status", status);
-        query.setFirstResult((int) pageable.getOffset());
-        query.setMaxResults(pageable.getPageSize());
-
-        return query.getResultList();
+        String sql = "delete from locations where locationName = ?";
+        jdbcTemplate.update(sql, locationName);
     }
 
     @Override
-    public List<LostnFoundDto> getLostnFoundWithDetails(Pageable pageable) {
-        Query query = entityManager.createQuery(
-                "SELECT new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto( " +
-                        "    t.finder.name, t.finder.userName, t.finder.email, t.finder.phoneNumber, " +
-                        "    t.owner.name, t.owner.userName, t.owner.email, t.owner.phoneNumber, " +
-                        "    t.Landmark.name, t.extraInfo, t.status, t.media.publicUrl " +  // Fill all fields
-                        ") FROM LostnFound t",
-                LostnFoundDto.class
-        );
-        query.setFirstResult((int) pageable.getOffset());
-        query.setMaxResults(pageable.getPageSize());
-
-        return query.getResultList();
+    public Long exsitLostnFound(String publicId) {
+        return jdbcTemplate.queryForObject("select coalesce(max(id), -1) from lostnfound where publicId= ?", Long.class, publicId);
     }
 
     @Override
-    public List<LostnFoundDto> getLostnFoundByLandmark(String landmarkName, Pageable pageable) {
-        Query query = entityManager.createQuery(
-                "SELECT new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto( " +
-                        "    t.finder.name, t.finder.userName, t.finder.email, t.finder.phoneNumber, " +
-                        "    t.owner.name, t.owner.userName, t.owner.email, t.owner.phoneNumber, " +
-                        "    t.Landmark.name, t.extraInfo, t.status, t.media.publicUrl " +  // Fill all fields
-                        ") FROM LostnFound t " +
-                        "WHERE t.Landmark.name = :landmarkName",
-                LostnFoundDto.class
-        );
-        query.setParameter("landmarkName", landmarkName);
-        query.setFirstResult((int) pageable.getOffset());
-        query.setMaxResults(pageable.getPageSize());
-
-        return query.getResultList();
-    }
-
-    @Transactional
-    @Override
-    public void saveLostnFoundDetails(LostnFoundDto lostnFoundDto) {
-        // Fetch related entities (User, Location, Media) based on the DTO data
-        User finder = entityManager.find(User.class, lostnFoundDto.getFinderUserName());
-        User owner = entityManager.find(User.class, lostnFoundDto.getOwnerUserName());
-        Locations landmark = entityManager.find(Locations.class, lostnFoundDto.getLandmarkName());
-        Media media = entityManager.find(Media.class, lostnFoundDto.getMediaPublicUrl());
-
-        // Create a new LostnFound entity with the details from the DTO
-        LostnFound lostnFound = new LostnFound();
-        lostnFound.setFinder(finder);
-        lostnFound.setOwner(owner);
-        lostnFound.setLandmark(landmark);
-        lostnFound.setExtraInfo(lostnFoundDto.getExtraInfo());
-        lostnFound.setStatus(false); // Default status is false (not found)
-        lostnFound.setMedia(media);
-
-        // Persist the entity
+    public void saveLostnFoundDetails(LostnFound lostnFound) {
         entityManager.persist(lostnFound);
     }
 
+    @Override
+    public List<LostnFoundDto> getLostnFoundByFilter(Optional<Boolean> status, Optional<String> owner, Optional<String> finder, Optional<String> landmark, Pageable pageable) {
+        return  entityManager.createQuery("select new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto(l.publicId , l.finder , l.owner , l.Lankmark , l.extraInfo , l.status , l.media ) from lostnfound l where " +
+                        "(:status is NULL or l.status = :status) and " +
+                        "(:owner is NULL or l.owner = :owner) and " +
+                        "(:finder is NULL or l.finder = :finder) and "+
+                        "(:landmark is NULL or l.landmark = :landmark)", LostnFoundDto .class)
+                .setParameter("status",status.orElse(null))
+                .setParameter("owner",owner.orElse(null))
+                .setParameter("finder",finder.orElse(null))
+                .setParameter("landmark" , landmark.orElse(null))
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+    }
 
+    @Override
+    public void updateLostnFound(LostnFound lostnFound, String publicId) {
+        if(exsitLostnFound(publicId) == -1L){
+            throw new EmptyResultDataAccessException("the lost and found with public id " + publicId +"does not exists" , 1);
+        }
+        else {
+            jdbcTemplate.update("update  lostnfound set " +
+                            "finder = case when ? is null then finder else ? end," +
+                            "owner = case when ? is null then owner else ? end, " +
+                            "Landmark = case  when ? is null then Landmark else ? end," +
+                            "extraInfo = case when ? is null then extraInfo else ? end " +
+                            "status = case when ? is null then status else ? end" +
+                            "media = case when ? is null then media else ? end" +
+                            " where publicId = ?",
+                    lostnFound.getFinder().getId(), lostnFound.getOwner().getId(),
+                    lostnFound.getLandmark().getId(), lostnFound.getExtraInfo(),
+                    lostnFound.getStatus(), lostnFound.getMedia().getId(), publicId);
+        }
+    }
 
+    @Override
+    public Optional<String> deleteLostnFound(String publicId) {
+        String sql = """
+            SELECT m.publicId
+            FROM media m
+            JOIN lostnfound l ON m.id = l.media_id
+            WHERE l.publicId = ?
+        """;
+        String mediaPublicId = jdbcTemplate.queryForObject(sql, String.class, publicId);
+
+        String deleteSql = """
+                DELETE FROM lostnfound
+                WHERE publicId = ?
+            """;
+        jdbcTemplate.update(deleteSql, publicId);
+
+        return Optional.ofNullable(mediaPublicId);
+
+    }
 
 
 }
