@@ -5,6 +5,8 @@ import in.ac.iitj.instiapp.payload.User.Alumni.AlumniBaseDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import org.assertj.core.api.Assertions;
+import in.ac.iitj.instiapp.payload.User.Faculty.FacultyBaseDto;
+import in.ac.iitj.instiapp.payload.User.Faculty.FacultyDetailedDto;
 
 public class Utils {
 
@@ -32,4 +34,13 @@ public class Utils {
         Assertions.assertThat(alumniBaseDto.getProgramName()).isEqualTo(studentProgramData.name);
 
     }
+
+    public static void matchFacultyBaseDto(FacultyBaseDto facultyBaseDto, FacultyData facultyData,OrganisationData organisationData, UserData userData){
+        Assertions.assertThat(facultyBaseDto.getUser().getUserName()).isEqualTo(userData.userName);
+        Assertions.assertThat(facultyBaseDto.getOrganisation().getUser().getUserName()).isEqualTo(userData.userName);
+        Assertions.assertThat(facultyBaseDto.getDescription().equals(facultyData.description));
+        Assertions.assertThat(facultyBaseDto.getWebsiteUrl()).isEqualTo(facultyData.websiteUrl);
+x
+    }
+
 }
