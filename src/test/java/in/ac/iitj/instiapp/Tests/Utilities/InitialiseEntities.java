@@ -1,15 +1,16 @@
 package in.ac.iitj.instiapp.Tests.Utilities;
 
-import in.ac.iitj.instiapp.Repository.CalendarRepository;
-import in.ac.iitj.instiapp.Repository.MediaRepository;
+import in.ac.iitj.instiapp.Repository.*;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.Alumni.AlumniRepository;
+import in.ac.iitj.instiapp.Repository.FacultyRepository;
+import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.Student.StudentRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.StudentBranchRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.StudentProgramRepository;
-import in.ac.iitj.instiapp.Repository.UserRepository;
-import in.ac.iitj.instiapp.Repository.UserTypeRepository;
 import in.ac.iitj.instiapp.Repository.impl.*;
+import in.ac.iitj.instiapp.Tests.EntityTestData.FacultyData;
+import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData;
 import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
@@ -20,8 +21,11 @@ import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentProgram;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
+import in.ac.iitj.instiapp.database.entities.User.Faculty.Faculty;
+import in.ac.iitj.instiapp.Tests.EntityTestData.FacultyData.*;
 
 import jakarta.transaction.Transactional;
+import org.hibernate.type.descriptor.jdbc.TinyIntJdbcType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
@@ -404,6 +408,41 @@ public class InitialiseEntities {
             studentRepository.save(student3);
 
 
+        }
+    }
+
+    @Component
+    @Import({FacultyRepositoryImpl.class})
+    public class InitialiseFaculty implements Initialise{
+        private final FacultyRepository facultyRepository;
+        private final UserRepository userRepository;
+        private final OrganisationRepository organisationRepository;
+
+        @Autowired
+        public InitialiseFaculty(FacultyRepository facultyRepository, UserRepository userRepository , OrganisationRepository organisationRepository) {
+            this.facultyRepository = facultyRepository;
+            this.userRepository = userRepository;
+            this.organisationRepository = organisationRepository;
+        }
+
+        @Override
+        public void initialise() {
+            Faculty faculty1 = FacultyData.FACULTY1.toEntity();
+            Faculty faculty2 = FacultyData.FACULTY2.toEntity();
+            Faculty faculty3 = FacultyData.FACULTY3.toEntity();
+
+            faculty1.setUser(new User(userRepository.exists(USER11.userName)));
+            faculty2.setUser(new User(userRepository.exists(USER12.userName)));
+            faculty3.setUser(new User(userRepository.exists(USER13.userName)));
+
+            faculty1.setOrganisation(new Organisation(organisationRepository.existOrganisation(ORGANISATION1.name())));
+            faculty2.setOrganisation(new Organisation(organisationRepository.existOrganisation(ORGANISATION2.name())));
+            faculty3.setOrganisation(new Organisation(organisationRepository.existOrganisation(ORGANISATION3.name())));
+
+
+            facultyRepository.save(faculty1);
+            facultyRepository.save(faculty2);
+            facultyRepository.save(faculty3);
         }
     }
 

@@ -23,6 +23,12 @@ public class Faculty {
     @OneToOne
     User user;
 
+    @Column(nullable = false)
+    String Description;
+
+    @Column(nullable = false)
+    String websiteUrl;
+
     @ManyToOne
     Organisation organisation;
 }

@@ -48,7 +48,7 @@ public interface FacultyRepository {
     /**
      * The OptionalValues shouldn't be null it should be always Optional.empty()
      */
-    List<FacultyBaseDto> getFacultyByFilter(Optional<String> organisationName, Pageable pageable);
+    public List<FacultyBaseDto> getFacultyByFilter(Optional<String> organisationName, String description, String websiteUrl, Pageable pageable);
 
 
     /**

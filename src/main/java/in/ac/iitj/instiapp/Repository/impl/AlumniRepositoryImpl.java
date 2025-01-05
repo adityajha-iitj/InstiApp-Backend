@@ -37,7 +37,7 @@ public AlumniRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManag
         StudentProgram program = entityManager.getReference(StudentProgram.class, alumni.getProgram().getId());
 
 
-        alumni.setUser( u);
+        alumni.setUser(u);
         alumni.setBranch(branch);
         alumni.setProgram(program);
 

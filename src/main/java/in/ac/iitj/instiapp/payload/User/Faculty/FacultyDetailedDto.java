@@ -15,10 +15,14 @@ import java.io.Serializable;
 public class FacultyDetailedDto implements Serializable {
     UserDetailedDto user;
     OrganisationBaseDto organisation;
+    String description;
+    String websiteUrl;
 
 
-    public FacultyDetailedDto(String username, String organisationUserName) {
+    public FacultyDetailedDto(String username, String organisationUserName, String description, String websiteUrl) {
         this.user = new UserDetailedDto(username);
         this.organisation = new OrganisationBaseDto(organisationUserName);
+        this.description = description;
+        this.websiteUrl = websiteUrl;
     }
 }
