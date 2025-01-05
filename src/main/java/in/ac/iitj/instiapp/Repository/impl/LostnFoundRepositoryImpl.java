@@ -1,7 +1,6 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
-import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
@@ -12,8 +11,6 @@ import org.springframework.stereotype.Repository;
 import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFound;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.Media.Media;
-
-import jakarta.transaction.Transactional;
 
 import java.util.List;
 

@@ -18,6 +18,8 @@ public class LostnFound {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
+    String publicId;
+
     @ManyToOne
     @JoinColumn(name = "finder_id", nullable = false)
     User finder;
