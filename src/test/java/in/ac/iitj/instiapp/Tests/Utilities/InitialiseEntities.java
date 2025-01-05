@@ -14,9 +14,13 @@ import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationType;
+import in.ac.iitj.instiapp.database.entities.User.Student.Alumni.Alumni;
+import in.ac.iitj.instiapp.database.entities.User.Student.Student.Student;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
+import in.ac.iitj.instiapp.database.entities.User.Student.StudentProgram;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
+
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -31,16 +35,55 @@ import static in.ac.iitj.instiapp.Tests.EntityTestData.StudentBranchData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserTypeData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.StudentProgramData.*;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.StudentData.*;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.AlumniData.*;
+
 
 public class InitialiseEntities {
 
     public  interface Initialise{
-       void initialise();
+        void initialise();
     }
 
+
+    @Component
+    @Import({MediaRepositoryImpl.class})
     public static class InitialiseMedia implements Initialise{
 
 
+        private final MediaRepository mediaRepository;
+
+        @Autowired
+        public InitialiseMedia(MediaRepository mediaRepository){
+            this.mediaRepository = mediaRepository;
+        }
+
+
+
+        @Transactional
+        public void initialise(){
+
+            // For organisation
+            mediaRepository.save(MEDIA1.toEntity());
+            mediaRepository.save(MEDIA2.toEntity());
+            mediaRepository.save(MEDIA3.toEntity());
+
+
+
+            // In database but should be unassigned for testing purpose
+            mediaRepository.save(MEDIA5.toEntity());
+            mediaRepository.save(MEDIA6.toEntity());
+            mediaRepository.save(MEDIA7.toEntity());
+
+
+
+            mediaRepository.save(MEDIA8.toEntity());
+            mediaRepository.save(MEDIA9.toEntity());
+            mediaRepository.save(MEDIA10.toEntity());
+
+
+
+        }
 
     }
 
@@ -74,6 +117,9 @@ public class InitialiseEntities {
             Long CALENDAR8Id = calendarRepository.save(CALENDAR8.toEntity());
             Long CALENDAR9Id = calendarRepository.save(CALENDAR9.toEntity());
             Long CALENDAR10Id = calendarRepository.save(CALENDAR10.toEntity());
+            Long CALENDAR11Id = calendarRepository.save(CALENDAR11.toEntity());
+            Long CALENDAR12Id = calendarRepository.save(CALENDAR12.toEntity());
+            Long CALENDAR13Id = calendarRepository.save(CALENDAR13.toEntity());
 
             userTypeRepository.save(USER_TYPE1.toEntity());
             userTypeRepository.save(USER_TYPE2.toEntity());
@@ -101,6 +147,9 @@ public class InitialiseEntities {
             User user8 = USER8.toEntity();
             User user9 = USER9.toEntity();
             User user10 = USER10.toEntity();
+            User user11 = USER11.toEntity();
+            User user12 = USER12.toEntity();
+            User user13 = USER13.toEntity();
 
             user1.setCalendar(new Calendar(CALENDAR1Id));
             user2.setCalendar(new Calendar(CALENDAR2Id));
@@ -111,6 +160,9 @@ public class InitialiseEntities {
             user8.setCalendar(new Calendar(CALENDAR8Id));
             user9.setCalendar(new Calendar(CALENDAR9Id));
             user10.setCalendar(new Calendar(CALENDAR10Id));
+            user11.setCalender(new Calendar(CALENDAR11Id));
+            user12.setCalender(new Calendar(CALENDAR11Id));
+            user13.setCalender(new Calendar(CALENDAR11Id));
 
 //            For organisation
             user1.setUserType(new Usertype(UserType1Id));
@@ -129,6 +181,11 @@ public class InitialiseEntities {
             user9.setUserType(new Usertype(UserType6Id));
             user10.setUserType(new Usertype(UserType6Id));
 
+//            For Faculty
+            user11.setUserType(new Usertype(UserType7Id));
+            user12.setUserType(new Usertype(UserType7Id));
+            user12.setUserType(new Usertype(UserType7Id));
+
 
             userRepository.save(user1);
             userRepository.save(user2);
@@ -142,7 +199,7 @@ public class InitialiseEntities {
 
 
     @Component
-    @Import({OrganisationRepositoryImpl.class, InitialiseEntities.InitialiseUser.class})
+    @Import({OrganisationRepositoryImpl.class, InitialiseEntities.InitialiseUser.class,InitialiseMedia.class})
     public static class InitialiseOrganisation implements Initialise{
 
         private final OrganisationRepository organisationRepository;
@@ -152,12 +209,13 @@ public class InitialiseEntities {
 
 
         @Autowired
-        public InitialiseOrganisation(OrganisationRepository organisationRepository, UserRepository userRepository, MediaRepository mediaRepository, InitialiseUser initialiseUser) {
+        public InitialiseOrganisation(OrganisationRepository organisationRepository, UserRepository userRepository, MediaRepository mediaRepository, InitialiseUser initialiseUser,InitialiseMedia initialiseMedia) {
             this.organisationRepository = organisationRepository;
             this.userRepository = userRepository;
             this.mediaRepository = mediaRepository;
 
             initialiseUser.initialise();
+            initialiseMedia.initialise();
         }
 
 
@@ -198,19 +256,22 @@ public class InitialiseEntities {
 
             organisation3.setParentOrganisation(new Organisation(organisationId1));
 
-            Media media1 = MEDIA_DATA1.toEntity();
-            Media media2 = MEDIA_DATA2.toEntity();
-            Media media3 = MEDIA_DATA3.toEntity();
+            Media media1 = MEDIA1.toEntity();
+            Media media2 = MEDIA2.toEntity();
+            Media media3 = MEDIA3.toEntity();
 
-            Long mediaId1 = mediaRepository.getIdByPublicId(MEDIA_DATA1.publicId);
-            Long mediaId2 = mediaRepository.getIdByPublicId(MEDIA_DATA2.publicId);
-            Long mediaId3 = mediaRepository.getIdByPublicId(MEDIA_DATA3.publicId);
+            Long mediaId1 = mediaRepository.getIdByPublicId(MEDIA1.publicId);
+            Long mediaId2 = mediaRepository.getIdByPublicId(MEDIA2.publicId);
+            Long mediaId3 = mediaRepository.getIdByPublicId(MEDIA3.publicId);
 
             organisation1.setMedia(new Media(mediaId1));
-            organisation2.setMedia(new M)
+            organisation2.setMedia(new Media(mediaId2));
+            organisation3.setMedia(new Media(mediaId3));
 
 
-
+            organisationRepository.save(organisation1);
+            organisationRepository.save(organisation2);
+            organisationRepository.save(organisation3);
         }
     }
 
@@ -258,46 +319,91 @@ public class InitialiseEntities {
 
 
     @Component
-    @Import({AlumniRepositoryImpl.class, UserRepositoryImpl.class, InitialiseProgramAndBranch.class})
+    @Import({AlumniRepositoryImpl.class,  InitialiseProgramAndBranch.class})
     public static class InitialiseAlumni implements Initialise{
 
 
         private final AlumniRepository alumniRepository;
         private final UserRepository userRepository;
+        private final StudentBranchRepository studentBranchRepository;
+        private final StudentProgramRepository studentProgramRepository;
 
         @Autowired
-        public InitialiseAlumni(AlumniRepository alumniRepository , UserRepository userRepository, InitialiseProgramAndBranch initialiseProgramAndBranch) {
+        public InitialiseAlumni(AlumniRepository alumniRepository , UserRepository userRepository, InitialiseProgramAndBranch initialiseProgramAndBranch, StudentProgramRepository studentProgramRepository, StudentBranchRepository studentBranchRepository) {
             initialiseProgramAndBranch.initialise();;
             this.alumniRepository = alumniRepository;
             this.userRepository = userRepository;
+            this.studentBranchRepository = studentBranchRepository;
+            this.studentProgramRepository = studentProgramRepository;
 
         }
 
         @Override
         public void initialise() {
+            Alumni alumni1 = ALUMNI1.toEntity();
+            Alumni alumni2 = ALUMNI2.toEntity();
+            Alumni alumni3 = ALUMNI3.toEntity();
 
 
+            alumni1.setUser(new User(userRepository.exists(USER8.userName)));
+            alumni2.setUser(new User(userRepository.exists(USER9.userName)));
+            alumni3.setUser(new User(userRepository.exists(USER10.userName)));
 
+            alumni1.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(STUDENT_BRANCH1.name)));
+            alumni2.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(STUDENT_BRANCH2.name)));
+            alumni3.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(STUDENT_BRANCH3.name)));
+
+            alumni1.setProgram(new StudentProgram(studentProgramRepository.existsStudentProgram(STUDENT_PROGRAM1.name)));
+            alumni2.setProgram(new StudentProgram(studentProgramRepository.existsStudentProgram(STUDENT_PROGRAM2.name)));
+            alumni3.setProgram(new StudentProgram(studentProgramRepository.existsStudentProgram(STUDENT_PROGRAM3.name)));
+
+            alumniRepository.save(alumni1);
+            alumniRepository.save(alumni2);
+            alumniRepository.save(alumni3);
         }
     }
 
     @Component
-    @Import({StudentRepositoryImpl.class , UserRepositoryImpl.class , InitialiseProgramAndBranch.class})
+    @Import({StudentRepositoryImpl.class  , InitialiseProgramAndBranch.class })
     public static class InitialiseStudent implements Initialise{
 
         private final StudentRepository studentRepository;
         private final UserRepository userRepository;
+        private final StudentProgramRepository studentProgramRepository;
+        private final StudentBranchRepository studentBranchRepository;
 
         @Autowired
-        public InitialiseStudent(StudentRepository studentRepository, UserRepository userRepository , InitialiseProgramAndBranch initialiseProgramAndBranch) {
+        public InitialiseStudent(StudentRepository studentRepository, UserRepository userRepository , StudentBranchRepository studentBranchRepository, StudentProgramRepository studentProgramRepository, InitialiseProgramAndBranch initialiseProgramAndBranch) {
             this.studentRepository = studentRepository;
             this.userRepository = userRepository;
+            this.studentBranchRepository = studentBranchRepository;
+            this.studentProgramRepository = studentProgramRepository;
             initialiseProgramAndBranch.initialise();
         }
         @Transactional
         @Override
         public void initialise() {
-            User user1 = USER1
+
+            Student student1 = STUDENT1.toEntity();
+            student1.setUser(new User(userRepository.exists(USER5.userName)));
+            student1.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(STUDENT_BRANCH1.name)));
+            student1.setProgram(new StudentProgram(studentProgramRepository.existsStudentProgram(STUDENT_PROGRAM1.name)));
+
+            Student student2 = STUDENT2.toEntity();
+            student2.setUser(new User(userRepository.exists(USER6.userName)));
+            student2.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(STUDENT_BRANCH2.name)));
+            student2.setProgram(new StudentProgram(studentProgramRepository.existsStudentProgram(STUDENT_PROGRAM2.name)));
+
+            Student student3 = STUDENT3.toEntity();
+            student3.setUser(new User(userRepository.exists(USER7.userName)));
+            student3.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(STUDENT_BRANCH3.name)));
+            student3.setProgram(new StudentProgram(studentProgramRepository.existsStudentProgram(STUDENT_PROGRAM3.name)));
+
+            studentRepository.save(student1);
+            studentRepository.save(student2);
+            studentRepository.save(student3);
+
+
         }
     }
 

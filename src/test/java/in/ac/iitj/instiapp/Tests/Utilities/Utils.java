@@ -1,9 +1,7 @@
 package in.ac.iitj.instiapp.Tests.Utilities;
 
-import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData;
-import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationTypeData;
-import in.ac.iitj.instiapp.Tests.EntityTestData.UserData;
-import in.ac.iitj.instiapp.Tests.EntityTestData.UserTypeData;
+import in.ac.iitj.instiapp.Tests.EntityTestData.*;
+import in.ac.iitj.instiapp.payload.User.Alumni.AlumniBaseDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import org.assertj.core.api.Assertions;
@@ -24,5 +22,14 @@ public class Utils {
         Assertions.assertThat(organisationBaseDto.getTypeName()).isEqualTo(organisationData.organisationType);
         Assertions.assertThat(organisationBaseDto.getDescription()).isEqualTo(organisationData.description);
         Assertions.assertThat(organisationBaseDto.getWebsite()).isEqualTo(organisationData.website);
+    }
+
+
+    public static void matchAlumniBaseDto(AlumniBaseDto alumniBaseDto, AlumniData alumniData, StudentBranchData studentBranchData, StudentProgramData studentProgramData,UserData userData){
+        Assertions.assertThat(alumniBaseDto.getUser().getUserName()).isEqualTo(userData.userName);
+        Assertions.assertThat(alumniBaseDto.getAdmissionYear()).isEqualTo(alumniData.admissionYear);
+        Assertions.assertThat(alumniBaseDto.getStudentBranchDto().getName()).isEqualTo(studentBranchData.name);
+        Assertions.assertThat(alumniBaseDto.getProgramName()).isEqualTo(studentProgramData.name);
+
     }
 }

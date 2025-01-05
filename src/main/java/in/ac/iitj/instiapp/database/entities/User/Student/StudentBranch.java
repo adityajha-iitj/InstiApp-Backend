@@ -37,4 +37,8 @@ public class StudentBranch {
         this.closingYear = closingYear;
         this.organisation = entity;
     }
+
+    public StudentBranch(Long id) {
+        this.Id = id;
+    }
 }

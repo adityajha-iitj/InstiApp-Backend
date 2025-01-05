@@ -40,6 +40,8 @@ public AlumniRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManag
         alumni.setUser( u);
         alumni.setBranch(branch);
         alumni.setProgram(program);
+
+        entityManager.persist(alumni);
     }
 
     @Override
@@ -67,7 +69,7 @@ public AlumniRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManag
 
     @Override
     public List<AlumniBaseDto> getAlumniByFilter(Optional<String> programName, Optional<String> branchNameName, Optional<Integer> admissionYear, Optional<Integer> passOutYear, Pageable pageable) {
-        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Alumni.AlumniBaseDto(al.user.userName,al.program.name, al.branch.name, al.admissionYear ) from Alumni  al where " +
+        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Alumni.AlumniBaseDto(al.user.userName,al.program.name, al.branch.name, al.admissionYear ) from Alumni al where " +
                 "(:programName is null or al.program.name = :programName) and" +
                 "(:branchName is null or al.branch.name = :branchName) and " +
                 "(:admissionYear is null or al.admissionYear = :admissionYear) and " +

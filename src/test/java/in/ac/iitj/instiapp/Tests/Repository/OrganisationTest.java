@@ -1,5 +1,6 @@
 package in.ac.iitj.instiapp.Tests.Repository;
 
+import in.ac.iitj.instiapp.Repository.MediaRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
 import in.ac.iitj.instiapp.Repository.impl.MediaRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.OrganisationRepositoryImpl;
@@ -9,9 +10,9 @@ import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.Tests.Utilities.Utils;
 import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
+import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationType;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationDetailedDto;
-import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,7 +31,7 @@ import java.util.List;
 
 import static in.ac.iitj.instiapp.Tests.EntityTestData.CalendarData.CALENDAR1;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData.ORGANISATION1;
-import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData.ORGANISATION4;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData.ORGANISATION3;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationTypeData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.USER3;
@@ -42,16 +43,13 @@ import static in.ac.iitj.instiapp.Tests.EntityTestData.UserTypeData.USER_TYPE1;
 public class OrganisationTest {
 
     private final OrganisationRepository organisationRepository;
-
-    private final InitialiseEntities.Initialise initialise;
-    @Autowired
-    private MediaRepositoryImpl mediaRepositoryImpl;
+    private final MediaRepository mediaRepository;
 
 
     @Autowired
-    public OrganisationTest(OrganisationRepository organisationRepository, InitialiseEntities.InitialiseOrganisation initialise) {
+    public OrganisationTest(OrganisationRepository organisationRepository, MediaRepository mediaRepository) {
         this.organisationRepository = organisationRepository;
-        this.initialise = initialise;
+        this.mediaRepository = mediaRepository;
     }
 
     @BeforeAll
@@ -113,8 +111,8 @@ public class OrganisationTest {
     }
 
     // TODO
-@Test
-@Order(5)
+    @Test
+    @Order(5)
     public void testDeleteOrganisationType(){
         Assertions.assertThat(organisationRepository.existsOrganisationType(ORGANISATION_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
         organisationRepository.deleteOrganisationType(ORGANISATION_TYPE1.name);
@@ -149,27 +147,21 @@ public class OrganisationTest {
     @Order(8)
     public void testGetOrganisationDetailed(){
         Assertions.assertThatThrownBy(() ->{
-            organisationRepository.organisationDetailed(USER1.userName);
+            organisationRepository.organisationDetailed(USER4.userName);
         }).isInstanceOf(EmptyResultDataAccessException.class);
 
 
-        OrganisationDetailedDto organisationDetailedDto = organisationRepository.organisationDetailed(USER1.userName);
-        Assertions.assertThat(organisationDetailedDto.getUsername()).isEqualTo(USER1.userName);
-        Assertions.assertThat(userDetailedDto.getName()).isEqualTo(USER1.name);
-        Assertions.assertThat(userDetailedDto.getEmail()).isEqualTo(USER1.email);
-        Assertions.assertThat(userDetailedDto.getAvatarUrl()).isEqualTo(USER1.avatarUrl);
-        Assertions.assertThat(userDetailedDto.getUserTypeName()).isEqualTo(USER_TYPE1.name);
-        Assertions.assertThat(userDetailedDto.getCalendarPublicId()).isEqualTo(CALENDAR1.publicId);
-        Assertions.assertThat(userDetailedDto.getPhoneNumber()).isEqualTo(USER1.phoneNumber);
+        OrganisationDetailedDto organisationDetailedDto = organisationRepository.organisationDetailed(USER3.userName);
+        Assertions.assertThat(organisationDetailedDto.getDescription()).isEqualTo(ORGANISATION3.description);
+        Assertions.assertThat(organisationDetailedDto.getWebsite()).isEqualTo(ORGANISATION3.website);
+        Assertions.assertThat(organisationDetailedDto.getTypeName()).isEqualTo(ORGANISATION3.organisationType.name);
+        Assertions.assertThat(organisationDetailedDto.getParentOrganisation().getParentOrganisationUserUserName()).isEqualTo(USER1.userName);
 
-        UserDetailedDto userDetailedDto1 = userRepository.getUserDetailed(USER1.userName,false);
-        Assertions.assertThat(userDetailedDto1.getUserName()).isEqualTo(USER1.userName);
-        Assertions.assertThat(userDetailedDto1.getName()).isEqualTo(USER1.name);
-        Assertions.assertThat(userDetailedDto1.getEmail()).isEqualTo(USER1.email);
-        Assertions.assertThat(userDetailedDto1.getAvatarUrl()).isEqualTo(USER1.avatarUrl);
-        Assertions.assertThat(userDetailedDto1.getUserTypeName()).isEqualTo(USER_TYPE1.name);
-        Assertions.assertThat(userDetailedDto1.getCalendarPublicId()).isNull();
-        Assertions.assertThat(userDetailedDto1.getPhoneNumber()).isNull();
+        OrganisationDetailedDto organisationDetailedDto1 = organisationRepository.organisationDetailed(USER1.userName);
+        Assertions.assertThat(organisationDetailedDto1.getDescription()).isEqualTo(ORGANISATION3.description);
+        Assertions.assertThat(organisationDetailedDto1.getWebsite()).isEqualTo(ORGANISATION3.website);
+        Assertions.assertThat(organisationDetailedDto1.getTypeName()).isEqualTo(ORGANISATION3.organisationType.name);
+        Assertions.assertThat(organisationDetailedDto1.getParentOrganisation().getParentOrganisationUserUserName()).isEqualTo(USER1.userName);
     }
 
     @Test
@@ -187,20 +179,21 @@ public class OrganisationTest {
         Assertions.assertThatThrownBy(() ->{
             Organisation organisation = OrganisationData.ORGANISATION3.toEntity();
             organisation.setId(organisationRepository.existOrganisation(USER1.userName));
-            organisation.setMedia(new Media(mediaRepositoryImpl.getIdByPublicId(MediaData.MEDIA_DATA1.publicId)));
-
+            organisation.setMedia(new Media(mediaRepository.getIdByPublicId(MediaData.MEDIA5.publicId)));
+            organisation.setParentOrganisation(new Organisation(organisationRepository.existOrganisation(USER1.userName)));
+            organisation.setType(new OrganisationType(organisationRepository.existsOrganisationType(USER1.userName)));
+            organisation.setDescription(ORGANISATION1.description);
+            organisation.setWebsite(ORGANISATION1.website);
 
             organisationRepository.updateOrganisation(organisation);
         }).isInstanceOf(EmptyResultDataAccessException.class);
+
+        Assertions.assertThat(organisationRepository.organisationDetailed(USER3.userName)).isEqualTo(USER3.userName);
+
+        organisationRepository.updateOrganisation(ORGANISATION3.toEntity());
+
+        Assertions.assertThat(organisationRepository.organisationDetailed(USER3.userName)).isEqualTo(USER1.userName);
     }
-
-
-
-
-
-
-
-
 
 
 

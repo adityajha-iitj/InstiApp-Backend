@@ -1,7 +1,5 @@
-package in.ac.iitj.instiapp.Tests.EntityTestData.Scheduling.Buses;
+package in.ac.iitj.instiapp.Tests.EntityTestData;
 
-import in.ac.iitj.instiapp.Tests.EntityTestData.StudentBranchData;
-import in.ac.iitj.instiapp.Tests.EntityTestData.StudentProgramData;
 import in.ac.iitj.instiapp.database.entities.User.Student.Alumni.Alumni;
 
 public enum AlumniData {

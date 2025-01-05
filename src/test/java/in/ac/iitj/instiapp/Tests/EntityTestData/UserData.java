@@ -13,8 +13,11 @@ public enum UserData {
     USER7("adityajha","ajha","ajha@gmail.com","111-666-8899-09887","AVATAR7.com"),
     USER8("rahul", "rsharma", "rsharma@gmail.com", "777-555-4444", "AVATAR8.com"),
     USER9("sneha", "skulkarni", "skulkarni@gmail.com", "666-777-3333", "AVATAR9.com"),
-    USER10("ankita", "agupta", "agupta@gmail.com", "555-666-2222", "AVATAR10.com");
-    ;
+    USER10("ankita", "agupta", "agupta@gmail.com", "555-666-2222", "AVATAR10.com"),
+    USER11("Danie", "DanieGJ", "daniegeorgejohn@gmail.com", "555-123-2222", "AVATAR11.com"),
+    USER12("George", "GeorgeDJ", "george@gmail.com", "555-345-2222", "AVATAR12.com"),
+    USER13("John", "JohnDG", "john@gmail.com", "555-567-2222", "AVATAR13.com");
+
 
     public final String name;
     public final String userName;

@@ -77,7 +77,8 @@ public interface AlumniRepository {
      * @param alumni StudentProgram only newId needed <br>
      *               StudentBranch only new Id needed <br>
      *               Doesn't update User Details <br>
-     *               userId shouldn't be null <br>
+     *               Id shouldn't be null <br>
+     *               userId could be null
      */
     void updateAlumni(Alumni alumni);
 

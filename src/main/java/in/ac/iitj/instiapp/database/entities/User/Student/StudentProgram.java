@@ -27,4 +27,8 @@ public class StudentProgram {
         this.name = name;
         this.isActive = isActive;
     }
+
+    public StudentProgram(Long id) {
+        this.Id = id;
+    }
 }

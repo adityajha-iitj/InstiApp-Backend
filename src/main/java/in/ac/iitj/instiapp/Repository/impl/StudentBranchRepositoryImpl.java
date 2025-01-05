@@ -44,13 +44,12 @@ public class StudentBranchRepositoryImpl implements StudentBranchRepository {
     @Override
     public StudentBranchDto getStudentBranch(String name) {
         try{
-            entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Student.StudentBranchDto(st.name,st.organisation.user.userName,st.openingYear,st.closingYear) from StudentBranch  st where st.name = :name",StudentBranchDto.class)
+          return   entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Student.StudentBranchDto(st.name,st.organisation.user.userName,st.openingYear,st.closingYear) from StudentBranch  st where st.name = :name",StudentBranchDto.class)
                     .setParameter("name", name)
                     .getSingleResult();
         }catch (NoResultException ignored){
             throw new EmptyResultDataAccessException("Student Branch with name "+name + " doesn't exist",1);
-        }
-    }
+        }}
 
     @Override
     public Long existsStudentBranch(String name) {

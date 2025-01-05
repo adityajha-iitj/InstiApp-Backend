@@ -58,4 +58,6 @@ public interface FacultyRepository {
      */
     void updateFaculty(Faculty faculty);
 
+    Long facultyExists(String username);
+
 }

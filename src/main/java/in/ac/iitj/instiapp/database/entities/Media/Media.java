@@ -34,4 +34,8 @@ public class Media {
         this.assetId = assetId;
         this.type = mediatype;
     }
+
+    public Media(Long mediaId) {
+        this.Id = mediaId;
+    }
 }
