@@ -2,6 +2,7 @@ package in.ac.iitj.instiapp.Tests.Utilities;
 
 import in.ac.iitj.instiapp.Repository.*;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
+import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.Alumni.AlumniRepository;
 import in.ac.iitj.instiapp.Repository.FacultyRepository;
 import in.ac.iitj.instiapp.Repository.UserRepository;
@@ -66,6 +67,47 @@ public class InitialiseEntities {
         @Autowired
         public InitialiseMedia(MediaRepository mediaRepository){
             this.mediaRepository = mediaRepository;
+        }
+
+
+
+        @Transactional
+        public void initialise(){
+
+            // For organisation
+            mediaRepository.save(MEDIA1.toEntity());
+            mediaRepository.save(MEDIA2.toEntity());
+            mediaRepository.save(MEDIA3.toEntity());
+
+
+
+            // In database but should be unassigned for testing purpose
+            mediaRepository.save(MEDIA5.toEntity());
+            mediaRepository.save(MEDIA6.toEntity());
+            mediaRepository.save(MEDIA7.toEntity());
+
+
+
+            mediaRepository.save(MEDIA8.toEntity());
+            mediaRepository.save(MEDIA9.toEntity());
+            mediaRepository.save(MEDIA10.toEntity());
+
+
+
+        }
+
+    }
+
+    @Component
+    @Import({OrganisationRoleRepositoryImpl.class})
+    public static class InitialiseOrganisationRole implements Initialise{
+
+
+        private final OrganisationRoleRepository organisationRoleRepository;
+
+        @Autowired
+        public InitialiseOrganisationRole(OrganisationRoleRepository organisationRoleRepository){
+            this.organisationRoleRepository = organisationRoleRepository;
         }
 
 
