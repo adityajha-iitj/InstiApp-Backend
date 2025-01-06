@@ -38,7 +38,7 @@ import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.USER3;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserTypeData.USER_TYPE1;
 
 @DataJpaTest
-@Import({OrganisationRepositoryImpl.class, InitialiseEntities.InitialiseUser.class})
+@Import({OrganisationRepositoryImpl.class, InitialiseEntities.InitialiseOrganisation.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class OrganisationTest {
 
