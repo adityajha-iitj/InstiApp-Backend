@@ -22,7 +22,7 @@ import java.util.List;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData.*;
 
 @DataJpaTest
-@Import({StudentBranchRepositoryImpl.class , StudentProgramRepository.class , InitialiseEntities.InitialiseProgramAndBranch.class})
+@Import({StudentBranchRepositoryImpl.class , InitialiseEntities.InitialiseProgramAndBranch.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class StudentBranchProgramTest {

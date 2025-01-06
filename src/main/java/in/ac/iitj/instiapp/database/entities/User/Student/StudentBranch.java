@@ -31,7 +31,7 @@ public class StudentBranch {
     @Column(name = "closing_year",nullable = true,columnDefinition = "INTEGER CHECK (closing_year >= 2007 AND closing_year <= 2200)")
     Integer closingYear;
 
-    public StudentBranch(String name, int openingYear, int closingYear, Organisation entity) {
+    public StudentBranch(String name, Integer openingYear, Integer closingYear, Organisation entity) {
         this.name = name;
         this.openingYear = openingYear;
         this.closingYear = closingYear;

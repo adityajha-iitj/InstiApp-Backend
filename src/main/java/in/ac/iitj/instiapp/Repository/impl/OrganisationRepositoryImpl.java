@@ -10,6 +10,8 @@ import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationDetailedDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -37,6 +39,7 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
         if(existsOrganisationType(organisationType.getName()) != -1L){
             throw new DataIntegrityViolationException("Organisation type already exists with name " + organisationType.getName());
         }
+
         entityManager.persist(organisationType);
     }
 
@@ -87,7 +90,9 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
             organisation.setMedia(entityManager.getReference(Media.class,organisation.getMedia().getId()));
         if(organisation.getParentOrganisation().getId() != null)
             organisation.setParentOrganisation(entityManager.getReference(Organisation.class, organisation.getParentOrganisation().getId()));
-
+        else {
+            organisation.setParentOrganisation(null);
+        }
 
         entityManager.persist(organisation);
     }
@@ -139,7 +144,7 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
 
     @Override
     public Long existOrganisation(String username) {
-        return jdbcTemplate.queryForObject("select coalesce(max(id), -1) from organisation o join users u on u.id = o.user_id where u.user_name = ?", Long.class, username);
+        return jdbcTemplate.queryForObject("select coalesce(max(o.id), -1::bigint) from organisation o join users u on u.id = o.user_id where u.user_name = ?", Long.class, username);
     }
 
     @Override

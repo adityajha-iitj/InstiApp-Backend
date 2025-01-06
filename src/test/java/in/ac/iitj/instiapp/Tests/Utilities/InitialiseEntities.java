@@ -189,7 +189,7 @@ public class InitialiseEntities {
 //            For Faculty
             user11.setUserType(new Usertype(UserType7Id));
             user12.setUserType(new Usertype(UserType7Id));
-            user12.setUserType(new Usertype(UserType7Id));
+            user13.setUserType(new Usertype(UserType7Id));
 
 
             userRepository.save(user1);
@@ -198,6 +198,12 @@ public class InitialiseEntities {
             userRepository.save(user5);
             userRepository.save(user6);
             userRepository.save(user7);
+            userRepository.save(user8);
+            userRepository.save(user9);
+            userRepository.save(user10);
+            userRepository.save(user11);
+            userRepository.save(user12);
+            userRepository.save(user13);
         }
 
     }
@@ -257,16 +263,11 @@ public class InitialiseEntities {
             organisation2.setUser(new User(userId2));
             organisation3.setUser(new User(userId3));
 
-            Long organisationId1 = organisationRepository.existOrganisation(USER1.userName);
+
 
             organisation1.setParentOrganisation(new Organisation(null));
             organisation2.setParentOrganisation(new Organisation(null));
-            organisation3.setParentOrganisation(new Organisation(organisationId1));
 
-
-            Media media1 = MEDIA1.toEntity();
-            Media media2 = MEDIA2.toEntity();
-            Media media3 = MEDIA3.toEntity();
 
             Long mediaId1 = mediaRepository.getIdByPublicId(MEDIA1.publicId);
             Long mediaId2 = mediaRepository.getIdByPublicId(MEDIA2.publicId);
@@ -278,6 +279,9 @@ public class InitialiseEntities {
 
 
             organisationRepository.save(organisation1);
+
+            organisation3.setParentOrganisation(new Organisation(organisationRepository.existOrganisation(USER1.userName)));
+
             organisationRepository.save(organisation2);
             organisationRepository.save(organisation3);
         }
@@ -393,17 +397,17 @@ public class InitialiseEntities {
         public void initialise() {
 
             Student student1 = STUDENT1.toEntity();
-            student1.setUser(new User(userRepository.exists(USER5.userName)));
+            student1.setUser(new User(userRepository.usernameExists(USER5.userName)));
             student1.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(STUDENT_BRANCH1.name)));
             student1.setProgram(new StudentProgram(studentProgramRepository.existsStudentProgram(STUDENT_PROGRAM1.name)));
 
             Student student2 = STUDENT2.toEntity();
-            student2.setUser(new User(userRepository.exists(USER6.userName)));
+            student2.setUser(new User(userRepository.usernameExists(USER6.userName)));
             student2.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(STUDENT_BRANCH2.name)));
             student2.setProgram(new StudentProgram(studentProgramRepository.existsStudentProgram(STUDENT_PROGRAM2.name)));
 
             Student student3 = STUDENT3.toEntity();
-            student3.setUser(new User(userRepository.exists(USER7.userName)));
+            student3.setUser(new User(userRepository.usernameExists(USER7.userName)));
             student3.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(STUDENT_BRANCH3.name)));
             student3.setProgram(new StudentProgram(studentProgramRepository.existsStudentProgram(STUDENT_PROGRAM3.name)));
 
@@ -416,17 +420,18 @@ public class InitialiseEntities {
     }
 
     @Component
-    @Import({FacultyRepositoryImpl.class})
+    @Import({FacultyRepositoryImpl.class,InitialiseOrganisation.class})
     public class InitialiseFaculty implements Initialise{
         private final FacultyRepository facultyRepository;
         private final UserRepository userRepository;
         private final OrganisationRepository organisationRepository;
 
         @Autowired
-        public InitialiseFaculty(FacultyRepository facultyRepository, UserRepository userRepository , OrganisationRepository organisationRepository) {
+        public InitialiseFaculty(FacultyRepository facultyRepository, UserRepository userRepository , OrganisationRepository organisationRepository,InitialiseOrganisation initialiseOrganisation) {
             this.facultyRepository = facultyRepository;
             this.userRepository = userRepository;
             this.organisationRepository = organisationRepository;
+            initialiseOrganisation.initialise();
         }
 
         @Override
