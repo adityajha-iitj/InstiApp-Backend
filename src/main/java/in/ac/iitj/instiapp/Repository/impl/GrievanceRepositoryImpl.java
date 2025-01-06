@@ -74,6 +74,7 @@ import in.ac.iitj.instiapp.database.entities.Grievance;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.payload.GrievanceDto;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Repository;
@@ -82,7 +83,10 @@ import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.Repository.UserRepository;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Optional;
+
 
 
 @Repository
@@ -96,7 +100,7 @@ public class GrievanceRepositoryImpl implements GrievanceRepository {
         this.entityManager = entityManager;
     }
 
-    public void addGrievance(Grievance grievance) {
+    public void save(Grievance grievance) {
         grievance.setUserFrom(entityManager.getReference(User.class,grievance.getUserFrom().getId()));
         grievance.setOrganisationRole(entityManager.getReference(OrganisationRole.class,grievance.getOrganisationRole().getId()));
         grievance.setMedia(entityManager.getReference(Media.class,grievance.getMedia().getId()));
@@ -108,71 +112,68 @@ public class GrievanceRepositoryImpl implements GrievanceRepository {
         entityManager.persist(grievance);
     }
 
-    public List<GrievanceDto> getGrievances(String username){
-        if(UserRepository.usernameExists(username) == -1L)
-            throw new EmptyResultDataAccessException("User with username " + username + " not found", 1);
+    public List<GrievanceDto> getGrievancesByFilter(Optional<String> title, Optional<String> description,Optional<String> organisationName, Optional<Boolean> resolved,Pageable pageable){
 
-        else
-            return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.GrievanceDto(gr.Title,gr.Description,gr.userFrom.userName,gr.organisationRole.organisation.user.userName,gr.organisationRole.roleName,gr.organisationRole.permission,gr.resolved,gr.media.publicId)"+
-                            " from Grievance gr where gr.userFrom = :username",GrievanceDto.class)
-                    .setParameter("username",username)
+            return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.GrievanceDto(gr.Title,gr.Description,gr.userFrom.userName,gr.organisationRole.organisation.user.userName,gr.organisationRole.roleName,gr.organisationRole.permission,gr.resolved,gr.media.publicId) from Grievance gr where"+
+                                    "(:title is null or gr.Title = :title) and " +
+                                    "(:description is null or gr.Description = :description) and " +
+                                    "(:organisationName is null or gr.organisationRole.organisation.user.userName = :organisationName) and "+
+                                    "(:resolved is null or gr.resolved = :resolved)",
+                            GrievanceDto.class)
+                    .setParameter("title", title.orElse(null))
+                    .setParameter("description", description.orElse(null))
+                    .setParameter("organisationName", organisationName.orElse(null))
+                    .setParameter("resolved",resolved.orElse(null))
+                    .setFirstResult((int) pageable.getOffset())
+                    .setMaxResults(pageable.getPageSize())
                     .getResultList();
     }
 
-    @Transactional
-    public void updateGrievance(String userName, String grievanceTitle, Boolean resolved) {
-        // Fetch the grievance using username and title
-        String queryStr = "SELECT gr FROM Grievance gr WHERE gr.userFrom.userName = :userName AND gr.Title = :grievanceTitle";
-        Grievance grievance;
-
-        try {
-            grievance = entityManager.createQuery(queryStr, Grievance.class)
-                    .setParameter("userName", userName)
-                    .setParameter("grievanceTitle", grievanceTitle)
-                    .getSingleResult();
-        } catch (Exception e) {
-            throw new RuntimeException("Grievance not found for username: " + userName + " and title: " + grievanceTitle, e);
-        }
-
-        grievance.setResolved(resolved);
-
-        // Persist the changes
-        entityManager.merge(grievance);
+    @Override
+    public void updateGrievance(String publicId, Grievance grievance) {
+        jdbcTemplate.update("UPDATE grievance SET " +
+                        "title = CASE WHEN ? IS NULL THEN title ELSE ? END, " +
+                        "description = CASE WHEN ? IS NULL THEN description ELSE ? END, " +
+                        "organisation_role_id = CASE WHEN ? IS NULL THEN organisation_role_id ELSE ? END, " +
+                        "media_id = CASE WHEN ? IS NULL THEN media_id ELSE ? END, " +
+                        "resolved = CASE WHEN ? IS NULL THEN resolved ELSE ? END " +
+                        "WHERE public_id = ?",
+                grievance.getTitle(), grievance.getTitle(),
+                grievance.getDescription(), grievance.getDescription(),
+                grievance.getOrganisationRole().getId(), grievance.getOrganisationRole().getId(),
+                grievance.getMedia().getId(), grievance.getMedia().getId(),
+                grievance.getResolved(), grievance.getResolved(),
+                publicId
+        );
     }
 
-    public boolean grievanceExists(String username, String grievanceTitle) {
-        String queryStr = "SELECT COUNT(gr) FROM Grievance gr WHERE gr.userFrom.userName = :username AND gr.Title = :grievanceTitle";
+
+
+    public Long existGrievance(String publicId) {
+        String queryStr = "SELECT COUNT(gr) FROM Grievance gr WHERE gr.publicId = :publicId";
         Long count = entityManager.createQuery(queryStr, Long.class)
-                .setParameter("username", username)
-                .setParameter("grievanceTitle", grievanceTitle)
+                .setParameter("publicId", publicId)
                 .getSingleResult();
-        return count > 0;
-    }
-
-
-    public GrievanceDto getGrievance(String username, String grievanceTitle) {
-        if(UserRepository.usernameExists(username) == -1L)
-            throw new EmptyResultDataAccessException("User with username " + username + " not found", 1);
-        if(!grievanceExists(username, grievanceTitle))
-            throw new EmptyResultDataAccessException("Grievance with the title" + grievanceTitle + " not found", 1);
-
+        if(count == 0)
+            return -1L;
         else
-            return entityManager.createQuery(" select new in.ac.iitj.instiapp.payload.GrievanceDto(gr.Title,gr.Description,gr.userFrom.userName,gr.organisationRole.organisation.user.userName,gr.organisationRole.roleName,gr.organisationRole.permission,gr.resolved,gr.media.publicId)" +
-                    "FROM Grievance gr WHERE gr.userFrom.userName = :username AND gr.Title =:grievanceTitle",GrievanceDto.class)
-                    .setParameter("username",username)
-                    .setParameter("grievanceTitle",grievanceTitle)
-                    .getSingleResult();
+            return count;
     }
 
-    public void deleteGrievance(String userName , String grievanceTitle){
+
+    public GrievanceDto getGrievance(String publicId){
+
+        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.GrievanceDto(gr.Title,gr.Description,gr.userFrom.userName,gr.organisationRole.organisation.user.userName,gr.organisationRole.roleName,gr.organisationRole.permission,gr.resolved,gr.media.publicId)"+
+                        " from Grievance gr where gr.publicId = :publicId",GrievanceDto.class)
+                .setParameter("publicId",publicId)
+                .getSingleResult();
+    }
+
+
+    @Override
+    public void deleteGrievance(String publicId) {
         // TODO
     }
-
-    public boolean checkGrievance(String title , String user_from_id){
-        // TODO
-        return false;
-    }
-
 
 
 
