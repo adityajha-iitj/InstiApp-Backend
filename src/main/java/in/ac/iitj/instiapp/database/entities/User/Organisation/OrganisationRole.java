@@ -20,6 +20,7 @@ public class OrganisationRole {
     @ManyToOne
     Organisation organisation;
 
+    @Column
     String roleName;
 
     @Enumerated(EnumType.STRING)

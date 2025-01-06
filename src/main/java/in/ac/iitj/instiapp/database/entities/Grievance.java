@@ -19,6 +19,9 @@ public class Grievance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
+    @Column(unique = true, nullable = false)
+    String publicId;
+
     @Column( nullable = false)
     String Title;
 
@@ -36,6 +39,6 @@ public class Grievance {
     Boolean resolved;
 
     @ManyToOne
-     @JoinColumn(name = "media_id", nullable = true)
+    @JoinColumn(name = "media_id", nullable = true)
     Media media;
 }

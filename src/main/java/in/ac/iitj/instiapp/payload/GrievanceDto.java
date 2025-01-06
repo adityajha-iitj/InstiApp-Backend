@@ -5,6 +5,8 @@ import in.ac.iitj.instiapp.payload.Media.MediaBaseDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.Value;
 
 import java.io.Serializable;
@@ -12,7 +14,8 @@ import java.io.Serializable;
 /**
  * DTO for {@link in.ac.iitj.instiapp.database.entities.Grievance}
  */
-@Value
+@Getter
+@Setter
 public class GrievanceDto implements Serializable {
     String Title;
     String Description;
