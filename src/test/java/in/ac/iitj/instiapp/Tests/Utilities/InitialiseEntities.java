@@ -25,6 +25,7 @@ import in.ac.iitj.instiapp.database.entities.User.Faculty.Faculty;
 import in.ac.iitj.instiapp.Tests.EntityTestData.FacultyData.*;
 
 import jakarta.transaction.Transactional;
+import org.aspectj.weaver.ast.Or;
 import org.hibernate.type.descriptor.jdbc.TinyIntJdbcType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -258,7 +259,10 @@ public class InitialiseEntities {
 
             Long organisationId1 = organisationRepository.existOrganisation(USER1.userName);
 
+            organisation1.setParentOrganisation(new Organisation(null));
+            organisation2.setParentOrganisation(new Organisation(null));
             organisation3.setParentOrganisation(new Organisation(organisationId1));
+
 
             Media media1 = MEDIA1.toEntity();
             Media media2 = MEDIA2.toEntity();
