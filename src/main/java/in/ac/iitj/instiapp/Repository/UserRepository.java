@@ -6,10 +6,12 @@ import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface UserRepository {
 
 
@@ -124,7 +126,7 @@ public interface UserRepository {
     /**
      * @return -1 if it doesn't exists
      */
-    Long usernameExists(String username);
+    static Long usernameExists(String username);
 
     /**
      * @apiNote The api using this functions if refreshes on userInteraction should have strict rateLimits To prevent exceeding quotas

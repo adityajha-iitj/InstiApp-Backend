@@ -1,0 +1,32 @@
+package in.ac.iitj.instiapp.payload;
+
+import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationPermission;
+import in.ac.iitj.instiapp.payload.Media.MediaBaseDto;
+import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
+import in.ac.iitj.instiapp.payload.User.UserBaseDto;
+import lombok.AllArgsConstructor;
+import lombok.Value;
+
+import java.io.Serializable;
+
+/**
+ * DTO for {@link in.ac.iitj.instiapp.database.entities.Grievance}
+ */
+@Value
+public class GrievanceDto implements Serializable {
+    String Title;
+    String Description;
+    UserBaseDto userFrom;
+    OrganisationRoleDto organisationRole;
+    Boolean resolved;
+    MediaBaseDto media;
+
+    public GrievanceDto(String title, String description, String username, String orgUsername, String roleName, OrganisationPermission permission, Boolean resolved, String mediaPublicId) {
+        this.Title = title;
+        this.Description = description;
+        this.userFrom = new UserBaseDto(username);
+        this.organisationRole = new OrganisationRoleDto(orgUsername,roleName,permission);
+        this.resolved = false;
+        this.media = new MediaBaseDto(mediaPublicId);
+    }
+}

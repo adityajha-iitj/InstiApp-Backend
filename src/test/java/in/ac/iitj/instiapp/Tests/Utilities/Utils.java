@@ -40,7 +40,7 @@ public class Utils {
         Assertions.assertThat(facultyBaseDto.getOrganisation().getUser().getUserName()).isEqualTo(userData.userName);
         Assertions.assertThat(facultyBaseDto.getDescription().equals(facultyData.description));
         Assertions.assertThat(facultyBaseDto.getWebsiteUrl()).isEqualTo(facultyData.websiteUrl);
-x
+
     }
 
 }

@@ -40,6 +40,8 @@ public AlumniRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManag
         alumni.setUser(u);
         alumni.setBranch(branch);
         alumni.setProgram(program);
+        alumni.setAdmissionYear(alumni.getAdmissionYear());
+        alumni.setPassOutYear(alumni.getPassOutYear());
 
         entityManager.persist(alumni);
     }

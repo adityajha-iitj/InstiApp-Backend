@@ -45,6 +45,9 @@ public class FacultyRepositoryImpl implements FacultyRepository {
     public void save(Faculty faculty) {
         faculty.setUser(entityManager.getReference(User.class, faculty.getUser().getId()));
         faculty.setOrganisation(entityManager.getReference(Organisation.class, faculty.getOrganisation().getId()));
+
+        faculty.setDescription(faculty.getDescription());
+        faculty.setWebsiteUrl(faculty.getWebsiteUrl());
         
         entityManager.persist(faculty);
     }
