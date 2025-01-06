@@ -22,4 +22,11 @@ public class Locations {
     @Column(nullable = false, unique = true)
     String name;
 
+    public Locations(String name) {
+        this.name = name;
+    }
+
+    public Locations(Long id) {
+        this.Id = id;
+    }
 }

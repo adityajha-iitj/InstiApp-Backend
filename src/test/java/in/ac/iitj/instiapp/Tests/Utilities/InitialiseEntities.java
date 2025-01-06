@@ -10,7 +10,11 @@ import in.ac.iitj.instiapp.Repository.User.Student.StudentBranchRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.StudentProgramRepository;
 import in.ac.iitj.instiapp.Repository.impl.*;
 import in.ac.iitj.instiapp.Tests.EntityTestData.FacultyData;
+import in.ac.iitj.instiapp.Tests.EntityTestData.LocationData;
+import in.ac.iitj.instiapp.Tests.EntityTestData.LostnFoundData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData;
+import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
+import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFound;
 import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
@@ -28,6 +32,7 @@ import jakarta.transaction.Transactional;
 import org.aspectj.weaver.ast.Or;
 import org.hibernate.type.descriptor.jdbc.TinyIntJdbcType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
@@ -482,16 +487,45 @@ public class InitialiseEntities {
     @Import({LostnFoundRepositoryImpl.class , MediaRepositoryImpl.class})
     public static class InitialiseLostnFound implements Initialise{
         private final LostnFoundRepository lostnFoundRepository;
+        private final UserRepository userRepository;
+        private final MediaRepository mediaRepository;
 
         @Autowired
-        public InitialiseLostnFound(LostnFoundRepository lostnFoundRepository) {
+        public InitialiseLostnFound(LostnFoundRepository lostnFoundRepository, UserRepository userRepository , MediaRepository mediaRepository) {
             this.lostnFoundRepository = lostnFoundRepository;
+            this.userRepository = userRepository;
+            this.mediaRepository = mediaRepository;
+
+
         }
 
         @Override
         public void initialise() {
-            // locations add karna hai
-            // user initialze karo
+            lostnFoundRepository.saveLocation(LocationData.LOCATION1.toEntity());
+            lostnFoundRepository.saveLocation(LocationData.LOCATION2.toEntity());
+            lostnFoundRepository.saveLocation(LocationData.LOCATION3.toEntity());
+
+            LostnFound lost1 = LostnFoundData.LOST_N_FOUND1.toEntity();
+            LostnFound lost2 = LostnFoundData.LOST_N_FOUND2.toEntity();
+            LostnFound lost3 = LostnFoundData.LOST_N_FOUND3.toEntity();
+
+            lost1.setFinder(new User(userRepository.exists(USER16.userName)));
+
+            lost1.setOwner(new User(userRepository.exists(USER14.userName)));
+            lost2.setOwner(new User(userRepository.exists(USER15.userName)));
+            lost3.setOwner(new User(userRepository.exists(USER16.userName)));
+
+            lost1.setLandmark(new Locations(lostnFoundRepository.existLocation(LocationData.LOCATION1.name)));
+            lost2.setLandmark(new Locations(lostnFoundRepository.existLocation(LocationData.LOCATION2.name)));
+            lost3.setLandmark(new Locations(lostnFoundRepository.existLocation(LocationData.LOCATION3.name)));
+
+            lost1.setMedia(new Media(mediaRepository.getIdByPublicId(MEDIA1.publicId)));
+            lost2.setMedia(new Media(mediaRepository.getIdByPublicId(MEDIA2.publicId)));
+            lost3.setMedia(new Media(mediaRepository.getIdByPublicId(MEDIA3.publicId)));
+
+            lostnFoundRepository.saveLostnFoundDetails(lost1);
+            lostnFoundRepository.saveLostnFoundDetails(lost2);
+            lostnFoundRepository.saveLostnFoundDetails(lost3);
 
         }
     }

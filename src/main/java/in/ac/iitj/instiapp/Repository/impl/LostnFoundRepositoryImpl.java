@@ -84,6 +84,15 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
     @Override
     public void saveLostnFoundDetails(LostnFound lostnFound) {
+        User finder = entityManager.getReference(User.class , lostnFound.getFinder().getId());
+        User owner = entityManager.getReference(User.class , lostnFound.getOwner().getId());
+        Locations landmark = entityManager.getReference(Locations.class ,lostnFound.getLandmark().getId() );
+        Media media = entityManager.getReference(Media.class , lostnFound.getMedia().getId());
+        lostnFound.setFinder(finder);
+        lostnFound.setOwner(owner);
+        lostnFound.setLandmark(landmark);
+        lostnFound.setMedia(media);
+
         entityManager.persist(lostnFound);
     }
 
