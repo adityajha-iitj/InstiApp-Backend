@@ -6,12 +6,12 @@ public interface CalendarRepository {
 
 
 
-    Long save(Calendar calendar);
+   void save(Calendar calendar);
 
 
 
     /*Temporary method for testing*/
-    Boolean calendarExists(String public_id);
+    Long calendarExists(String public_id);
 
 
 }

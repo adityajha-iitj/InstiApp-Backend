@@ -4,7 +4,7 @@ package in.ac.iitj.instiapp.Tests.Repository;
 import in.ac.iitj.instiapp.Repository.CalendarRepository;
 import in.ac.iitj.instiapp.Repository.impl.CalendarRepositoryImpl;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -38,8 +38,12 @@ public class CalendarTest {
     @Test
     @Order(1)
     public  void testCalendarExists(){
-        Assertions.assertThat(calendarRepository.calendarExists(CALENDAR1.publicId)).isTrue();
-        Assertions.assertThat(calendarRepository.calendarExists(CALENDAR2.publicId)).isFalse();
+
+        Long id1 = calendarRepository.calendarExists(CALENDAR1.publicId);
+        Long id2 = calendarRepository.calendarExists(CALENDAR2.publicId);
+        Assertions.assertNotEquals(-1, id1);
+        Assertions.assertEquals(-1, id2);
+
     }
 
 }

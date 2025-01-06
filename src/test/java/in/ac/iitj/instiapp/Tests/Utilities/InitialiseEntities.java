@@ -118,21 +118,21 @@ public class InitialiseEntities {
 
         @Transactional
         public void initialise() {
-            Long CALENDAR1Id = calendarRepository.save(CALENDAR1.toEntity());
-            Long CALENDAR2Id = calendarRepository.save(CALENDAR2.toEntity());
-            Long CALENDAR3Id = calendarRepository.save(CALENDAR3.toEntity());
-            Long CALENDAR5Id = calendarRepository.save(CALENDAR5.toEntity());
-            Long CALENDAR6Id = calendarRepository.save(CALENDAR6.toEntity());
-            Long CALENDAR7Id = calendarRepository.save(CALENDAR7.toEntity());
-            Long CALENDAR8Id = calendarRepository.save(CALENDAR8.toEntity());
-            Long CALENDAR9Id = calendarRepository.save(CALENDAR9.toEntity());
-            Long CALENDAR10Id = calendarRepository.save(CALENDAR10.toEntity());
-            Long CALENDAR11Id = calendarRepository.save(CALENDAR11.toEntity());
-            Long CALENDAR12Id = calendarRepository.save(CALENDAR12.toEntity());
-            Long CALENDAR13Id = calendarRepository.save(CALENDAR13.toEntity());
-             Long CALENDAR14Id = calendarRepository.save(CALENDAR14.toEntity());
-            Long CALENDAR15Id = calendarRepository.save(CALENDAR15.toEntity());
-            Long CALENDAR16Id = calendarRepository.save(CALENDAR16.toEntity());
+            calendarRepository.save(CALENDAR1.toEntity());
+            calendarRepository.save(CALENDAR2.toEntity());
+            calendarRepository.save(CALENDAR3.toEntity());
+            calendarRepository.save(CALENDAR5.toEntity());
+            calendarRepository.save(CALENDAR6.toEntity());
+            calendarRepository.save(CALENDAR7.toEntity());
+            calendarRepository.save(CALENDAR8.toEntity());
+            calendarRepository.save(CALENDAR9.toEntity());
+            calendarRepository.save(CALENDAR10.toEntity());
+            calendarRepository.save(CALENDAR11.toEntity());
+            calendarRepository.save(CALENDAR12.toEntity());
+            calendarRepository.save(CALENDAR13.toEntity());
+            calendarRepository.save(CALENDAR14.toEntity());
+            calendarRepository.save(CALENDAR15.toEntity());
+            calendarRepository.save(CALENDAR16.toEntity());
 
             userTypeRepository.save(USER_TYPE1.toEntity());
             userTypeRepository.save(USER_TYPE2.toEntity());
@@ -170,21 +170,21 @@ public class InitialiseEntities {
             User user15 = USER15.toEntity();
             User user16 = USER16.toEntity();
 
-            user1.setCalendar(new Calendar(CALENDAR1Id));
-            user2.setCalendar(new Calendar(CALENDAR2Id));
-            user3.setCalendar(new Calendar(CALENDAR3Id));
-            user5.setCalendar(new Calendar(CALENDAR5Id));
-            user6.setCalendar(new Calendar(CALENDAR6Id));
-            user7.setCalendar(new Calendar(CALENDAR7Id));
-            user8.setCalendar(new Calendar(CALENDAR8Id));
-            user9.setCalendar(new Calendar(CALENDAR9Id));
-            user10.setCalendar(new Calendar(CALENDAR10Id));
-            user11.setCalendar(new Calendar(CALENDAR11Id));
-            user12.setCalendar(new Calendar(CALENDAR12Id));
-            user13.setCalendar(new Calendar(CALENDAR13Id));
-            user14.setCalendar(new Calendar(CALENDAR14Id));
-            user15.setCalendar(new Calendar(CALENDAR15Id));
-            user16.setCalendar(new Calendar(CALENDAR16Id));
+            user1.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR1.publicId)));
+            user2.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR2.publicId)));
+            user3.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR3.publicId)));
+            user5.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR5.publicId)));
+            user6.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR6.publicId)));
+            user7.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR7.publicId)));
+            user8.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR8.publicId)));
+            user9.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR9.publicId)));
+            user10.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR10.publicId)));
+            user11.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR11.publicId)));
+            user12.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR12.publicId)));
+            user13.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR13.publicId)));
+            user14.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR14.publicId)));
+            user15.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR15.publicId)));
+            user16.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR16.publicId)));
 
 //            For organisation
             user1.setUserType(new Usertype(UserType1Id));
