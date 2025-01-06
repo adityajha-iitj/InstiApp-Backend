@@ -99,13 +99,17 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
 
     @Override
     public OrganisationBaseDto getOrganisation(String username) {
-        try{
-        return  entityManager.createQuery(
-                "select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto(:username, o.parentOrganisation.user.userName,o.type.name,o.Description,o.Website) from Organisation o where o.user.userName = :username", OrganisationBaseDto.class)
-                .setParameter("username", username)
-                .getSingleResult();}
-        catch (NoResultException e){
-            throw new EmptyResultDataAccessException("no organisation with username " + username + "exists",1);
+        if(existOrganisation(username) == -1L){
+            throw new EmptyResultDataAccessException("No organisation type " + username + "exists",1);
+        }
+        else {
+            System.out.println(username);
+            return entityManager.createQuery(
+                    "select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto( o.user.userName, " +
+                            "case when o.parentOrganisation is null then null else o.parentOrganisation.user.userName end, o.type.name, o.Description, o.Website) from Organisation o where o.user.userName = :username", OrganisationBaseDto.class)
+                    .setParameter("username", username)
+                    .getSingleResult();
+
         }
     }
 
@@ -137,6 +141,7 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
 
 
         if(organisationDetailedDto.getParentOrganisation().getUser().getUserName() != null){
+            System.out.println("Hello world" + organisationDetailedDto.getParentOrganisation().getUser().getUserName());
             organisationDetailedDto.setParentOrganisation(getOrganisation(organisationDetailedDto.getParentOrganisation().getUser().getUserName()));
         }
         return organisationDetailedDto;
