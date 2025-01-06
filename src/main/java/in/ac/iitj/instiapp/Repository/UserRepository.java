@@ -126,7 +126,7 @@ public interface UserRepository {
     /**
      * @return -1 if it doesn't exists
      */
-    static Long usernameExists(String username);
+    Long usernameExists(String username);
 
     /**
      * @apiNote The api using this functions if refreshes on userInteraction should have strict rateLimits To prevent exceeding quotas

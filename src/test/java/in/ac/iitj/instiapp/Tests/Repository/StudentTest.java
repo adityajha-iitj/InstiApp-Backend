@@ -81,7 +81,7 @@ public class StudentTest {
         Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM2.name , program_filter.get(0).getProgramName());
         Assertions.assertEquals(StudentData.STUDENT2.admissionYear , program_filter.get(0).getAdmissionYear());
 
-        List<StudentBaseDto> ad_filter = studentRepository.getStudentByFilter(Optional.empty() , Optional.empty() , Optional.of(StudentData.STUDENT3.name) , pageable);
+        List<StudentBaseDto> ad_filter = studentRepository.getStudentByFilter(Optional.empty() , Optional.empty() , Optional.of(StudentData.STUDENT3.admissionYear) , pageable);
         Assertions.assertEquals(1 , branch_filter.size());
         Assertions.assertEquals(UserData.USER7.name , program_filter.get(0).getUser().getName());
         Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM3.name , program_filter.get(0).getProgramName());

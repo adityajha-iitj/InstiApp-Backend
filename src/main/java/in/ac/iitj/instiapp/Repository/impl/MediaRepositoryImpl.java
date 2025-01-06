@@ -45,7 +45,7 @@ public class MediaRepositoryImpl implements MediaRepository {
 
     @Override
     public Long getIdByPublicId(String publicId) {
-     return   jdbcTemplate.queryForObject("select max(m.id,-1) from Media m where m.public_id = ?", Long.class, publicId);
+     return   jdbcTemplate.queryForObject("select coalesce(max(m.id), -1) from Media m where m.public_id = ?", Long.class, publicId);
     }
 
     @Override
