@@ -125,6 +125,9 @@ public class InitialiseEntities {
             Long CALENDAR11Id = calendarRepository.save(CALENDAR11.toEntity());
             Long CALENDAR12Id = calendarRepository.save(CALENDAR12.toEntity());
             Long CALENDAR13Id = calendarRepository.save(CALENDAR13.toEntity());
+             Long CALENDAR14Id = calendarRepository.save(CALENDAR14.toEntity());
+            Long CALENDAR15Id = calendarRepository.save(CALENDAR15.toEntity());
+            Long CALENDAR16Id = calendarRepository.save(CALENDAR16.toEntity());
 
             userTypeRepository.save(USER_TYPE1.toEntity());
             userTypeRepository.save(USER_TYPE2.toEntity());
@@ -134,12 +137,15 @@ public class InitialiseEntities {
             userTypeRepository.save(USER_TYPE7.toEntity());
 
 
+
+
             Long UserType1Id = userRepository.exists(USER_TYPE1.name);
             Long UserType2Id = userRepository.exists(USER_TYPE2.name);
             Long UserType3Id = userRepository.exists(USER_TYPE3.name);
             Long UserType5Id = userRepository.exists(USER_TYPE5.name);
             Long UserType6Id = userRepository.exists(USER_TYPE6.name);
             Long UserType7Id = userRepository.exists(USER_TYPE7.name);
+
 
 
 
@@ -155,6 +161,9 @@ public class InitialiseEntities {
             User user11 = USER11.toEntity();
             User user12 = USER12.toEntity();
             User user13 = USER13.toEntity();
+            User user14 = USER14.toEntity();
+            User user15 = USER15.toEntity();
+            User user16 = USER16.toEntity();
 
             user1.setCalendar(new Calendar(CALENDAR1Id));
             user2.setCalendar(new Calendar(CALENDAR2Id));
@@ -168,11 +177,15 @@ public class InitialiseEntities {
             user11.setCalendar(new Calendar(CALENDAR11Id));
             user12.setCalendar(new Calendar(CALENDAR12Id));
             user13.setCalendar(new Calendar(CALENDAR13Id));
+            user14.setCalendar(new Calendar(CALENDAR14Id));
+            user15.setCalendar(new Calendar(CALENDAR15Id));
+            user16.setCalendar(new Calendar(CALENDAR16Id));
 
 //            For organisation
             user1.setUserType(new Usertype(UserType1Id));
             user2.setUserType(new Usertype(UserType2Id));
             user3.setUserType(new Usertype(UserType3Id));
+
 
 
 //            For student
@@ -189,8 +202,12 @@ public class InitialiseEntities {
 //            For Faculty
             user11.setUserType(new Usertype(UserType7Id));
             user12.setUserType(new Usertype(UserType7Id));
-            user12.setUserType(new Usertype(UserType7Id));
+            user13.setUserType(new Usertype(UserType7Id));
 
+//          for lostandfound
+            user14.setUserType(new Usertype(UserType7Id));
+            user15.setUserType(new Usertype(UserType7Id));
+            user16.setUserType(new Usertype(UserType7Id));
 
             userRepository.save(user1);
             userRepository.save(user2);
@@ -198,6 +215,16 @@ public class InitialiseEntities {
             userRepository.save(user5);
             userRepository.save(user6);
             userRepository.save(user7);
+            userRepository.save(user8);
+            userRepository.save(user9);
+            userRepository.save(user10);
+            userRepository.save(user11);
+            userRepository.save(user12);
+            userRepository.save(user13);
+            userRepository.save(user14);
+            userRepository.save(user15);
+            userRepository.save(user16);
+
         }
 
     }
@@ -417,7 +444,7 @@ public class InitialiseEntities {
 
     @Component
     @Import({FacultyRepositoryImpl.class})
-    public class InitialiseFaculty implements Initialise{
+    public static class InitialiseFaculty implements Initialise{
         private final FacultyRepository facultyRepository;
         private final UserRepository userRepository;
         private final OrganisationRepository organisationRepository;
@@ -447,6 +474,25 @@ public class InitialiseEntities {
             facultyRepository.save(faculty1);
             facultyRepository.save(faculty2);
             facultyRepository.save(faculty3);
+        }
+    }
+
+
+    @Component
+    @Import({LostnFoundRepositoryImpl.class , MediaRepositoryImpl.class})
+    public static class InitialiseLostnFound implements Initialise{
+        private final LostnFoundRepository lostnFoundRepository;
+
+        @Autowired
+        public InitialiseLostnFound(LostnFoundRepository lostnFoundRepository) {
+            this.lostnFoundRepository = lostnFoundRepository;
+        }
+
+        @Override
+        public void initialise() {
+            // locations add karna hai
+            // user initialze karo
+
         }
     }
 
