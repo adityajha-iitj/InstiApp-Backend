@@ -26,8 +26,13 @@ import java.util.Optional;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class LostnFoundTest {
 
+
+    private final LostnFoundRepository lostnFoundRepository;
+
     @Autowired
-    private LostnFoundRepository lostnFoundRepository;
+    public LostnFoundTest(LostnFoundRepository lostnFoundRepository) {
+        this.lostnFoundRepository = lostnFoundRepository;
+    }
 
     @BeforeAll
     public static void setup(@Autowired InitialiseEntities.InitialiseLostnFound lostnFound)  {

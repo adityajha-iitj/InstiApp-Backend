@@ -2,23 +2,22 @@ package in.ac.iitj.instiapp.Tests.Utilities;
 
 import in.ac.iitj.instiapp.Repository.*;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
-import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.Alumni.AlumniRepository;
 import in.ac.iitj.instiapp.Repository.FacultyRepository;
 import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.Student.StudentRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.StudentBranchRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.StudentProgramRepository;
+import in.ac.iitj.instiapp.Repository.GrievanceRepository;
 import in.ac.iitj.instiapp.Repository.impl.*;
-import in.ac.iitj.instiapp.Tests.EntityTestData.FacultyData;
-import in.ac.iitj.instiapp.Tests.EntityTestData.LocationData;
-import in.ac.iitj.instiapp.Tests.EntityTestData.LostnFoundData;
-import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData;
+import in.ac.iitj.instiapp.Tests.EntityTestData.*;
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
 import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFound;
+import in.ac.iitj.instiapp.database.entities.Grievance;
 import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
+import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationType;
 import in.ac.iitj.instiapp.database.entities.User.Student.Alumni.Alumni;
 import in.ac.iitj.instiapp.database.entities.User.Student.Student.Student;
@@ -28,12 +27,13 @@ import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.database.entities.User.Faculty.Faculty;
 import in.ac.iitj.instiapp.Tests.EntityTestData.FacultyData.*;
+import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
+import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData.*;
 
 import jakarta.transaction.Transactional;
 import org.aspectj.weaver.ast.Or;
 import org.hibernate.type.descriptor.jdbc.TinyIntJdbcType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
@@ -99,7 +99,7 @@ public class InitialiseEntities {
     }
 
     @Component
-    @Import({OrganisationRoleRepositoryImpl.class})
+    @Import({OrganisationRoleRepositoryImpl.class })
     public static class InitialiseOrganisationRole implements Initialise{
 
 
@@ -115,24 +115,6 @@ public class InitialiseEntities {
         @Transactional
         public void initialise(){
 
-            // For organisation
-            mediaRepository.save(MEDIA1.toEntity());
-            mediaRepository.save(MEDIA2.toEntity());
-            mediaRepository.save(MEDIA3.toEntity());
-
-
-
-            // In database but should be unassigned for testing purpose
-            mediaRepository.save(MEDIA5.toEntity());
-            mediaRepository.save(MEDIA6.toEntity());
-            mediaRepository.save(MEDIA7.toEntity());
-
-
-
-            mediaRepository.save(MEDIA8.toEntity());
-            mediaRepository.save(MEDIA9.toEntity());
-            mediaRepository.save(MEDIA10.toEntity());
-
 
 
         }
@@ -142,39 +124,41 @@ public class InitialiseEntities {
 
 
     @Component
-    @Import({UserRepositoryImpl.class, CalendarRepositoryImpl.class, UserTypeRepositoryImpl.class})
+    @Import({UserRepositoryImpl.class, CalendarRepositoryImpl.class, UserTypeRepositoryImpl.class, GrievanceRepositoryImpl.class})
     public static class InitialiseUser implements Initialise {
 
         private final CalendarRepository calendarRepository;
         private final UserRepository userRepository;
         private final UserTypeRepository userTypeRepository;
+        private final GrievanceRepository grievanceRepository;
 
 
         @Autowired
-        public InitialiseUser(CalendarRepository calendarRepository, UserRepository userRepository, UserTypeRepository userTypeRepository) {
+        public InitialiseUser(CalendarRepository calendarRepository, UserRepository userRepository, UserTypeRepository userTypeRepository,  GrievanceRepository grievanceRepository) {
             this.userRepository = userRepository;
             this.userTypeRepository = userTypeRepository;
             this.calendarRepository = calendarRepository;
+            this.grievanceRepository =grievanceRepository;
         }
 
 
         @Transactional
         public void initialise() {
-            Long CALENDAR1Id = calendarRepository.save(CALENDAR1.toEntity());
-            Long CALENDAR2Id = calendarRepository.save(CALENDAR2.toEntity());
-            Long CALENDAR3Id = calendarRepository.save(CALENDAR3.toEntity());
-            Long CALENDAR5Id = calendarRepository.save(CALENDAR5.toEntity());
-            Long CALENDAR6Id = calendarRepository.save(CALENDAR6.toEntity());
-            Long CALENDAR7Id = calendarRepository.save(CALENDAR7.toEntity());
-            Long CALENDAR8Id = calendarRepository.save(CALENDAR8.toEntity());
-            Long CALENDAR9Id = calendarRepository.save(CALENDAR9.toEntity());
-            Long CALENDAR10Id = calendarRepository.save(CALENDAR10.toEntity());
-            Long CALENDAR11Id = calendarRepository.save(CALENDAR11.toEntity());
-            Long CALENDAR12Id = calendarRepository.save(CALENDAR12.toEntity());
-            Long CALENDAR13Id = calendarRepository.save(CALENDAR13.toEntity());
-             Long CALENDAR14Id = calendarRepository.save(CALENDAR14.toEntity());
-            Long CALENDAR15Id = calendarRepository.save(CALENDAR15.toEntity());
-            Long CALENDAR16Id = calendarRepository.save(CALENDAR16.toEntity());
+            calendarRepository.save(CALENDAR1.toEntity());
+            calendarRepository.save(CALENDAR2.toEntity());
+            calendarRepository.save(CALENDAR3.toEntity());
+            calendarRepository.save(CALENDAR5.toEntity());
+            calendarRepository.save(CALENDAR6.toEntity());
+            calendarRepository.save(CALENDAR7.toEntity());
+            calendarRepository.save(CALENDAR8.toEntity());
+            calendarRepository.save(CALENDAR9.toEntity());
+            calendarRepository.save(CALENDAR10.toEntity());
+            calendarRepository.save(CALENDAR11.toEntity());
+            calendarRepository.save(CALENDAR12.toEntity());
+            calendarRepository.save(CALENDAR13.toEntity());
+            calendarRepository.save(CALENDAR14.toEntity());
+            calendarRepository.save(CALENDAR15.toEntity());
+            calendarRepository.save(CALENDAR16.toEntity());
 
             userTypeRepository.save(USER_TYPE1.toEntity());
             userTypeRepository.save(USER_TYPE2.toEntity());
@@ -212,21 +196,21 @@ public class InitialiseEntities {
             User user15 = USER15.toEntity();
             User user16 = USER16.toEntity();
 
-            user1.setCalendar(new Calendar(CALENDAR1Id));
-            user2.setCalendar(new Calendar(CALENDAR2Id));
-            user3.setCalendar(new Calendar(CALENDAR3Id));
-            user5.setCalendar(new Calendar(CALENDAR5Id));
-            user6.setCalendar(new Calendar(CALENDAR6Id));
-            user7.setCalendar(new Calendar(CALENDAR7Id));
-            user8.setCalendar(new Calendar(CALENDAR8Id));
-            user9.setCalendar(new Calendar(CALENDAR9Id));
-            user10.setCalendar(new Calendar(CALENDAR10Id));
-            user11.setCalendar(new Calendar(CALENDAR11Id));
-            user12.setCalendar(new Calendar(CALENDAR12Id));
-            user13.setCalendar(new Calendar(CALENDAR13Id));
-            user14.setCalendar(new Calendar(CALENDAR14Id));
-            user15.setCalendar(new Calendar(CALENDAR15Id));
-            user16.setCalendar(new Calendar(CALENDAR16Id));
+            user1.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR1.publicId)));
+            user2.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR2.publicId)));
+            user3.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR3.publicId)));
+            user5.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR5.publicId)));
+            user6.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR6.publicId)));
+            user7.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR7.publicId)));
+            user8.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR8.publicId)));
+            user9.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR9.publicId)));
+            user10.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR10.publicId)));
+            user11.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR11.publicId)));
+            user12.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR12.publicId)));
+            user13.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR13.publicId)));
+            user14.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR14.publicId)));
+            user15.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR15.publicId)));
+            user16.setCalendar(new Calendar(calendarRepository.calendarExists(CALENDAR16.publicId)));
 
 //            For organisation
             user1.setUserType(new Usertype(UserType1Id));
@@ -384,7 +368,7 @@ public class InitialiseEntities {
             studentBranch2.setOrganisation(new Organisation(organisationRepository.existOrganisation(USER2.userName)));
 
             StudentBranch studentBranch3 = STUDENT_BRANCH3.toEntity();
-            studentBranch3.setOrganisation(new Organisation(organisationRepository.existOrganisation(USER1.userName)));
+            studentBranch3.setOrganisation(new Organisation(organisationRepository.existOrganisation(USER3.userName)));
 
             studentBranchRepository.saveStudentBranch(studentBranch1);
             studentBranchRepository.saveStudentBranch(studentBranch2);
@@ -489,7 +473,7 @@ public class InitialiseEntities {
 
     @Component
     @Import({FacultyRepositoryImpl.class,InitialiseOrganisation.class})
-    public static class InitialiseFaculty implements Initialise{
+    public class InitialiseFaculty implements Initialise{
         private final FacultyRepository facultyRepository;
         private final UserRepository userRepository;
         private final OrganisationRepository organisationRepository;
@@ -525,22 +509,24 @@ public class InitialiseEntities {
 
 
     @Component
-    @Import({LostnFoundRepositoryImpl.class , MediaRepositoryImpl.class})
+    @Import({LostnFoundRepositoryImpl.class , MediaRepositoryImpl.class , UserRepositoryImpl.class , InitialiseUser.class})
     public static class InitialiseLostnFound implements Initialise{
         private final LostnFoundRepository lostnFoundRepository;
         private final UserRepository userRepository;
         private final MediaRepository mediaRepository;
 
         @Autowired
-        public InitialiseLostnFound(LostnFoundRepository lostnFoundRepository, UserRepository userRepository , MediaRepository mediaRepository) {
+        public InitialiseLostnFound(LostnFoundRepository lostnFoundRepository, UserRepository userRepository , MediaRepository mediaRepository , InitialiseUser initialiseUser) {
             this.lostnFoundRepository = lostnFoundRepository;
             this.userRepository = userRepository;
             this.mediaRepository = mediaRepository;
+            initialiseUser.initialise();
 
 
         }
 
         @Override
+        @Transactional
         public void initialise() {
             lostnFoundRepository.saveLocation(LocationData.LOCATION1.toEntity());
             lostnFoundRepository.saveLocation(LocationData.LOCATION2.toEntity());
@@ -550,7 +536,7 @@ public class InitialiseEntities {
             LostnFound lost2 = LostnFoundData.LOST_N_FOUND2.toEntity();
             LostnFound lost3 = LostnFoundData.LOST_N_FOUND3.toEntity();
 
-            lost1.setFinder(new User(userRepository.exists(USER16.userName)));
+            lost3.setFinder(new User(userRepository.exists(USER14.userName)));
 
             lost1.setOwner(new User(userRepository.exists(USER14.userName)));
             lost2.setOwner(new User(userRepository.exists(USER15.userName)));
@@ -569,6 +555,47 @@ public class InitialiseEntities {
             lostnFoundRepository.saveLostnFoundDetails(lost3);
 
         }
+    }
+
+    @Component
+    @Import({GrievanceRepositoryImpl.class,UserRepositoryImpl.class, OrganisationRoleRepositoryImpl.class, MediaRepositoryImpl.class})
+    public static class InitialiseGrievance implements Initialise{
+        private final GrievanceRepository grievanceRepository;
+        private final UserRepository userRepository;
+        private final OrganisationRoleRepository organisationRoleRepository;
+        private final MediaRepository mediaRepository;
+
+        @Autowired
+        public InitialiseGrievance(GrievanceRepository grievanceRepository, UserRepository userRepository , OrganisationRoleRepository organisationRoleRepository, MediaRepository mediaRepository) {
+            this.grievanceRepository = grievanceRepository;
+            this.userRepository = userRepository;
+            this.organisationRoleRepository = organisationRoleRepository;
+            this.mediaRepository = mediaRepository;
+
+        }
+
+//        @Override
+//        public void initialise() {
+//
+//            organisationRoleRepository.saveOrganisationRole(OrganisationRoleData.ORGANISATION_ROLE1.toEntity());
+//            organisationRoleRepository.saveOrganisationRole(OrganisationRoleData.ORGANISATION_ROLE2.toEntity());
+//            organisationRoleRepository.saveOrganisationRole(OrganisationRoleData.ORGANISATION_ROLE3.toEntity());
+//
+//
+//
+//            Grievance grievance1 = GrievanceData.GRIEVANCE1.toEntity();
+//            Grievance grievance2 = GrievanceData.GRIEVANCE2.toEntity();
+//            Grievance grievance3 = GrievanceData.GRIEVANCE3.toEntity();
+//
+//            grievance1.setUserFrom(new User(userRepository.exists(USER5.userName)));
+//            grievance2.setUserFrom(new User(userRepository.exists(USER6.userName)));
+//            grievance3.setUserFrom(new User(userRepository.exists(USER7.userName)));
+//
+//            grievance1.setOrganisationRole(new OrganisationRole(organisationRoleRepository.existOrganisationRole(ORGANISA)));
+//
+//
+//        }
+
     }
 
 

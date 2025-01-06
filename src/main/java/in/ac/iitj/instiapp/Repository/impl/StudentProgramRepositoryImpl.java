@@ -63,7 +63,8 @@ public class StudentProgramRepositoryImpl implements StudentProgramRepository {
         entityManager.createQuery("update StudentProgram  sp set sp.name = :newName ,sp.isActive = :isActive where sp.name = :oldName")
                 .setParameter("newName", newName)
                 .setParameter("isActive", isActive)
-                .setParameter("oldName", oldName);
+                .setParameter("oldName", oldName)
+                .executeUpdate();
 
     }
 

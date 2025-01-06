@@ -1,6 +1,7 @@
 package in.ac.iitj.instiapp.Tests.Utilities;
 
 import in.ac.iitj.instiapp.Tests.EntityTestData.*;
+import in.ac.iitj.instiapp.payload.GrievanceDto;
 import in.ac.iitj.instiapp.payload.User.Alumni.AlumniBaseDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
@@ -40,6 +41,11 @@ public class Utils {
         Assertions.assertThat(facultyBaseDto.getOrganisation().getUser().getUserName()).isEqualTo(userData.userName);
         Assertions.assertThat(facultyBaseDto.getDescription().equals(facultyData.description));
         Assertions.assertThat(facultyBaseDto.getWebsiteUrl()).isEqualTo(facultyData.websiteUrl);
+    }
+    public static void matchGrievanceDto(GrievanceDto grievanceDto, GrievanceData grievanceData){
+        Assertions.assertThat(grievanceDto.getTitle()).isEqualTo(grievanceData.Title);
+        Assertions.assertThat(grievanceDto.getDescription()).isEqualTo(grievanceData.Description);
+        Assertions.assertThat(grievanceDto.getResolved()).isEqualTo(grievanceData.resolved);
 
     }
 

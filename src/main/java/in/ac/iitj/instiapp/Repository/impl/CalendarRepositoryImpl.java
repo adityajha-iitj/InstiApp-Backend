@@ -23,14 +23,14 @@ public class CalendarRepositoryImpl implements CalendarRepository {
 
 
     @Override
-    public Long save(Calendar calendar) {
-      return jdbcTemplate.queryForObject("INSERT into calendar (public_id) values(?) RETURNING id",Long.class,calendar.getPublicId());
+    public void save(Calendar calendar) {
+      entityManager.persist(calendar);
     }
 
 
 
     @Override
-    public Boolean calendarExists(String public_id) {
-       return  jdbcTemplate.queryForObject("SELECT EXISTS(SELECT 1 FROM calendar where public_id = ?)", Boolean.class,public_id);
+    public Long calendarExists(String public_id) {
+        return jdbcTemplate.queryForObject("select coalesce(max(id), -1) from calendar where public_id= ?", Long.class, public_id);
     }
 }

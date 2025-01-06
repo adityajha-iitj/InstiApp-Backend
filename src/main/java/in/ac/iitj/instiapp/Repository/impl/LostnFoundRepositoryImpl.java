@@ -35,7 +35,7 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
     @Override
     public Long existLocation(String locationName) {
-        return jdbcTemplate.queryForObject("select coalesce(max(id), -1) from locations where locationName = ?", Long.class, locationName);
+        return jdbcTemplate.queryForObject("select coalesce(max(id), -1) from locations where name = ?", Long.class, locationName);
     }
 
     @Override
@@ -84,21 +84,29 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
     @Override
     public void saveLostnFoundDetails(LostnFound lostnFound) {
-        User finder = entityManager.getReference(User.class , lostnFound.getFinder().getId());
-        User owner = entityManager.getReference(User.class , lostnFound.getOwner().getId());
-        Locations landmark = entityManager.getReference(Locations.class ,lostnFound.getLandmark().getId() );
-        Media media = entityManager.getReference(Media.class , lostnFound.getMedia().getId());
+        User finder = null;
+        if (lostnFound.getFinder() != null && lostnFound.getFinder().getId() != null) {
+            finder = entityManager.getReference(User.class, lostnFound.getFinder().getId());
+        }
+        User owner = entityManager.getReference(User.class, lostnFound.getOwner().getId());
+
+        Locations landmark = entityManager.getReference(Locations.class, lostnFound.getLandmark().getId());
+
+        Media media = entityManager.getReference(Media.class, lostnFound.getMedia().getId());
+
+// Set values
         lostnFound.setFinder(finder);
         lostnFound.setOwner(owner);
         lostnFound.setLandmark(landmark);
         lostnFound.setMedia(media);
+
 
         entityManager.persist(lostnFound);
     }
 
     @Override
     public List<LostnFoundDto> getLostnFoundByFilter(Optional<Boolean> status, Optional<String> owner, Optional<String> finder, Optional<String> landmark, Pageable pageable) {
-        return  entityManager.createQuery("select new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto(l.publicId , l.finder , l.owner , l.Lankmark , l.extraInfo , l.status , l.media ) from lostnfound l where " +
+        return  entityManager.createQuery("select new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto(l.publicId , l.finder , l.owner , l.Lankmark , l.extraInfo , l.status , l.media ) from LostnFound l where " +
                         "(:status is NULL or l.status = :status) and " +
                         "(:owner is NULL or l.owner = :owner) and " +
                         "(:finder is NULL or l.finder = :finder) and "+

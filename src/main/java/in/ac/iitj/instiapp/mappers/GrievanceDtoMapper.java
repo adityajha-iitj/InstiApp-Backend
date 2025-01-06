@@ -1,4 +1,4 @@
-package in.ac.iitj.instiapp.mappers;
+/*package in.ac.iitj.instiapp.mappers;
 
 import in.ac.iitj.instiapp.database.entities.Grievance;
 import in.ac.iitj.instiapp.payload.GrievanceDto;
@@ -13,3 +13,5 @@ public interface GrievanceDtoMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Grievance partialUpdate(GrievanceDto grievanceDto, @MappingTarget Grievance grievance);
 }
+
+ */

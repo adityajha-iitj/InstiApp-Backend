@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
+import java.util.Optional;
 
 public class StudentBranchRepositoryImpl implements StudentBranchRepository {
 
@@ -71,17 +72,31 @@ public class StudentBranchRepositoryImpl implements StudentBranchRepository {
             throw new DataIntegrityViolationException("Student branch already exists with name " + studentBranch.getName());
         }
 
-        jdbcTemplate.update("update student_branch set " +
-                "organisation_id = case when ? is null then organisation_id else ? end," +
-                "name = case when ? is null then name else ? end," +
-                "opening_year = case when ? is null then opening_year else ? end," +
-                "closing_year = case when ? is null then closing_year else ? end where id = ?",
-                studentBranch.getOrganisation().getId(), studentBranch.getOrganisation().getId(),
-                studentBranch.getName(), studentBranch.getName(),
-                studentBranch.getOpeningYear(), studentBranch.getOpeningYear(),
-                studentBranch.getClosingYear(), studentBranch.getClosingYear(),
+        jdbcTemplate.update(
+                "update student_branch set " +
+                        "organisation_id = case when ? is null then organisation_id else ? end," +
+                        "name = case when ? is null then name else ? end," +
+                        "opening_year = case when ? is null then opening_year else ? end," +
+                        "closing_year = case when ? is null then closing_year else ? end " +
+                        "where id = ?",
+
+                Optional.ofNullable(studentBranch.getOrganisation())
+                        .map(org -> org.getId()).orElse(null),
+                Optional.ofNullable(studentBranch.getOrganisation())
+                        .map(org -> org.getId()).orElse(null),
+
+                Optional.ofNullable(studentBranch.getName()).orElse(null),
+                Optional.ofNullable(studentBranch.getName()).orElse(null),
+
+                Optional.ofNullable(studentBranch.getOpeningYear()).orElse(null),
+                Optional.ofNullable(studentBranch.getOpeningYear()).orElse(null),
+
+                Optional.ofNullable(studentBranch.getClosingYear()).orElse(null),
+                Optional.ofNullable(studentBranch.getClosingYear()).orElse(null),
+
                 id
-                );
+        );
+
 
     }
 
