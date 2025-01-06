@@ -105,15 +105,18 @@ public class StudentRepositoryImpl implements StudentRepository {
       }
 
 
-        jdbcTemplate.update("update  student set " +
-                "branch_id = case when ? is null then branch_id else ? end," +
-                "program_id = case when ? is null then program_id else ? end, " +
-                "admission_year = case  when ? is null then admission_year else ? end where id = ?",
-                student.getBranch().getId(), student.getBranch().getId(),
-                student.getProgram().getId(), student.getProgram().getId(),
-                student.getAdmissionYear(), student.getAdmissionYear()
-                        ,student.getId()
-                );
+        entityManager.createQuery(
+                        "UPDATE Student s " +
+                                "SET s.branch.id = CASE WHEN :branchId IS NULL THEN s.branch.id ELSE :branchId END, " +
+                                "s.program.id = CASE WHEN :programId IS NULL THEN s.program.id ELSE :programId END, " +
+                                "s.admissionYear = CASE WHEN :admissionYear IS NULL THEN s.admissionYear ELSE :admissionYear END " +
+                                "WHERE s.id = :studentId"
+                )
+                .setParameter("branchId", student.getBranch() != null ? student.getBranch().getId() : null)
+                .setParameter("programId", student.getProgram() != null ? student.getProgram().getId() : null)
+                .setParameter("admissionYear", student.getAdmissionYear())
+                .setParameter("studentId", existStudent(username))
+                .executeUpdate();
 
     }
 

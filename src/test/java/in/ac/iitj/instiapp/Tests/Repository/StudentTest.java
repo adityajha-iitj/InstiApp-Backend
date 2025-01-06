@@ -41,11 +41,18 @@ import java.util.Optional;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class StudentTest {
 
+    private final StudentRepository studentRepository;
+    private final StudentProgramRepository studentProgramRepository;
+    private final UserRepository userRepository;
+    private final StudentBranchRepository studentBranchRepository;
+
     @Autowired
-    private StudentRepository studentRepository;
-    private StudentProgramRepository studentProgramRepository;
-    private UserRepository userRepository;
-    private StudentBranchRepository studentBranchRepository;
+    public StudentTest(StudentBranchRepository studentBranchRepository , StudentProgramRepository studentProgramRepository , UserRepository userRepository , StudentRepository studentRepository) {
+        this.studentBranchRepository = studentBranchRepository;
+        this.studentProgramRepository = studentProgramRepository;
+        this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
+    }
 
 
     @BeforeAll
@@ -58,7 +65,7 @@ public class StudentTest {
     @Order(1)
     @Test
     public void testGetStudent(){
-        StudentBaseDto student1 = studentRepository.getStudent(UserData.USER1.userName);
+        StudentBaseDto student1 = studentRepository.getStudent(UserData.USER5.userName);
         Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH1.name , student1.getStudentBranch().getName());
         Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM1.name , student1.getProgramName());
         Assertions.assertEquals(StudentData.STUDENT1.admissionYear , student1.getAdmissionYear());
@@ -71,21 +78,21 @@ public class StudentTest {
         Pageable pageable = PageRequest.of(0, 10);
         List<StudentBaseDto> program_filter = studentRepository.getStudentByFilter(Optional.of( StudentProgramData.STUDENT_PROGRAM1.name ), Optional.empty() , Optional.empty() , pageable);
         Assertions.assertEquals(1 , program_filter.size());
-        Assertions.assertEquals(UserData.USER5.name , program_filter.get(0).getUser().getName());
+        Assertions.assertEquals(UserData.USER5.userName , program_filter.get(0).getUser().getUserName());
         Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH1.name , program_filter.get(0).getStudentBranch().getName());
         Assertions.assertEquals(StudentData.STUDENT1.admissionYear , program_filter.get(0).getAdmissionYear());
 
         List<StudentBaseDto> branch_filter = studentRepository.getStudentByFilter(Optional.empty() , Optional.of(StudentBranchData.STUDENT_BRANCH2.name) , Optional.empty() , pageable);
         Assertions.assertEquals(1 , branch_filter.size());
-        Assertions.assertEquals(UserData.USER6.name , program_filter.get(0).getUser().getName());
-        Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM2.name , program_filter.get(0).getProgramName());
-        Assertions.assertEquals(StudentData.STUDENT2.admissionYear , program_filter.get(0).getAdmissionYear());
+        Assertions.assertEquals(UserData.USER6.userName , branch_filter.get(0).getUser().getUserName());
+        Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM2.name , branch_filter.get(0).getProgramName());
+        Assertions.assertEquals(StudentData.STUDENT2.admissionYear , branch_filter.get(0).getAdmissionYear());
 
         List<StudentBaseDto> ad_filter = studentRepository.getStudentByFilter(Optional.empty() , Optional.empty() , Optional.of(StudentData.STUDENT3.admissionYear) , pageable);
         Assertions.assertEquals(1 , branch_filter.size());
-        Assertions.assertEquals(UserData.USER7.name , program_filter.get(0).getUser().getName());
-        Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM3.name , program_filter.get(0).getProgramName());
-        Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH3.name , program_filter.get(0).getStudentBranch().getName());
+        Assertions.assertEquals(UserData.USER7.userName , ad_filter.get(0).getUser().getUserName());
+        Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM3.name , ad_filter.get(0).getProgramName());
+        Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH3.name , ad_filter.get(0).getStudentBranch().getName());
 
 
     }
@@ -93,16 +100,16 @@ public class StudentTest {
     @Order(3)
     @Test
     public void testExistStudent(){
-        Long id = studentRepository.existStudent(UserData.USER1.userName);
+        Long id = studentRepository.existStudent(UserData.USER5.userName);
         Long id2 = studentRepository.existStudent(UserData.USER4.userName);
-        Assertions.assertEquals(-1 , id);
-        Assertions.assertNotEquals(-1 , id2);
+        Assertions.assertNotEquals(-1 , id);
+        Assertions.assertEquals(-1 , id2);
     }
 
     @Order(4)
     @Test
     public void testGetDetailedStudent(){
-        StudentBaseDto student1 = studentRepository.getStudent(UserData.USER1.userName);
+        StudentBaseDto student1 = studentRepository.getStudent(UserData.USER5.userName);
         Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH1.name , student1.getStudentBranch().getName());
         Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM1.name , student1.getProgramName());
         Assertions.assertEquals(StudentData.STUDENT1.admissionYear , student1.getAdmissionYear());
@@ -118,9 +125,9 @@ public class StudentTest {
         newStudent.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(StudentBranchData.STUDENT_BRANCH3.name)));
         newStudent.setProgram(new StudentProgram(studentProgramRepository.existsStudentProgram(StudentProgramData.STUDENT_PROGRAM3.name)));
 
-        studentRepository.updateStudent(UserData.USER2.userName, newStudent);
+        studentRepository.updateStudent(UserData.USER6.userName, newStudent);
 
-        StudentBaseDto student2 = studentRepository.getStudent(UserData.USER2.userName);
+        StudentBaseDto student2 = studentRepository.getStudent(UserData.USER6.userName);
         Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH3.name , student2.getStudentBranch().getName());
         Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM3.name , student2.getProgramName());
         Assertions.assertEquals(StudentData.STUDENT3.admissionYear , student2.getAdmissionYear());

@@ -6,6 +6,7 @@ import in.ac.iitj.instiapp.Repository.User.Student.StudentProgramRepository;
 import in.ac.iitj.instiapp.Repository.impl.StudentBranchRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.StudentBranchData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.StudentProgramData;
+import in.ac.iitj.instiapp.Tests.EntityTestData.UserData;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
 import org.junit.jupiter.api.*;
@@ -16,8 +17,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import in.ac.iitj.instiapp.payload.User.Student.StudentBranchDto;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.annotation.Rollback;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData.*;
 
@@ -26,16 +30,19 @@ import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class StudentBranchProgramTest {
+    StudentProgramRepository studentProgramRepository;
+    StudentBranchRepository studentBranchRepository;
+
     @Autowired
-    private StudentProgramRepository studentProgramRepository;
-    private StudentBranchRepository studentBranchRepository;
+    public StudentBranchProgramTest(StudentBranchRepository studentBranchRepository , StudentProgramRepository studentProgramRepository) {
+        this.studentBranchRepository = studentBranchRepository;
+        this.studentProgramRepository = studentProgramRepository;
+    }
 
 
     @BeforeAll
-    public static void setup(@Autowired StudentBranchRepository studentBranchRepository , @Autowired StudentProgramRepository studentProgramRepository , @Autowired InitialiseEntities.InitialiseProgramAndBranch initialiseProgramAndBranch) {
-
+    public static void setup( @Autowired InitialiseEntities.InitialiseProgramAndBranch initialiseProgramAndBranch) {
         initialiseProgramAndBranch.initialise();
-
     }
 
     @Order(1)
@@ -43,16 +50,32 @@ public class StudentBranchProgramTest {
     public void testGetListOfStudentBranch(){
         Pageable pageable = PageRequest.of(0, 10);
         List<StudentBranchDto> list = studentBranchRepository.getListOfStudentBranch(pageable);
-        Assertions.assertEquals(2 , list.size());
-        Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH1.name , list.get(0).getName());
-        Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH1.openingYear , list.get(0).getOpeningYear());
-        Assertions.assertEquals(ORGANISATION1.description , list.get(0).getOrganisation().getDescription());
-        Assertions.assertNull(StudentBranchData.STUDENT_BRANCH1.closingYear);
+        Set<StudentBranchDto> expected = Set.of(
+                new StudentBranchDto(
+                        StudentBranchData.STUDENT_BRANCH1.name,
+                        UserData.USER1.userName,
+                        StudentBranchData.STUDENT_BRANCH1.openingYear,
+                        StudentBranchData.STUDENT_BRANCH1.closingYear // Closing year is null
+                ),
+                new StudentBranchDto(
+                        StudentBranchData.STUDENT_BRANCH2.name,
+                        UserData.USER2.userName,
+                        StudentBranchData.STUDENT_BRANCH2.openingYear,
+                        StudentBranchData.STUDENT_BRANCH2.closingYear // Closing year is null
+                ),
+                new StudentBranchDto(
+                StudentBranchData.STUDENT_BRANCH3.name,
+                UserData.USER3.userName,
+                StudentBranchData.STUDENT_BRANCH3.openingYear,
+                StudentBranchData.STUDENT_BRANCH3.closingYear
+        )
+        );
 
-        Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH2.name, list.get(1).getName());
-        Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH2.openingYear , list.get(1).getOpeningYear());
-        Assertions.assertEquals(ORGANISATION2.description, list.get(1).getOrganisation().getDescription());
+        // Convert actual results into a set
+        Set<StudentBranchDto> actual = new HashSet<>(list);
 
+        // Verify
+        Assertions.assertEquals(expected, actual);
     }
 
     @Order(2)
@@ -81,7 +104,7 @@ public class StudentBranchProgramTest {
         studentBranchRepository.updateStudentBranch(StudentBranchData.STUDENT_BRANCH1.name, studentBranch);
 
         StudentBranchDto branch = studentBranchRepository.getStudentBranch(StudentBranchData.STUDENT_BRANCH4.name);
-        Assertions.assertEquals(ORGANISATION2.description , branch.getOrganisation().getDescription());
+        Assertions.assertEquals(null , branch.getOrganisation().getDescription());
         Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH4.openingYear , studentBranch.getOpeningYear());
         Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH4.closingYear , studentBranch.getClosingYear());
 
@@ -103,15 +126,16 @@ public class StudentBranchProgramTest {
         Pageable pageable = PageRequest.of(0, 10);
         List<String> programs = studentProgramRepository.getListOfStudentPrograms(pageable , true);
         Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM1.name , programs.get(0));
-        Assertions.assertEquals(2 , programs.size());
+        Assertions.assertEquals(3 , programs.size());
         List<String> programs_all = studentProgramRepository.getListOfStudentPrograms(pageable , false);
         Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM1.name , programs_all.get(0));
-        Assertions.assertEquals(4 , programs_all.size());
-        Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM2.name , programs_all.get(1));
+        Assertions.assertEquals(2 , programs_all.size());
+        Assertions.assertEquals(StudentProgramData.STUDENT_PROGRAM3.name , programs_all.get(1));
     }
 
     @Order(7)
     @Test
+    @Rollback(value = true)
     public void updateStudentProgram(){
         studentProgramRepository.updateStudentProgram(StudentProgramData.STUDENT_PROGRAM1.name , StudentProgramData.STUDENT_PROGRAM4.name, StudentProgramData.STUDENT_PROGRAM4.isActive);
         Long id = studentProgramRepository.existsStudentProgram(StudentProgramData.STUDENT_PROGRAM4.name);

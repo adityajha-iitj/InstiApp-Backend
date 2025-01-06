@@ -22,11 +22,11 @@ public class LostnFound {
     String publicId;
 
     @ManyToOne
-    @JoinColumn(name = "finder_id", nullable = false)
+    @JoinColumn(name = "finder_id", nullable = true)
     User finder;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = true)
+    @JoinColumn(name = "owner_id", nullable = false)
     User owner;
 
     @ManyToOne
