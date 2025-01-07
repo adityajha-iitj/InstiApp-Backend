@@ -46,7 +46,7 @@ public interface UserRepository {
      * @param name
      * @return -1 If the name doesn't exist else the Long ID
      */
-    Long exists(String name);
+    Long userTypeExists(String name);
 
 
 

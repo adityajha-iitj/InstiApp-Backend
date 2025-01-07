@@ -26,12 +26,9 @@ import in.ac.iitj.instiapp.database.entities.User.Student.StudentProgram;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.database.entities.User.Faculty.Faculty;
-import in.ac.iitj.instiapp.Tests.EntityTestData.FacultyData.*;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
 
 import jakarta.transaction.Transactional;
-import org.aspectj.weaver.ast.Or;
-import org.hibernate.type.descriptor.jdbc.TinyIntJdbcType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
@@ -47,7 +44,6 @@ import static in.ac.iitj.instiapp.Tests.EntityTestData.UserTypeData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.StudentProgramData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.StudentData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.AlumniData.*;
-import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData.*;
 
 public class InitialiseEntities {
 
@@ -146,12 +142,12 @@ public class InitialiseEntities {
 
 
 
-            Long UserType1Id = userRepository.exists(USER_TYPE1.name);
-            Long UserType2Id = userRepository.exists(USER_TYPE2.name);
-            Long UserType3Id = userRepository.exists(USER_TYPE3.name);
-            Long UserType5Id = userRepository.exists(USER_TYPE5.name);
-            Long UserType6Id = userRepository.exists(USER_TYPE6.name);
-            Long UserType7Id = userRepository.exists(USER_TYPE7.name);
+            Long UserType1Id = userRepository.userTypeExists(USER_TYPE1.name);
+            Long UserType2Id = userRepository.userTypeExists(USER_TYPE2.name);
+            Long UserType3Id = userRepository.userTypeExists(USER_TYPE3.name);
+            Long UserType5Id = userRepository.userTypeExists(USER_TYPE5.name);
+            Long UserType6Id = userRepository.userTypeExists(USER_TYPE6.name);
+            Long UserType7Id = userRepository.userTypeExists(USER_TYPE7.name);
 
 
 

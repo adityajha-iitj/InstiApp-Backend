@@ -2,7 +2,6 @@ package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
-import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
@@ -16,10 +15,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Repository
@@ -38,7 +35,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void save(Usertype userType) {
-        if(exists(userType.getName()) != -1L){
+        if(userTypeExists(userType.getName()) != -1L){
             throw new DataIntegrityViolationException("Usertype already exists");
         }
         entityManager.persist(userType);
@@ -53,17 +50,17 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Long exists(String name) {
+    public Long userTypeExists(String name) {
         return jdbcTemplate.queryForObject("select COALESCE(MAX (id), -1) from user_type where name = ?  ",Long.class,name);
     }
 
     @Override
     public void update(String oldName, String newName) {
 
-        if(exists(oldName) == -1L){
+        if(userTypeExists(oldName) == -1L){
             throw new EmptyResultDataAccessException("No usertype " + oldName + "exists",1);
         }
-        if(exists(newName) != -1L){
+        if(userTypeExists(newName) != -1L){
             throw new DataIntegrityViolationException("Usertype with name " + newName + " already exists");
         }
 
@@ -75,7 +72,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void delete(String userTypeName) {
-            if (exists(userTypeName) == -1){
+            if (userTypeExists(userTypeName) == -1){
                 throw new EmptyResultDataAccessException("No usertype " + userTypeName + "exists",1);
             }
 
@@ -179,7 +176,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void setUserType(String username, String newUserType) {
-        Long newUserTypeId = exists(newUserType);
+        Long newUserTypeId = userTypeExists(newUserType);
         Long userId = usernameExists(username);
         if(newUserTypeId == -1L || userId == -1L){
             throw new EmptyResultDataAccessException("Usertype  " +newUserType + "not found",1);

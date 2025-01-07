@@ -8,8 +8,6 @@ import in.ac.iitj.instiapp.Tests.EntityTestData.*;
 import in.ac.iitj.instiapp.database.entities.User.Faculty.Faculty;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.User;
-import in.ac.iitj.instiapp.payload.User.Alumni.AlumniBaseDto;
-import in.ac.iitj.instiapp.payload.User.Alumni.AlumniDetailedDto;
 import in.ac.iitj.instiapp.payload.User.Faculty.FacultyDetailedDto;
 import in.ac.iitj.instiapp.payload.User.Faculty.FacultyBaseDto;
 import org.junit.jupiter.api.*;
@@ -111,7 +109,7 @@ public class FacultyTest {
     @Rollback(value = true)
     public void testUpdateFaculty() {
         Faculty faculty = FacultyData.FACULTY2.toEntity();
-        faculty.setUser(new User(userRepositoryImpl.exists(UserData.USER11.userName)));
+        faculty.setUser(new User(userRepositoryImpl.userTypeExists(UserData.USER11.userName)));
         faculty.setOrganisation(new Organisation(organisationRepository.existOrganisation(UserData.USER1.userName)));
         facultyRepository.updateFaculty(faculty);
 

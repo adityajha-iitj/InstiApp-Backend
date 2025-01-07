@@ -1,18 +1,13 @@
 package in.ac.iitj.instiapp.Tests.Repository;
 
 
-import in.ac.iitj.instiapp.Repository.CalendarRepository;
 import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.Tests.Utilities.Utils;
-import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
-import in.ac.iitj.instiapp.database.entities.User.User;
-import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
 import org.assertj.core.api.Assertions;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -28,7 +23,6 @@ import org.springframework.test.annotation.Rollback;
 import java.util.List;
 
 import static in.ac.iitj.instiapp.Tests.EntityTestData.CalendarData.CALENDAR1;
-import static in.ac.iitj.instiapp.Tests.EntityTestData.CalendarData.CALENDAR4;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserTypeData.*;
 
@@ -61,12 +55,12 @@ public class UserTest {
     @Rollback(value = true)
     public void testSaveUserType(){
 
-        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
-        Assertions.assertThat(userRepository.exists(USER_TYPE4.name)).isEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE4.name)).isEqualTo(-1L);
 
         userRepository.save(USER_TYPE4.toEntity());
 
-        Assertions.assertThat(userRepository.exists(USER_TYPE4.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE4.name)).isNotNull().isNotEqualTo(-1L);
 
 
         Assertions.assertThatThrownBy(() -> userRepository.save(USER_TYPE1.toEntity()))
@@ -83,10 +77,10 @@ public class UserTest {
     @Test
     @Order(3)
     public void testExistsUsertype(){
-        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
-        Assertions.assertThat(userRepository.exists(USER_TYPE2.name)).isNotNull().isNotEqualTo(-1L);
-        Assertions.assertThat(userRepository.exists(USER_TYPE3.name)).isNotNull().isNotEqualTo(-1L);
-        Assertions.assertThat(userRepository.exists(USER_TYPE4.name)).isEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE2.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE3.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE4.name)).isEqualTo(-1L);
     }
 
     @Test
@@ -99,23 +93,23 @@ public class UserTest {
                 .isInstanceOf(DataIntegrityViolationException.class);
 
 
-        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
-        Assertions.assertThat(userRepository.exists(USER_TYPE4.name)).isEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE4.name)).isEqualTo(-1L);
 
 
         userRepository.update(USER_TYPE1.name, USER_TYPE4.name);
 
-        Assertions.assertThat(userRepository.exists(USER_TYPE4.name)).isNotNull().isNotEqualTo(-1L);
-        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE4.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE1.name)).isEqualTo(-1L);
     }
 
     // TODO
 @Test
 @Order(5)
     public void testDeleteUserType(){
-        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE1.name)).isNotNull().isNotEqualTo(-1L);
         userRepository.delete(USER_TYPE1.name);
-        Assertions.assertThat(userRepository.exists(USER_TYPE1.name)).isEqualTo(-1L);
+        Assertions.assertThat(userRepository.userTypeExists(USER_TYPE1.name)).isEqualTo(-1L);
     }
 
 

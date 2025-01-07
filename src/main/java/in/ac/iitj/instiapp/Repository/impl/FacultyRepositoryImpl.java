@@ -75,7 +75,7 @@ public class FacultyRepositoryImpl implements FacultyRepository {
 
     public FacultyDetailedDto getDetailedFaculty(String username){
         try{
-            return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Faculty.FacultyDetailedDto(fa.user.userName,fa.organisation.user.userName, fa.websiteUrl, fa.Description) from Faculty fa where fa.user.userName= :username", FacultyDetailedDto.class)
+            return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Faculty.FacultyDetailedDto(fa.user.userName,fa.organisation.user.userName, fa.Description, fa.websiteUrl) from Faculty fa where fa.user.userName= :username", FacultyDetailedDto.class)
                     .setParameter("username",username)
                     .getSingleResult();
         }catch (NoResultException ignored){
