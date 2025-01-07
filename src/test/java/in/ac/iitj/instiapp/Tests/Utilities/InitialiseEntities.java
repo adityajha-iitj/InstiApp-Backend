@@ -572,7 +572,7 @@ public class InitialiseEntities {
     }
 
     @Component
-    @Import({GrievanceRepositoryImpl.class,UserRepositoryImpl.class, OrganisationRoleRepositoryImpl.class, MediaRepositoryImpl.class})
+    @Import({GrievanceRepositoryImpl.class,UserRepositoryImpl.class, OrganisationRoleRepositoryImpl.class, MediaRepositoryImpl.class, InitialiseUser.class, InitialiseMedia.class})
     public static class InitialiseGrievance implements Initialise{
         private final GrievanceRepository grievanceRepository;
         private final UserRepository userRepository;

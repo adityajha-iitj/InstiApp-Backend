@@ -2,6 +2,7 @@ package in.ac.iitj.instiapp.Tests.Repository;
 
 import in.ac.iitj.instiapp.Repository.GrievanceRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
+import in.ac.iitj.instiapp.Repository.impl.GrievanceRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.database.entities.Grievance;
@@ -14,8 +15,11 @@ import org.assertj.core.api.Assertions;
 import org.hibernate.annotations.NaturalId;
 import org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import in.ac.iitj.instiapp.Tests.EntityTestData.GrievanceData;
 import org.springframework.context.annotation.Import;
@@ -32,7 +36,9 @@ import java.util.Optional;
 import static jdk.dynalink.linker.support.Guards.isNotNull;
 
 @DataJpaTest
-@Import({InitialiseEntities.InitialiseGrievance.class,InitialiseEntities.InitialiseOrganisationRole.class, InitialiseEntities.InitialiseMedia.class,InitialiseEntities.InitialiseUser.class})
+@Import({InitialiseEntities.InitialiseGrievance.class, GrievanceRepositoryImpl.class})
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class GrivanceTest {
 
     @Autowired
@@ -47,10 +53,11 @@ public class GrivanceTest {
 
 
     @Autowired
-    public GrivanceTest(MediaRepository mediaRepository, UserRepository userRepository, OrganisationRoleRepository organisationRoleRepository) {
+    public GrivanceTest(MediaRepository mediaRepository, UserRepository userRepository, OrganisationRoleRepository organisationRoleRepository, GrievanceRepository grievanceRepository) {
         this.mediaRepository = mediaRepository;
         this.organisationRoleRepository = organisationRoleRepository;
         this.userRepository = userRepository;
+        this.grievanceRepository = grievanceRepository;
     }
 
     @BeforeAll
