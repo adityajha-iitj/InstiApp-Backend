@@ -106,7 +106,7 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
             System.out.println(username);
             return entityManager.createQuery(
                     "select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto( o.user.userName, " +
-                            "case when o.parentOrganisation is null then null else o.parentOrganisation.user.userName end, o.type.name, o.Description, o.Website) from Organisation o where o.user.userName = :username", OrganisationBaseDto.class)
+                            "case when o.parentOrganisation is null then null else o.parentOrganisation.user.userName end, o.type.name, o.Description, o.Website) from Organisation o left join o.parentOrganisation left join  o.parentOrganisation.user where o.user.userName = :username", OrganisationBaseDto.class)
                     .setParameter("username", username)
                     .getSingleResult();
 
