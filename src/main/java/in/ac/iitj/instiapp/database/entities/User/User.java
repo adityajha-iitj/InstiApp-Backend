@@ -60,5 +60,9 @@ public class User{
     public User(Long userId) {
         this.Id = userId;
     }
+
+    public User(String userName) {
+        this.userName = userName;
+    }
 }
 

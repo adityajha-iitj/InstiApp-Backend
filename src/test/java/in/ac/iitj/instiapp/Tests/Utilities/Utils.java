@@ -1,9 +1,11 @@
 package in.ac.iitj.instiapp.Tests.Utilities;
 
 import in.ac.iitj.instiapp.Tests.EntityTestData.*;
+import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.payload.GrievanceDto;
 import in.ac.iitj.instiapp.payload.User.Alumni.AlumniBaseDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto;
+import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import org.assertj.core.api.Assertions;
 import in.ac.iitj.instiapp.payload.User.Faculty.FacultyBaseDto;
@@ -22,9 +24,15 @@ public class Utils {
     }
 
     public static void matchOrganisationBaseDto(OrganisationBaseDto organisationBaseDto, OrganisationData organisationData, OrganisationTypeData organisationTypeData) {
-        Assertions.assertThat(organisationBaseDto.getTypeName()).isEqualTo(organisationData.organisationType);
+        Assertions.assertThat(organisationBaseDto.getTypeName()).isEqualTo(organisationTypeData.name);
         Assertions.assertThat(organisationBaseDto.getDescription()).isEqualTo(organisationData.description);
         Assertions.assertThat(organisationBaseDto.getWebsite()).isEqualTo(organisationData.website);
+    }
+
+    public static void matchOrganisationRoleDto(OrganisationRoleDto organisationRoleDto, OrganisationRoleData organisationRoleData, UserData userData){
+        Assertions.assertThat(organisationRoleDto.getOrganisationUsername()).isEqualTo(userData.userName);
+        Assertions.assertThat(organisationRoleDto.getRoleName()).isEqualTo(organisationRoleData.roleName);
+        Assertions.assertThat(organisationRoleDto.getPermission()).isEqualTo(organisationRoleData.organisationPermission);
     }
 
 
