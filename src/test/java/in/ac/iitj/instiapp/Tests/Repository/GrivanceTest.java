@@ -2,8 +2,10 @@ package in.ac.iitj.instiapp.Tests.Repository;
 
 import in.ac.iitj.instiapp.Repository.GrievanceRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
+import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.database.entities.Grievance;
+import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.payload.GrievanceDto;
 import in.ac.iitj.instiapp.Repository.MediaRepository;
 import in.ac.iitj.instiapp.Repository.UserRepository;
@@ -30,7 +32,7 @@ import java.util.Optional;
 import static jdk.dynalink.linker.support.Guards.isNotNull;
 
 @DataJpaTest
-@Import({InitialiseEntities})
+@Import({InitialiseEntities.InitialiseGrievance.class,InitialiseEntities.InitialiseOrganisationRole.class, InitialiseEntities.InitialiseMedia.class,InitialiseEntities.InitialiseUser.class})
 public class GrivanceTest {
 
     @Autowired
@@ -52,8 +54,9 @@ public class GrivanceTest {
     }
 
     @BeforeAll
-    public static void setUp(@Autowired InitialiseEntities.InitialiseUser initialiseUser) {
-        initialiseUser.initialise();
+    public static void setUp(@Autowired InitialiseEntities.InitialiseGrievance initialiseGrievance) {
+        initialiseGrievance.initialise();
+
     }
 
     @Test
@@ -104,6 +107,7 @@ public class GrivanceTest {
         grievance.setTitle("Updated Title");
         grievance.setDescription("Updated Description");
         grievance.setResolved(true);
+        grievance.setOrganisationRole(new OrganisationRole(organisationRoleRepository.existOrganisationRole(OrganisationRoleData.ORGANISATION_ROLE2.roleName, String.valueOf(OrganisationRoleData.ORGANISATION_ROLE2.organisationPermission))));
 
         // Step 2: Perform the update operation
         grievanceRepository.updateGrievance(GrievanceData.GRIEVANCE1.publicId,grievance);
@@ -115,6 +119,11 @@ public class GrivanceTest {
         Assertions.assertThat(updatedGrievanceDto.getTitle()).isEqualTo("Updated Title");
         Assertions.assertThat(updatedGrievanceDto.getDescription()).isEqualTo("Updated Description");
         Assertions.assertThat(updatedGrievanceDto.getResolved()).isTrue();
+
+        Assertions.assertThat(updatedGrievanceDto.getOrganisationRole().getRoleName())
+                .isEqualTo(OrganisationRoleData.ORGANISATION_ROLE2.roleName);
+        Assertions.assertThat(updatedGrievanceDto.getOrganisationRole().getPermission())
+                .isEqualTo(OrganisationRoleData.ORGANISATION_ROLE2.organisationPermission);
     }
 
 

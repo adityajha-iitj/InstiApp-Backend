@@ -28,7 +28,6 @@ import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.database.entities.User.Faculty.Faculty;
 import in.ac.iitj.instiapp.Tests.EntityTestData.FacultyData.*;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
-import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData.*;
 
 import jakarta.transaction.Transactional;
 import org.aspectj.weaver.ast.Or;
@@ -48,7 +47,7 @@ import static in.ac.iitj.instiapp.Tests.EntityTestData.UserTypeData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.StudentProgramData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.StudentData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.AlumniData.*;
-
+import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData.*;
 
 public class InitialiseEntities {
 
@@ -91,29 +90,6 @@ public class InitialiseEntities {
             mediaRepository.save(MEDIA8.toEntity());
             mediaRepository.save(MEDIA9.toEntity());
             mediaRepository.save(MEDIA10.toEntity());
-
-
-
-        }
-
-    }
-
-    @Component
-    @Import({OrganisationRoleRepositoryImpl.class })
-    public static class InitialiseOrganisationRole implements Initialise{
-
-
-        private final OrganisationRoleRepository organisationRoleRepository;
-
-        @Autowired
-        public InitialiseOrganisationRole(OrganisationRoleRepository organisationRoleRepository){
-            this.organisationRoleRepository = organisationRoleRepository;
-        }
-
-
-
-        @Transactional
-        public void initialise(){
 
 
 
@@ -337,6 +313,44 @@ public class InitialiseEntities {
             organisationRepository.save(organisation2);
             organisationRepository.save(organisation3);
         }
+    }
+
+    @Component
+    @Import({OrganisationRoleRepositoryImpl.class , UserRepositoryImpl.class})
+    public static class InitialiseOrganisationRole implements Initialise{
+
+
+        private final OrganisationRoleRepository organisationRoleRepository;
+        private final UserRepository userRepository;
+        private final OrganisationRepository organisationRepository;
+
+
+        @Autowired
+        public InitialiseOrganisationRole(OrganisationRoleRepository organisationRoleRepository, UserRepository userRepository,OrganisationRepository organisationRepository, InitialiseUser initialiseUser) {
+            this.organisationRoleRepository = organisationRoleRepository;
+            this.userRepository = userRepository;
+            this.organisationRepository = organisationRepository;
+
+            initialiseUser.initialise();
+        }
+
+
+        @Transactional
+        public void initialise(){
+            OrganisationRole organisationRole1 = OrganisationRoleData.ORGANISATION_ROLE1.toEntity();
+            OrganisationRole organisationRole2 = OrganisationRoleData.ORGANISATION_ROLE2.toEntity();
+            OrganisationRole organisationRole3 = OrganisationRoleData.ORGANISATION_ROLE3.toEntity();
+
+            organisationRole1.setOrganisation(new Organisation(organisationRepository.existOrganisation(USER1.userName)));
+            organisationRole2.setOrganisation(new Organisation(organisationRepository.existOrganisation(USER2.userName)));
+            organisationRole3.setOrganisation(new Organisation(organisationRepository.existOrganisation(USER3.userName)));
+
+            organisationRoleRepository.saveOrganisationRole(organisationRole1);
+            organisationRoleRepository.saveOrganisationRole(organisationRole2);
+            organisationRoleRepository.saveOrganisationRole(organisationRole3);
+
+        }
+
     }
 
 
@@ -566,35 +580,40 @@ public class InitialiseEntities {
         private final MediaRepository mediaRepository;
 
         @Autowired
-        public InitialiseGrievance(GrievanceRepository grievanceRepository, UserRepository userRepository , OrganisationRoleRepository organisationRoleRepository, MediaRepository mediaRepository) {
+        public InitialiseGrievance(GrievanceRepository grievanceRepository, UserRepository userRepository , OrganisationRoleRepository organisationRoleRepository, MediaRepository mediaRepository, InitialiseUser initialiseUser, InitialiseMedia initialiseMedia) {
             this.grievanceRepository = grievanceRepository;
             this.userRepository = userRepository;
             this.organisationRoleRepository = organisationRoleRepository;
             this.mediaRepository = mediaRepository;
 
+            initialiseUser.initialise();
+            initialiseMedia.initialise();
+
         }
 
-//        @Override
-//        public void initialise() {
-//
-//            organisationRoleRepository.saveOrganisationRole(OrganisationRoleData.ORGANISATION_ROLE1.toEntity());
-//            organisationRoleRepository.saveOrganisationRole(OrganisationRoleData.ORGANISATION_ROLE2.toEntity());
-//            organisationRoleRepository.saveOrganisationRole(OrganisationRoleData.ORGANISATION_ROLE3.toEntity());
-//
-//
-//
-//            Grievance grievance1 = GrievanceData.GRIEVANCE1.toEntity();
-//            Grievance grievance2 = GrievanceData.GRIEVANCE2.toEntity();
-//            Grievance grievance3 = GrievanceData.GRIEVANCE3.toEntity();
-//
-//            grievance1.setUserFrom(new User(userRepository.exists(USER5.userName)));
-//            grievance2.setUserFrom(new User(userRepository.exists(USER6.userName)));
-//            grievance3.setUserFrom(new User(userRepository.exists(USER7.userName)));
-//
-//            grievance1.setOrganisationRole(new OrganisationRole(organisationRoleRepository.existOrganisationRole(ORGANISA)));
-//
-//
-//        }
+        @Override
+        public void initialise() {
+
+            Grievance grievance1 = GrievanceData.GRIEVANCE1.toEntity();
+            Grievance grievance2 = GrievanceData.GRIEVANCE2.toEntity();
+            Grievance grievance3 = GrievanceData.GRIEVANCE3.toEntity();
+
+            grievance1.setUserFrom(new User(userRepository.exists(USER5.userName)));
+            grievance2.setUserFrom(new User(userRepository.exists(USER6.userName)));
+            grievance3.setUserFrom(new User(userRepository.exists(USER7.userName)));
+
+            grievance1.setOrganisationRole(new OrganisationRole(organisationRoleRepository.existOrganisationRole(USER1.userName, OrganisationRoleData.ORGANISATION_ROLE1.roleName)));
+            grievance2.setOrganisationRole(new OrganisationRole(organisationRoleRepository.existOrganisationRole(USER2.userName, OrganisationRoleData.ORGANISATION_ROLE2.roleName)));
+            grievance3.setOrganisationRole(new OrganisationRole(organisationRoleRepository.existOrganisationRole(USER3.userName, OrganisationRoleData.ORGANISATION_ROLE3.roleName)));
+
+            grievance1.setMedia(new Media(mediaRepository.getIdByPublicId(MEDIA1.publicId)));
+            grievance2.setMedia(new Media(mediaRepository.getIdByPublicId(MEDIA2.publicId)));
+            grievance3.setMedia(new Media(mediaRepository.getIdByPublicId(MEDIA3.publicId)));
+
+            grievanceRepository.save(grievance1);
+            grievanceRepository.save(grievance2);
+            grievanceRepository.save(grievance3);
+        }
 
     }
 

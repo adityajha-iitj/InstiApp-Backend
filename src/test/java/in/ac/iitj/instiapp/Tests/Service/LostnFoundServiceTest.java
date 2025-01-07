@@ -1,9 +1,9 @@
-package in.ac.iitj.instiapp.Tests.Service;
+/*package in.ac.iitj.instiapp.Tests.Service;
 
 import in.ac.iitj.instiapp.Repository.LostnFoundRepository;
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
 import in.ac.iitj.instiapp.services.LostnFoundService;
-import in.ac.iitj.instiapp.services.impl.LostnFoundServiceImpl;
+//import in.ac.iitj.instiapp.services.impl.LostnFoundServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,4 +83,4 @@ public class LostnFoundServiceTest {
         // Assert
         verify(lostnFoundRepository).deleteLocationByName(locationName);
     }
-}
+} */

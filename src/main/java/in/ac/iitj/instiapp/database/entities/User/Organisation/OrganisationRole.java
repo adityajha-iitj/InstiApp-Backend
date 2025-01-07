@@ -27,6 +27,7 @@ public class OrganisationRole {
     OrganisationPermission permission;
 
 
-
-
+    public OrganisationRole(Long userId) {
+        this.Id = userId;
+    }
 }
