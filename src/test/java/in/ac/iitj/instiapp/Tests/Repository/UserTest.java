@@ -77,7 +77,7 @@ public class UserTest {
     @Order(2)
     public void testGetAllUserTypes(){
         Assertions.assertThat(userRepository.getAllUserTypes(PageRequest.of(0,10)))
-                .containsExactlyInAnyOrder(USER_TYPE1.name, USER_TYPE2.name,USER_TYPE3.name);
+                .containsExactlyInAnyOrder(USER_TYPE1.name, USER_TYPE2.name,USER_TYPE3.name, USER_TYPE5.name,USER_TYPE6.name,USER_TYPE7.name);
     }
 
     @Test
