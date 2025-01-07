@@ -1,13 +1,16 @@
 package in.ac.iitj.instiapp.Tests.Repository;
 
 
+import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.StudentBranchRepository;
 import in.ac.iitj.instiapp.Repository.User.Student.StudentProgramRepository;
+import in.ac.iitj.instiapp.Repository.impl.OrganisationRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.StudentBranchRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.StudentBranchData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.StudentProgramData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.UserData;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
+import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +29,19 @@ import java.util.Set;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData.*;
 
 @DataJpaTest
-@Import({StudentBranchRepositoryImpl.class , InitialiseEntities.InitialiseProgramAndBranch.class})
+@Import({StudentBranchRepositoryImpl.class , InitialiseEntities.InitialiseProgramAndBranch.class , OrganisationRepositoryImpl.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class StudentBranchProgramTest {
     StudentProgramRepository studentProgramRepository;
     StudentBranchRepository studentBranchRepository;
+    OrganisationRepository organisationRepository;
 
     @Autowired
-    public StudentBranchProgramTest(StudentBranchRepository studentBranchRepository , StudentProgramRepository studentProgramRepository) {
+    public StudentBranchProgramTest(StudentBranchRepository studentBranchRepository , StudentProgramRepository studentProgramRepository , OrganisationRepository organisationRepository) {
         this.studentBranchRepository = studentBranchRepository;
         this.studentProgramRepository = studentProgramRepository;
+        this.organisationRepository = organisationRepository;
     }
 
 
@@ -98,6 +103,7 @@ public class StudentBranchProgramTest {
 
     @Order(4)
     @Test
+    @Rollback(value = true)
     public void testUpdateStudentBranch(){
         Long id =studentBranchRepository.existsStudentBranch(StudentBranchData.STUDENT_BRANCH1.name);
         StudentBranch studentBranch = StudentBranchData.STUDENT_BRANCH4.toEntity();
@@ -107,6 +113,17 @@ public class StudentBranchProgramTest {
         Assertions.assertEquals(null , branch.getOrganisation().getDescription());
         Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH4.openingYear , studentBranch.getOpeningYear());
         Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH4.closingYear , studentBranch.getClosingYear());
+
+        StudentBranch name = new StudentBranch(null , null ,StudentBranchData.STUDENT_BRANCH3.closingYear , new Organisation(organisationRepository.existOrganisation(UserData.USER1.userName)));
+        studentBranchRepository.updateStudentBranch(StudentBranchData.STUDENT_BRANCH2.name, name);
+        StudentBranchDto check_name = studentBranchRepository.getStudentBranch(StudentBranchData.STUDENT_BRANCH2.name);
+        Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH2.name , check_name.getName());
+        Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH2.openingYear , check_name.getOpeningYear());
+        Assertions.assertEquals(StudentBranchData.STUDENT_BRANCH3.closingYear , check_name.getClosingYear());
+        Assertions.assertEquals(organisationRepository.getOrganisation(UserData.USER1.userName).getUser().getUserName(), check_name.getOrganisation().getUser().getUserName());
+
+
+
 
     }
 
