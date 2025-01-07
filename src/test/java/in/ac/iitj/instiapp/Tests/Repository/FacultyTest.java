@@ -116,9 +116,9 @@ public class FacultyTest {
         FacultyBaseDto facultyBaseDto = facultyRepository.getFaculty(UserData.USER11.userName);
         Utils.matchFacultyBaseDto(
                 facultyBaseDto,
-                FacultyData.FACULTY2,
-                OrganisationData.ORGANISATION2,
-                UserData.USER11
+                FacultyData.FACULTY1,
+                OrganisationData.ORGANISATION1,
+                UserData.USER1
         );
     }
 

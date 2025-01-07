@@ -49,7 +49,7 @@ public class OrganisationRoleRepositoryImpl implements OrganisationRoleRepositor
 
     @Override
     public Long existOrganisationRole(String organisationName, String roleName) {
-        return jdbcTemplate.queryForObject("select COALESCE(MAX(r.id), -1) from organisation_role r " + "join organisation o on o.id = r.organisation_id " + "where r.role_name = ? and o.name = ?", Long.class, roleName, organisationName);
+        return jdbcTemplate.queryForObject("select COALESCE(MAX(r.id), -1) from OrganisationRole r " + "join organisation o on o.id = r.organisation_id " + "where r.role_name = ? and o.name = ?", Long.class, roleName, organisationName);
     }
 
     @Override
