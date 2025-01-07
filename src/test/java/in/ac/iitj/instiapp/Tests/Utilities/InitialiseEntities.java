@@ -417,15 +417,16 @@ public class InitialiseEntities {
         }
 
         @Override
+        @Transactional
         public void initialise() {
             Alumni alumni1 = ALUMNI1.toEntity();
             Alumni alumni2 = ALUMNI2.toEntity();
             Alumni alumni3 = ALUMNI3.toEntity();
 
 
-            alumni1.setUser(new User(userRepository.exists(USER8.userName)));
-            alumni2.setUser(new User(userRepository.exists(USER9.userName)));
-            alumni3.setUser(new User(userRepository.exists(USER10.userName)));
+            alumni1.setUser(new User(userRepository.usernameExists(USER8.userName)));
+            alumni2.setUser(new User(userRepository.usernameExists(USER9.userName)));
+            alumni3.setUser(new User(userRepository.usernameExists(USER10.userName)));
 
             alumni1.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(STUDENT_BRANCH1.name)));
             alumni2.setBranch(new StudentBranch(studentBranchRepository.existsStudentBranch(STUDENT_BRANCH2.name)));
