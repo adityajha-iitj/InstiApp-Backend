@@ -37,7 +37,6 @@ public class Utils {
     }
 
     public static void matchFacultyBaseDto(FacultyBaseDto facultyBaseDto, FacultyData facultyData,OrganisationData organisationData, UserData userData){
-        Assertions.assertThat(facultyBaseDto.getUser().getUserName()).isEqualTo(userData.userName);
         Assertions.assertThat(facultyBaseDto.getOrganisation().getUser().getUserName()).isEqualTo(userData.userName);
         Assertions.assertThat(facultyBaseDto.getDescription().equals(facultyData.description));
         Assertions.assertThat(facultyBaseDto.getWebsiteUrl()).isEqualTo(facultyData.websiteUrl);

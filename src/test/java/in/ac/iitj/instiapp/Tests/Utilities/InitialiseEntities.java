@@ -316,22 +316,22 @@ public class InitialiseEntities {
     }
 
     @Component
-    @Import({OrganisationRoleRepositoryImpl.class , UserRepositoryImpl.class})
+    @Import({OrganisationRoleRepositoryImpl.class , InitialiseOrganisation.class})
     public static class InitialiseOrganisationRole implements Initialise{
 
 
         private final OrganisationRoleRepository organisationRoleRepository;
-        private final UserRepository userRepository;
         private final OrganisationRepository organisationRepository;
 
 
+
         @Autowired
-        public InitialiseOrganisationRole(OrganisationRoleRepository organisationRoleRepository, UserRepository userRepository,OrganisationRepository organisationRepository, InitialiseUser initialiseUser) {
+        public InitialiseOrganisationRole(OrganisationRoleRepository organisationRoleRepository, OrganisationRepository organisationRepository, InitialiseOrganisation initialiseOrganisation) {
             this.organisationRoleRepository = organisationRoleRepository;
-            this.userRepository = userRepository;
             this.organisationRepository = organisationRepository;
 
-            initialiseUser.initialise();
+            initialiseOrganisation.initialise();
+
         }
 
 
@@ -487,8 +487,8 @@ public class InitialiseEntities {
     }
 
     @Component
-    @Import({FacultyRepositoryImpl.class,InitialiseOrganisation.class})
-    public class InitialiseFaculty implements Initialise{
+    @Import({FacultyRepositoryImpl.class,InitialiseOrganisation.class,  UserRepositoryImpl.class, OrganisationRepositoryImpl.class})
+    public static class InitialiseFaculty implements Initialise{
         private final FacultyRepository facultyRepository;
         private final UserRepository userRepository;
         private final OrganisationRepository organisationRepository;
@@ -498,6 +498,7 @@ public class InitialiseEntities {
             this.facultyRepository = facultyRepository;
             this.userRepository = userRepository;
             this.organisationRepository = organisationRepository;
+
             initialiseOrganisation.initialise();
         }
 
@@ -507,13 +508,13 @@ public class InitialiseEntities {
             Faculty faculty2 = FacultyData.FACULTY2.toEntity();
             Faculty faculty3 = FacultyData.FACULTY3.toEntity();
 
-            faculty1.setUser(new User(userRepository.exists(USER11.userName)));
-            faculty2.setUser(new User(userRepository.exists(USER12.userName)));
-            faculty3.setUser(new User(userRepository.exists(USER13.userName)));
+            faculty1.setUser(new User(userRepository.usernameExists(USER11.userName)));
+            faculty2.setUser(new User(userRepository.usernameExists(USER12.userName)));
+            faculty3.setUser(new User(userRepository.usernameExists(USER13.userName)));
 
-            faculty1.setOrganisation(new Organisation(organisationRepository.existOrganisation(ORGANISATION1.name())));
-            faculty2.setOrganisation(new Organisation(organisationRepository.existOrganisation(ORGANISATION2.name())));
-            faculty3.setOrganisation(new Organisation(organisationRepository.existOrganisation(ORGANISATION3.name())));
+            faculty1.setOrganisation(new Organisation(organisationRepository.existOrganisation(USER1.userName)));
+            faculty2.setOrganisation(new Organisation(organisationRepository.existOrganisation(USER2.userName)));
+            faculty3.setOrganisation(new Organisation(organisationRepository.existOrganisation(USER3.userName)));
 
 
             facultyRepository.save(faculty1);
@@ -573,7 +574,7 @@ public class InitialiseEntities {
     }
 
     @Component
-    @Import({GrievanceRepositoryImpl.class,UserRepositoryImpl.class, OrganisationRoleRepositoryImpl.class, MediaRepositoryImpl.class, InitialiseUser.class, InitialiseMedia.class})
+    @Import({GrievanceRepositoryImpl.class, InitialiseMedia.class, InitialiseOrganisationRole.class})
     public static class InitialiseGrievance implements Initialise{
         private final GrievanceRepository grievanceRepository;
         private final UserRepository userRepository;
@@ -581,14 +582,14 @@ public class InitialiseEntities {
         private final MediaRepository mediaRepository;
 
         @Autowired
-        public InitialiseGrievance(GrievanceRepository grievanceRepository, UserRepository userRepository , OrganisationRoleRepository organisationRoleRepository, MediaRepository mediaRepository, InitialiseUser initialiseUser, InitialiseMedia initialiseMedia) {
+        public InitialiseGrievance(GrievanceRepository grievanceRepository , OrganisationRoleRepository organisationRoleRepository, MediaRepository mediaRepository, UserRepository userRepository, InitialiseMedia initialiseMedia, InitialiseOrganisationRole initialiseOrganisationRole) {
             this.grievanceRepository = grievanceRepository;
-            this.userRepository = userRepository;
             this.organisationRoleRepository = organisationRoleRepository;
             this.mediaRepository = mediaRepository;
+            this.userRepository = userRepository;
 
-            initialiseUser.initialise();
             initialiseMedia.initialise();
+            initialiseOrganisationRole.initialise();
 
         }
 
@@ -599,9 +600,9 @@ public class InitialiseEntities {
             Grievance grievance2 = GrievanceData.GRIEVANCE2.toEntity();
             Grievance grievance3 = GrievanceData.GRIEVANCE3.toEntity();
 
-            grievance1.setUserFrom(new User(userRepository.exists(USER5.userName)));
-            grievance2.setUserFrom(new User(userRepository.exists(USER6.userName)));
-            grievance3.setUserFrom(new User(userRepository.exists(USER7.userName)));
+            grievance1.setUserFrom(new User(userRepository.usernameExists(USER5.userName)));
+            grievance2.setUserFrom(new User(userRepository.usernameExists(USER6.userName)));
+            grievance3.setUserFrom(new User(userRepository.usernameExists(USER7.userName)));
 
             grievance1.setOrganisationRole(new OrganisationRole(organisationRoleRepository.existOrganisationRole(USER1.userName, OrganisationRoleData.ORGANISATION_ROLE1.roleName)));
             grievance2.setOrganisationRole(new OrganisationRole(organisationRoleRepository.existOrganisationRole(USER2.userName, OrganisationRoleData.ORGANISATION_ROLE2.roleName)));

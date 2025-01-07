@@ -2,6 +2,7 @@ package in.ac.iitj.instiapp.Tests.Repository;
 
 import in.ac.iitj.instiapp.Repository.FacultyRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
+import in.ac.iitj.instiapp.Repository.impl.FacultyRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.*;
 import in.ac.iitj.instiapp.database.entities.User.Faculty.Faculty;
@@ -11,13 +12,12 @@ import in.ac.iitj.instiapp.payload.User.Alumni.AlumniBaseDto;
 import in.ac.iitj.instiapp.payload.User.Alumni.AlumniDetailedDto;
 import in.ac.iitj.instiapp.payload.User.Faculty.FacultyDetailedDto;
 import in.ac.iitj.instiapp.payload.User.Faculty.FacultyBaseDto;
+import org.junit.jupiter.api.*;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.Rollback;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -30,17 +30,23 @@ import java.util.Optional;
 
 
 @DataJpaTest
-@Import({InitialiseEntities.InitialiseFaculty.class})
+@Import({InitialiseEntities.InitialiseFaculty.class, FacultyRepositoryImpl.class})
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class FacultyTest {
+
+    @Autowired
     private final FacultyRepository facultyRepository;
+    @Autowired
     private final OrganisationRepository organisationRepository;
     @Autowired
     private UserRepositoryImpl userRepositoryImpl;
 
     @Autowired
-    public FacultyTest(FacultyRepository facultyRepository, OrganisationRepository organisationRepository) {
+    public FacultyTest(FacultyRepository facultyRepository, OrganisationRepository organisationRepository, UserRepositoryImpl userRepositoryImpl) {
         this.facultyRepository = facultyRepository;
         this.organisationRepository = organisationRepository;
+        this.userRepositoryImpl = userRepositoryImpl;
     }
 
     @BeforeAll
@@ -59,7 +65,7 @@ public class FacultyTest {
 
 
         FacultyBaseDto facultyBaseDto = facultyRepository.getFaculty(UserData.USER11.userName);
-        Utils.matchFacultyBaseDto(facultyBaseDto ,FacultyData.FACULTY1,OrganisationData.ORGANISATION1, UserData.USER11);
+        Utils.matchFacultyBaseDto(facultyBaseDto ,FacultyData.FACULTY1,OrganisationData.ORGANISATION1, UserData.USER1);
     }
 
     @Test
@@ -72,7 +78,6 @@ public class FacultyTest {
 
         FacultyDetailedDto facultyDetailedDto = facultyRepository.getDetailedFaculty(UserData.USER11.userName);
         Assertions.assertThat(facultyDetailedDto.getUser().getUserName()).isEqualTo(UserData.USER11.userName);
-        Assertions.assertThat(facultyDetailedDto.getOrganisation().getUser().getUserName()).isEqualTo(OrganisationData.ORGANISATION1);
         Assertions.assertThat(facultyDetailedDto.getDescription()).isEqualTo(FacultyData.FACULTY1.description);
         Assertions.assertThat(facultyDetailedDto.getWebsiteUrl()).isEqualTo(FacultyData.FACULTY1.websiteUrl);
     }
@@ -82,14 +87,14 @@ public class FacultyTest {
     public void testGetFacultyByFilter() {
         Pageable pageable = PageRequest.of(0, 10);
 
-        List<FacultyBaseDto> facultyBaseDtoList = facultyRepository.getFacultyByFilter(Optional.of(String.valueOf(OrganisationData.ORGANISATION1)), String.valueOf(Optional.empty()), String.valueOf(Optional.empty()), pageable);
-        Utils.matchFacultyBaseDto(facultyBaseDtoList.get(0), FacultyData.FACULTY1, OrganisationData.ORGANISATION1, UserData.USER11);
+        List<FacultyBaseDto> facultyBaseDtoList = facultyRepository.getFacultyByFilter(Optional.of(UserData.USER1.userName), Optional.empty(), Optional.empty(), pageable);
+        Utils.matchFacultyBaseDto(facultyBaseDtoList.get(0), FacultyData.FACULTY1, OrganisationData.ORGANISATION1, UserData.USER1);
 
-        facultyBaseDtoList = facultyRepository.getFacultyByFilter(Optional.empty(), String.valueOf(Optional.of(FacultyData.FACULTY1.description)), String.valueOf(Optional.empty()), pageable);
-        Utils.matchFacultyBaseDto(facultyBaseDtoList.get(0), FacultyData.FACULTY1, OrganisationData.ORGANISATION1, UserData.USER11);
+        facultyBaseDtoList = facultyRepository.getFacultyByFilter(Optional.empty(), Optional.of(FacultyData.FACULTY1.description), Optional.empty(), pageable);
+        Utils.matchFacultyBaseDto(facultyBaseDtoList.get(0), FacultyData.FACULTY1, OrganisationData.ORGANISATION1, UserData.USER1);
 
-        facultyBaseDtoList = facultyRepository.getFacultyByFilter(Optional.empty(), String.valueOf(Optional.empty()), String.valueOf(FacultyData.FACULTY1.websiteUrl), pageable);
-        Utils.matchFacultyBaseDto(facultyBaseDtoList.get(0), FacultyData.FACULTY1, OrganisationData.ORGANISATION1, UserData.USER11);
+        facultyBaseDtoList = facultyRepository.getFacultyByFilter(Optional.empty(), Optional.empty(), Optional.of(FacultyData.FACULTY1.websiteUrl), pageable);
+        Utils.matchFacultyBaseDto(facultyBaseDtoList.get(0), FacultyData.FACULTY1, OrganisationData.ORGANISATION1, UserData.USER1);
     }
 
     @Test

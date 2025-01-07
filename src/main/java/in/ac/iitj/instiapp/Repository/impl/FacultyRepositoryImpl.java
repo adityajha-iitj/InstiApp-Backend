@@ -46,8 +46,7 @@ public class FacultyRepositoryImpl implements FacultyRepository {
         faculty.setUser(entityManager.getReference(User.class, faculty.getUser().getId()));
         faculty.setOrganisation(entityManager.getReference(Organisation.class, faculty.getOrganisation().getId()));
 
-        faculty.setDescription(faculty.getDescription());
-        faculty.setWebsiteUrl(faculty.getWebsiteUrl());
+
         
         entityManager.persist(faculty);
     }
@@ -66,17 +65,17 @@ public class FacultyRepositoryImpl implements FacultyRepository {
     @Override
     public FacultyBaseDto getFaculty(String username) {
         try{
-            return  entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Faculty.FacultyBaseDto(fa.user.userName, fa.organisation.user.userName, fa.Description, fa.websiteUrl) from Faculty fa where fa.user.name = :username", FacultyBaseDto.class)
+            return  entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Faculty.FacultyBaseDto(fa.user.userName, fa.organisation.user.userName, fa.Description, fa.websiteUrl) from Faculty fa where fa.user.userName = :username", FacultyBaseDto.class)
                     .setParameter("username",username)
                     .getSingleResult();
         }catch (NoResultException ignored){
-            throw new EmptyResultDataAccessException("Alumni with username " + username+" does not exist" ,1);
+            throw new EmptyResultDataAccessException("Faculty with username " + username+" does not exist" ,1);
         }
     }
 
     public FacultyDetailedDto getDetailedFaculty(String username){
         try{
-            return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Faculty.FacultyDetailedDto(fa.user.userName,fa.organisation.user.userName, fa.websiteUrl, fa.Description) from Faculty fa where fa.user.name= :username", FacultyDetailedDto.class)
+            return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Faculty.FacultyDetailedDto(fa.user.userName,fa.organisation.user.userName, fa.websiteUrl, fa.Description) from Faculty fa where fa.user.userName= :username", FacultyDetailedDto.class)
                     .setParameter("username",username)
                     .getSingleResult();
         }catch (NoResultException ignored){
@@ -89,7 +88,7 @@ public class FacultyRepositoryImpl implements FacultyRepository {
         jdbcTemplate.update("update faculty set " +
                         "org_id = case when ? is null then org_id else ? end," +
                         "description = case when ? is null then description else ? end," +
-                        "website_url = case when ? is null then website_url else ? end," +
+                        "website_url = case when ? is null then website_url else ? end " +
                         "where id =?",
                 faculty.getOrganisation().getId(),faculty.getOrganisation().getId(),
                 faculty.getDescription(),faculty.getDescription(),
@@ -100,11 +99,17 @@ public class FacultyRepositoryImpl implements FacultyRepository {
 
 
     @Override
-    public List<FacultyBaseDto> getFacultyByFilter(Optional<String> organisationName, String description, String websiteUrl, Pageable pageable) {
-        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Faculty.FacultyBaseDto(fa.user.userName,fa.organisation.user.userName, fa.Description, fa.websiteUrl ) from Faculty fa where " +
-                        "(:organisationName is null or fa.organisation.user.userName = :organisationName) and" +
-                        "(:description is null or fa.Description = :description) and" +
-                        "(:websiteUrl is null or fa.websiteUrl = :websiteUrl)",FacultyBaseDto.class)
+    public List<FacultyBaseDto> getFacultyByFilter(Optional<String> organisationName, Optional<String> description, Optional<String> websiteUrl, Pageable pageable) {
+        return entityManager.createQuery(
+                        "select new in.ac.iitj.instiapp.payload.User.Faculty.FacultyBaseDto(fa.user.userName, fa.organisation.user.userName, fa.Description, fa.websiteUrl) " +
+                                "from Faculty fa " +
+                                "where (:organisationName is null or fa.organisation.user.userName = :organisationName) " +
+                                "and (:description is null or fa.Description = :description) " +
+                                "and (:websiteUrl is null or fa.websiteUrl = :websiteUrl)",
+                        FacultyBaseDto.class)
+                .setParameter("organisationName", organisationName.orElse(null)) // Unwrap Optional
+                .setParameter("description", description.orElse(null)) // Unwrap Optional
+                .setParameter("websiteUrl", websiteUrl.orElse(null)) // Unwrap Optional
                 .setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();
