@@ -1,6 +1,7 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
+import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
 import in.ac.iitj.instiapp.payload.User.Student.StudentBaseDto;
 import jakarta.persistence.EntityManager;
@@ -65,7 +66,7 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
             throw new DataIntegrityViolationException("location already exists with name " + locations.getName());
         }
         else{
-            String sql = "update locations set locationName = ? where locationName = ?";
+            String sql = "update locations set name = ? where name = ?";
             jdbcTemplate.update(sql, locations.getName(), oldLocationName);
         }
 
@@ -73,13 +74,18 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
     @Override
     public void deleteLocationByName(String locationName) {
-        String sql = "delete from locations where locationName = ?";
-        jdbcTemplate.update(sql, locationName);
+        if(existLocation(locationName) == -1){
+            throw new DataIntegrityViolationException("location doesnt exist with name " + locationName);
+        }
+        else {
+            String sql = "delete from locations where name = ?";
+            jdbcTemplate.update(sql, locationName);
+        }
     }
 
     @Override
     public Long exsitLostnFound(String publicId) {
-        return jdbcTemplate.queryForObject("select coalesce(max(id), -1) from lostnfound where publicId= ?", Long.class, publicId);
+        return jdbcTemplate.queryForObject("select coalesce(max(id), -1) from lostnfound where public_id= ?", Long.class, publicId);
     }
 
     @Override
@@ -120,18 +126,23 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
     @Override
     public List<LostnFoundDto> getLostnFoundByFilter(Optional<Boolean> status, Optional<String> owner, Optional<String> finder, Optional<String> landmark, Pageable pageable) {
-        return  entityManager.createQuery("select new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto(l.publicId , l.finder , l.owner , l.Lankmark , l.extraInfo , l.status , l.media ) from LostnFound l where " +
-                        "(:status is NULL or l.status = :status) and " +
-                        "(:owner is NULL or l.owner = :owner) and " +
-                        "(:finder is NULL or l.finder = :finder) and "+
-                        "(:landmark is NULL or l.landmark = :landmark)", LostnFoundDto .class)
-                .setParameter("status",status.orElse(null))
-                .setParameter("owner",owner.orElse(null))
-                .setParameter("finder",finder.orElse(null))
-                .setParameter("landmark" , landmark.orElse(null))
+        return entityManager.createQuery(
+                        "select new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto(" +
+                                "l.publicId,l.finder.userName, l.owner.userName, l.Landmark.name, " +
+                                "l.extraInfo, l.status, l.media.publicId) " +
+                                "from LostnFound l left join l.finder " +
+                                "where (:status is null or l.status = :status) " +
+                                "AND (:owner is null or l.owner.userName = :owner) " +
+                                "AND (:finder is null or l.finder.userName = :finder) " + // Ensure correct attribute paths
+                                "AND (:landmark is null or l.Landmark.name = :landmark) ", LostnFoundDto.class)
+                .setParameter("status", status.orElse(null))
+                .setParameter("owner", owner.orElse(null))
+                .setParameter("finder", finder.orElse(null))
+                .setParameter("landmark", landmark.orElse(null)) // Parameter names match query
                 .setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();
+
     }
 
     @Override
@@ -140,17 +151,47 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
             throw new EmptyResultDataAccessException("the lost and found with public id " + publicId +"does not exists" , 1);
         }
         else {
-            jdbcTemplate.update("update  lostnfound set " +
-                            "finder = case when ? is null then finder else ? end," +
-                            "owner = case when ? is null then owner else ? end, " +
-                            "Landmark = case  when ? is null then Landmark else ? end," +
-                            "extraInfo = case when ? is null then extraInfo else ? end " +
-                            "status = case when ? is null then status else ? end" +
-                            "media = case when ? is null then media else ? end" +
-                            " where publicId = ?",
-                    lostnFound.getFinder().getId(), lostnFound.getOwner().getId(),
-                    lostnFound.getLandmark().getId(), lostnFound.getExtraInfo(),
-                    lostnFound.getStatus(), lostnFound.getMedia().getId(), publicId);
+            jdbcTemplate.update(
+                    "UPDATE lostnfound SET " +
+                            "finder_id = CASE WHEN cast(? as integer) IS NULL THEN finder_id ELSE ? END, " +
+                            "owner_id = CASE WHEN cast(? as integer) IS NULL THEN owner_id ELSE ? END, " +
+                            "landmark_id = CASE WHEN cast(? as integer) IS NULL THEN Landmark_id ELSE ? END, " +
+                            "extra_info = CASE WHEN ? IS NULL THEN extra_info ELSE ? END, " +
+                            "status = CASE WHEN ? IS NULL THEN status ELSE ? END, " +
+                            "media_id = CASE WHEN cast(? as integer) IS NULL THEN media_id ELSE ? END " +
+                            "WHERE public_id = ?",
+
+                    // Parameters for query
+                    Optional.ofNullable(lostnFound.getFinder())
+                            .map(User::getId).orElse(null),
+                    Optional.ofNullable(lostnFound.getFinder())
+                            .map(User::getId).orElse(null),
+
+                    Optional.ofNullable(lostnFound.getOwner())
+                            .map(User::getId).orElse(null),
+                    Optional.ofNullable(lostnFound.getOwner())
+                            .map(User::getId).orElse(null),
+
+                    Optional.ofNullable(lostnFound.getLandmark())
+                            .map(Locations::getId).orElse(null),
+                    Optional.ofNullable(lostnFound.getLandmark())
+                            .map(Locations::getId).orElse(null),
+
+                    lostnFound.getExtraInfo(),
+                    lostnFound.getExtraInfo(),
+
+                    lostnFound.getStatus(),
+                    lostnFound.getStatus(),
+
+                    Optional.ofNullable(lostnFound.getMedia())
+                            .map(Media::getId).orElse(null),
+                    Optional.ofNullable(lostnFound.getMedia())
+                            .map(Media::getId).orElse(null),
+
+                    publicId
+            );
+
+
         }
     }
 
