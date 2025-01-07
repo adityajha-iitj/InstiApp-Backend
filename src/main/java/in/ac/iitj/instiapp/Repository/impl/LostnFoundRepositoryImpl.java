@@ -84,22 +84,36 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
     @Override
     public void saveLostnFoundDetails(LostnFound lostnFound) {
+
         User finder = null;
-        if (lostnFound.getFinder() != null && lostnFound.getFinder().getId() != null) {
+        if (lostnFound.getFinder() != null && lostnFound.getFinder().getId() != -1) {
             finder = entityManager.getReference(User.class, lostnFound.getFinder().getId());
         }
-        User owner = entityManager.getReference(User.class, lostnFound.getOwner().getId());
+        User owner = null;
+        if (lostnFound.getOwner() != null && lostnFound.getOwner().getId() != -1) {
+            owner = entityManager.getReference(User.class, lostnFound.getOwner().getId());
+        }
+        Locations landmark = null;
+        if (lostnFound.getLandmark() != null && lostnFound.getLandmark().getId() != -1) {
+            landmark = entityManager.getReference(Locations.class, lostnFound.getLandmark().getId());
+        }
+        Media media = null;
+        if (lostnFound.getMedia() != null && lostnFound.getMedia().getId() != -1) {
+            media = entityManager.getReference(Media.class, lostnFound.getMedia().getId());
+        }
 
-        Locations landmark = entityManager.getReference(Locations.class, lostnFound.getLandmark().getId());
-
-        Media media = entityManager.getReference(Media.class, lostnFound.getMedia().getId());
-
-// Set values
-        lostnFound.setFinder(finder);
-        lostnFound.setOwner(owner);
-        lostnFound.setLandmark(landmark);
-        lostnFound.setMedia(media);
-
+        if (finder != null) {
+            lostnFound.setFinder(finder);
+        }
+        if (owner != null) {
+            lostnFound.setOwner(owner);
+        }
+        if (landmark != null) {
+            lostnFound.setLandmark(landmark);
+        }
+        if (media != null) {
+            lostnFound.setMedia(media);
+        }
 
         entityManager.persist(lostnFound);
     }

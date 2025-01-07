@@ -524,18 +524,19 @@ public class InitialiseEntities {
 
 
     @Component
-    @Import({LostnFoundRepositoryImpl.class , MediaRepositoryImpl.class , UserRepositoryImpl.class , InitialiseUser.class})
+    @Import({LostnFoundRepositoryImpl.class , MediaRepositoryImpl.class , UserRepositoryImpl.class , InitialiseUser.class , InitialiseMedia.class})
     public static class InitialiseLostnFound implements Initialise{
         private final LostnFoundRepository lostnFoundRepository;
         private final UserRepository userRepository;
         private final MediaRepository mediaRepository;
 
         @Autowired
-        public InitialiseLostnFound(LostnFoundRepository lostnFoundRepository, UserRepository userRepository , MediaRepository mediaRepository , InitialiseUser initialiseUser) {
+        public InitialiseLostnFound(LostnFoundRepository lostnFoundRepository, UserRepository userRepository , MediaRepository mediaRepository , InitialiseUser initialiseUser , InitialiseMedia initialiseMedia) {
             this.lostnFoundRepository = lostnFoundRepository;
             this.userRepository = userRepository;
             this.mediaRepository = mediaRepository;
             initialiseUser.initialise();
+            initialiseMedia.initialise();
 
 
         }
@@ -551,11 +552,11 @@ public class InitialiseEntities {
             LostnFound lost2 = LostnFoundData.LOST_N_FOUND2.toEntity();
             LostnFound lost3 = LostnFoundData.LOST_N_FOUND3.toEntity();
 
-            lost3.setFinder(new User(userRepository.exists(USER14.userName)));
+            lost3.setFinder(new User(userRepository.usernameExists(USER14.userName)));
 
-            lost1.setOwner(new User(userRepository.exists(USER14.userName)));
-            lost2.setOwner(new User(userRepository.exists(USER15.userName)));
-            lost3.setOwner(new User(userRepository.exists(USER16.userName)));
+            lost1.setOwner(new User(userRepository.usernameExists(USER14.userName)));
+            lost2.setOwner(new User(userRepository.usernameExists(USER15.userName)));
+            lost3.setOwner(new User(userRepository.usernameExists(USER16.userName)));
 
             lost1.setLandmark(new Locations(lostnFoundRepository.existLocation(LocationData.LOCATION1.name)));
             lost2.setLandmark(new Locations(lostnFoundRepository.existLocation(LocationData.LOCATION2.name)));
