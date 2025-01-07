@@ -49,7 +49,7 @@ public AlumniRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManag
     @Override
     public AlumniBaseDto getAlumni(String username) {
         try{
-            return  entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Alumni.AlumniBaseDto(al.user.userName, al.program.name, al.branch.name, al.admissionYear) from Alumni al where al.user.name = :username", AlumniBaseDto.class)
+            return  entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Alumni.AlumniBaseDto(al.user.userName, al.program.name, al.branch.name, al.admissionYear) from Alumni al where al.user.userName = :username", AlumniBaseDto.class)
                     .setParameter("username",username)
                     .getSingleResult();
         }catch (NoResultException ignored){
@@ -76,6 +76,10 @@ public AlumniRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManag
                 "(:branchName is null or al.branch.name = :branchName) and " +
                 "(:admissionYear is null or al.admissionYear = :admissionYear) and " +
                 "(:passOutYear is null  or al.passOutYear  = :passOutYear)",AlumniBaseDto.class)
+                .setParameter("programName",null)
+                .setParameter("branchName",null)
+                .setParameter("admissionYear",null)
+                .setParameter("passOutYear",null)
                 .setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();
