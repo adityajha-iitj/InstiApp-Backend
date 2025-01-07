@@ -76,10 +76,10 @@ public AlumniRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManag
                 "(:branchName is null or al.branch.name = :branchName) and " +
                 "(:admissionYear is null or al.admissionYear = :admissionYear) and " +
                 "(:passOutYear is null  or al.passOutYear  = :passOutYear)",AlumniBaseDto.class)
-                .setParameter("programName",null)
-                .setParameter("branchName",null)
-                .setParameter("admissionYear",null)
-                .setParameter("passOutYear",null)
+                .setParameter("programName",programName.orElse(null))
+                .setParameter("branchName",branchNameName.orElse(null))
+                .setParameter("admissionYear",admissionYear.orElse(null))
+                .setParameter("passOutYear",passOutYear.orElse(null))
                 .setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();

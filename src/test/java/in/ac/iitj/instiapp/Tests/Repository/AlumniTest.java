@@ -89,16 +89,20 @@ public class AlumniTest {
 
 
         List<AlumniBaseDto> alumniBaseDtoList = alumniRepository.getAlumniByFilter(Optional.of(StudentProgramData.STUDENT_PROGRAM1.name), Optional.empty(),Optional.empty(),Optional.empty(),pageable);
+        Assertions.assertThat(alumniBaseDtoList.size()).isEqualTo(1);
         Utils.matchAlumniBaseDto(alumniBaseDtoList.get(0),AlumniData.ALUMNI1,StudentBranchData.STUDENT_BRANCH1,StudentProgramData.STUDENT_PROGRAM1,UserData.USER8);
 
 
         alumniBaseDtoList = alumniRepository.getAlumniByFilter(Optional.empty(),Optional.of(StudentBranchData.STUDENT_BRANCH1.name),Optional.empty(),Optional.empty(),pageable);
+        Assertions.assertThat(alumniBaseDtoList.size()).isEqualTo(1);
         Utils.matchAlumniBaseDto(alumniBaseDtoList.get(0),AlumniData.ALUMNI1,StudentBranchData.STUDENT_BRANCH1,StudentProgramData.STUDENT_PROGRAM1,UserData.USER8);
 
         alumniBaseDtoList = alumniRepository.getAlumniByFilter(Optional.empty(),Optional.empty(),Optional.of(AlumniData.ALUMNI1.admissionYear),Optional.empty(),pageable);
+        Assertions.assertThat(alumniBaseDtoList.size()).isEqualTo(1);
         Utils.matchAlumniBaseDto(alumniBaseDtoList.get(0),AlumniData.ALUMNI1,StudentBranchData.STUDENT_BRANCH1,StudentProgramData.STUDENT_PROGRAM1,UserData.USER8);
 
         alumniBaseDtoList = alumniRepository.getAlumniByFilter(Optional.empty(),Optional.empty(),Optional.empty(),Optional.of(AlumniData.ALUMNI1.passOutYear),pageable);
+        Assertions.assertThat(alumniBaseDtoList.size()).isEqualTo(2);
         Utils.matchAlumniBaseDto(alumniBaseDtoList.get(0),AlumniData.ALUMNI1,StudentBranchData.STUDENT_BRANCH1,StudentProgramData.STUDENT_PROGRAM1,UserData.USER8);
     }
 
