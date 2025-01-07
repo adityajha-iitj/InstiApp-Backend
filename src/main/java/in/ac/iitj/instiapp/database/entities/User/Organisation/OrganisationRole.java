@@ -30,4 +30,10 @@ public class OrganisationRole {
     public OrganisationRole(Long userId) {
         this.Id = userId;
     }
+    
+    public OrganisationRole(Organisation organisation, String roleName, OrganisationPermission permission) {
+        this.organisation = organisation;
+        this.roleName = roleName;
+        this.permission = permission;
+    }
 }
