@@ -74,25 +74,25 @@ public class StudentBranchRepositoryImpl implements StudentBranchRepository {
 
         jdbcTemplate.update(
                 "update student_branch set " +
-                        "organisation_id = case when ? is null then organisation_id else ? end," +
-                        "name = case when ? is null then name else ? end," +
-                        "opening_year = case when ? is null then opening_year else ? end," +
-                        "closing_year = case when ? is null then closing_year else ? end " +
+                        "organisation_id = case when cast(? as integer) is null then organisation_id else ? end," +
+                        "name = case when cast(? as varchar) is null then name else ? end," +
+                        "opening_year = case when cast(? as integer) is null then opening_year else ? end," +
+                        "closing_year = case when cast(? as integer) is null then closing_year else ? end " +
                         "where id = ?",
 
                 Optional.ofNullable(studentBranch.getOrganisation())
-                        .map(org -> org.getId()).orElse(null),
+                        .map(Organisation::getId).orElse(null),
                 Optional.ofNullable(studentBranch.getOrganisation())
-                        .map(org -> org.getId()).orElse(null),
+                        .map(Organisation::getId).orElse(null),
 
-                Optional.ofNullable(studentBranch.getName()).orElse(null),
-                Optional.ofNullable(studentBranch.getName()).orElse(null),
+                studentBranch.getName(),
+                studentBranch.getName(),
 
-                Optional.ofNullable(studentBranch.getOpeningYear()).orElse(null),
-                Optional.ofNullable(studentBranch.getOpeningYear()).orElse(null),
+                studentBranch.getOpeningYear(),
+                studentBranch.getOpeningYear(),
 
-                Optional.ofNullable(studentBranch.getClosingYear()).orElse(null),
-                Optional.ofNullable(studentBranch.getClosingYear()).orElse(null),
+                studentBranch.getClosingYear(),
+                studentBranch.getClosingYear(),
 
                 id
         );
