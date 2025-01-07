@@ -86,7 +86,7 @@ public class FacultyRepositoryImpl implements FacultyRepository {
     @Override
     public void updateFaculty(Faculty faculty) {
         jdbcTemplate.update("update faculty set " +
-                        "org_id = case when ? is null then org_id else ? end," +
+                        "organisation_id = case when ? is null then organisation_id else ? end," +
                         "description = case when ? is null then description else ? end," +
                         "website_url = case when ? is null then website_url else ? end " +
                         "where id =?",
