@@ -103,7 +103,6 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
             throw new EmptyResultDataAccessException("No organisation type " + username + "exists",1);
         }
         else {
-            System.out.println(username);
             return entityManager.createQuery(
                     "select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto( o.user.userName, " +
                             "case when o.parentOrganisation is null then null else o.parentOrganisation.user.userName end, o.type.name, o.Description, o.Website) from Organisation o left join o.parentOrganisation left join  o.parentOrganisation.user where o.user.userName = :username", OrganisationBaseDto.class)
@@ -115,7 +114,7 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
 
     @Override
     public List<OrganisationBaseDto> getOrganisationByType(OrganisationType organisationType, Pageable pageable) {
-        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto(o.user.userName,o.parentOrganisation.user.userName,o.type.name,o.Description,o.Website) from Organisation o where o.type.name = :typeName",OrganisationBaseDto.class)
+        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto(o.user.userName,o.parentOrganisation.user.userName,o.type.name,o.Description,o.Website) from Organisation o left join o.parentOrganisation left join o.parentOrganisation.user where o.type.name = :typeName",OrganisationBaseDto.class)
                 .setParameter("typeName",organisationType.getName())
                 .setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageable.getPageSize())
@@ -132,10 +131,10 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
 
 
         OrganisationDetailedDto organisationDetailedDto =  entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationDetailedDto(o.user.userName," +
-                "CASE when o.parentOrganisation is NOt null THEn o.parentOrganisation.user.userName else NUll end," +
+                "CASE when o.parentOrganisation is not null then  o.parentOrganisation.user.userName else NUll end," +
                 "o.type.name,o.Description," +
                 "CASE when o.media is NOT NULL then o.media.publicId else null end," +
-                "o.Website ) from Organisation o where o.id = :id",OrganisationDetailedDto.class)
+                "o.Website ) from Organisation o left join o.parentOrganisation left join o.media left join o.parentOrganisation.user where o.id = :id",OrganisationDetailedDto.class)
                 .setParameter("id",organisationId)
                 .getSingleResult();
 
@@ -144,7 +143,7 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
             System.out.println("Hello world" + organisationDetailedDto.getParentOrganisation().getUser().getUserName());
             organisationDetailedDto.setParentOrganisation(getOrganisation(organisationDetailedDto.getParentOrganisation().getUser().getUserName()));
         }
-        return organisationDetailedDto;
+            return organisationDetailedDto;
     }
 
     @Override
@@ -170,11 +169,29 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
                     "type_id = case  when ? is null then type_id  else ? end ," +
                     "description = case  when ? is null then description else ? end," +
                     "website = case when ? is null then website else ? end where id = ?",
-                    organisation.getParentOrganisation().getId(), organisation.getParentOrganisation().getId(),
-                    organisation.getMedia().getId(), organisation.getMedia().getId(),
-                    organisation.getType().getId(), organisation.getType().getId(),
-                    organisation.getDescription(), organisation.getDescription(),
-                    organisation.getWebsite(), organisation.getWebsite(),
+
+                    Optional.ofNullable(organisation.getParentOrganisation())
+                            .map(Organisation::getId).orElse(null),
+                    Optional.ofNullable(organisation.getParentOrganisation())
+                            .map(Organisation::getId).orElse(null),
+
+                    Optional.ofNullable(organisation.getMedia())
+                            .map(Media::getId).orElse(null),
+                    Optional.ofNullable(organisation.getMedia())
+                            .map(Media::getId).orElse(null),
+
+                    Optional.ofNullable(organisation.getType())
+                            .map(OrganisationType::getId).orElse(null),
+                    Optional.ofNullable(organisation.getType())
+                            .map(OrganisationType::getId).orElse(null),
+
+                    organisation.getDescription(),
+                    organisation.getDescription(),
+
+                    organisation.getWebsite(),
+                    organisation.getWebsite(),
+
+
                     organisation.getId()
                     );
 

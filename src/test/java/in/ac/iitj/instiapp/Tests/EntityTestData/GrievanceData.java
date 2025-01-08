@@ -5,7 +5,7 @@ import in.ac.iitj.instiapp.database.entities.Grievance;
 public enum GrievanceData {
 
     GRIEVANCE1("100","Regarding the Water coolers","The water coolers are not properly functioning",false),
-    GRIEVANCE2("101","Regarding the Water coolers","My door knob at O4 W314 is broken, kindly fix it",false),
+    GRIEVANCE2("101","Regarding the Door Knob","My door knob at O4 W314 is broken, kindly fix it",true),
     GRIEVANCE3("102","Regarding the AC in my room","The Air Conditioner in my room O4 W314 is not working properly",true),
     GRIEVANCE4("103","This is a Test","This is just a test grievance without any functionality",false);
 

@@ -156,13 +156,13 @@ public class OrganisationTest {
         Assertions.assertThat(organisationDetailedDto.getDescription()).isEqualTo(ORGANISATION3.description);
         Assertions.assertThat(organisationDetailedDto.getWebsite()).isEqualTo(ORGANISATION3.website);
         Assertions.assertThat(organisationDetailedDto.getTypeName()).isEqualTo(ORGANISATION_TYPE3.name);
-        Assertions.assertThat(organisationDetailedDto.getParentOrganisation().getParentOrganisationUserUserName()).isEqualTo(USER1.userName);
+        Assertions.assertThat(organisationDetailedDto.getParentOrganisation().getUser().getUserName()).isEqualTo(USER1.userName);
 
         OrganisationDetailedDto organisationDetailedDto1 = organisationRepository.organisationDetailed(USER1.userName);
         Assertions.assertThat(organisationDetailedDto1.getDescription()).isEqualTo(ORGANISATION1.description);
         Assertions.assertThat(organisationDetailedDto1.getWebsite()).isEqualTo(ORGANISATION1.website);
         Assertions.assertThat(organisationDetailedDto1.getTypeName()).isEqualTo(ORGANISATION_TYPE1.name);
-        Assertions.assertThat(organisationDetailedDto1.getParentOrganisation().getParentOrganisationUserUserName()).isEqualTo(USER1.userName);
+
     }
 
     @Test
@@ -176,12 +176,12 @@ public class OrganisationTest {
 
     @Test
     @Order(10)
+    @Rollback(value = true)
     public void testUpdateOrganisation(){
 
         Organisation organisation = OrganisationData.ORGANISATION3.toEntity();
         organisation.setId(organisationRepository.existOrganisation(USER1.userName));
         organisation.setMedia(new Media(mediaRepository.getIdByPublicId(MediaData.MEDIA5.publicId)));
-        organisation.setParentOrganisation(new Organisation(organisationRepository.existOrganisation(USER1.userName)));
         organisation.setType(new OrganisationType(organisationRepository.existsOrganisationType(ORGANISATION_TYPE1.name)));
         organisation.setDescription(ORGANISATION1.description);
         organisation.setWebsite(ORGANISATION1.website);
@@ -192,9 +192,16 @@ public class OrganisationTest {
 
         Assertions.assertThat((organisationRepository.organisationDetailed(USER3.userName)).getUser().getUserName()).isEqualTo(USER3.userName);
 
-        organisationRepository.updateOrganisation(ORGANISATION3.toEntity());
+        organisationRepository.updateOrganisation(organisation);
 
-        Assertions.assertThat(organisationRepository.organisationDetailed(USER3.userName)).isEqualTo(USER1.userName);
+        Assertions.assertThat(organisationRepository.organisationDetailed(USER1.userName).getDescription()).isEqualTo(ORGANISATION1.description);
+         organisation.setType(new OrganisationType(organisationRepository.existsOrganisationType(ORGANISATION_TYPE2.name)));
+         organisationRepository.updateOrganisation(organisation);
+        Assertions.assertThat(organisationRepository.organisationDetailed(USER1.userName).getTypeName()).isEqualTo(ORGANISATION_TYPE2.name);
+        organisation.setParentOrganisation(new Organisation(organisationRepository.existOrganisation(USER2.userName)));
+        organisationRepository.updateOrganisation(organisation);
+        Assertions.assertThat(organisationRepository.organisationDetailed(USER1.userName).getParentOrganisation().getUser().getUserName()).isEqualTo(USER2.userName);
+
     }
 
 

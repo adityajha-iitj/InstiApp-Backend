@@ -29,7 +29,7 @@ public class GrievanceDto implements Serializable {
         this.Description = description;
         this.userFrom = new UserBaseDto(username);
         this.organisationRole = new OrganisationRoleDto(orgUsername,roleName,permission);
-        this.resolved = false;
+        this.resolved = resolved;
         this.media = new MediaBaseDto(mediaPublicId);
     }
 }

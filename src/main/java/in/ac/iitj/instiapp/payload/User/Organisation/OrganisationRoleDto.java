@@ -3,6 +3,8 @@ package in.ac.iitj.instiapp.payload.User.Organisation;
 import com.fasterxml.jackson.annotation.JsonView;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationPermission;
 import in.ac.iitj.instiapp.payload.Views;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.Value;
 
 import java.io.Serializable;
@@ -10,7 +12,8 @@ import java.io.Serializable;
 /**
  * DTO for {@link in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole}
  */
-@Value
+@Getter
+@Setter
 public class OrganisationRoleDto implements Serializable {
 
     String organisationUsername;
