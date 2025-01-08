@@ -100,6 +100,7 @@ public class GrievanceRepositoryImpl implements GrievanceRepository {
         this.entityManager = entityManager;
     }
 
+    @Transactional
     public void save(Grievance grievance) {
         grievance.setUserFrom(entityManager.getReference(User.class,grievance.getUserFrom().getId()));
         grievance.setOrganisationRole(entityManager.getReference(OrganisationRole.class,grievance.getOrganisationRole().getId()));
@@ -131,20 +132,30 @@ public class GrievanceRepositoryImpl implements GrievanceRepository {
 
     @Override
     public void updateGrievance(String publicId, Grievance grievance) {
-        jdbcTemplate.update("UPDATE grievance SET " +
-                        "title = CASE WHEN ? IS NULL THEN title ELSE ? END, " +
-                        "description = CASE WHEN ? IS NULL THEN description ELSE ? END, " +
-                        "organisation_role_id = CASE WHEN ? IS NULL THEN organisation_role_id ELSE ? END, " +
-                        "media_id = CASE WHEN ? IS NULL THEN media_id ELSE ? END, " +
-                        "resolved = CASE WHEN ? IS NULL THEN resolved ELSE ? END " +
-                        "WHERE public_id = ?",
-                grievance.getTitle(), grievance.getTitle(),
-                grievance.getDescription(), grievance.getDescription(),
-                grievance.getOrganisationRole().getId(), grievance.getOrganisationRole().getId(),
-                grievance.getMedia().getId(), grievance.getMedia().getId(),
-                grievance.getResolved(), grievance.getResolved(),
+
+        Long organisationRoleId = grievance.getOrganisationRole().getId();
+
+// Update query with extracted ID
+        String updateQuery = "UPDATE grievance SET " +
+                "title = CASE WHEN ? IS NULL THEN title ELSE ? END, " +
+                "description = CASE WHEN ? IS NULL THEN description ELSE ? END, " +
+                "organisation_role_id = CASE WHEN cast(? as bigint) IS NULL THEN organisation_role_id ELSE ? END, " +
+                "resolved = CASE WHEN ? IS NULL THEN resolved else ? end " +
+                "WHERE public_id = ?";
+
+
+        jdbcTemplate.update(updateQuery,
+                grievance.getTitle(),
+                grievance.getTitle(),
+                grievance.getDescription(),
+                grievance.getDescription(),
+                organisationRoleId,
+                organisationRoleId,
+                grievance.getResolved(),
+                grievance.getResolved(),
                 publicId
         );
+
     }
 
 
@@ -164,7 +175,8 @@ public class GrievanceRepositoryImpl implements GrievanceRepository {
     public GrievanceDto getGrievance(String publicId){
 
         return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.GrievanceDto(gr.Title,gr.Description,gr.userFrom.userName,gr.organisationRole.organisation.user.userName,gr.organisationRole.roleName,gr.organisationRole.permission,gr.resolved,gr.media.publicId)"+
-                        " from Grievance gr where gr.publicId = :publicId",GrievanceDto.class)
+                        " from Grievance gr " +
+                        "where gr.publicId = :publicId",GrievanceDto.class)
                 .setParameter("publicId",publicId)
                 .getSingleResult();
     }

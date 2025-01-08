@@ -49,10 +49,12 @@ public class Utils {
         Assertions.assertThat(facultyBaseDto.getDescription().equals(facultyData.description));
         Assertions.assertThat(facultyBaseDto.getWebsiteUrl()).isEqualTo(facultyData.websiteUrl);
     }
-    public static void matchGrievanceDto(GrievanceDto grievanceDto, GrievanceData grievanceData){
+    public static void matchGrievanceDto(GrievanceDto grievanceDto, GrievanceData grievanceData, OrganisationRoleData organisationRoleData){
         Assertions.assertThat(grievanceDto.getTitle()).isEqualTo(grievanceData.Title);
         Assertions.assertThat(grievanceDto.getDescription()).isEqualTo(grievanceData.Description);
         Assertions.assertThat(grievanceDto.getResolved()).isEqualTo(grievanceData.resolved);
+        Assertions.assertThat(grievanceDto.getOrganisationRole().getRoleName()).isEqualTo(organisationRoleData.roleName);
+        Assertions.assertThat(grievanceDto.getOrganisationRole().getPermission()).isEqualTo(organisationRoleData.organisationPermission);
 
     }
 
