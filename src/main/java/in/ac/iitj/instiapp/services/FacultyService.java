@@ -15,9 +15,10 @@ public interface FacultyService {
 
     public void facultyExists(String userName);
     public void save(FacultyDetailedDto facultyDetailedDto);
+    public void save(FacultyBaseDto facultyBaseDto);
     public FacultyBaseDto getFaculty(String userName);
     public FacultyDetailedDto getDetailedFaculty(String userName, boolean isPrivate);
-    public void updateFaculty(FacultyBaseDto facultyBaseDto);
+    public void updateFaculty(FacultyDetailedDto facultyDetailedDto);
     public List<FacultyBaseDto> getFacultyByFilter(Optional<String> organisationName, Optional<String> description, Optional<String> websiteUrl, Pageable pageable);
     public void deleteFaculty(String userName);
 

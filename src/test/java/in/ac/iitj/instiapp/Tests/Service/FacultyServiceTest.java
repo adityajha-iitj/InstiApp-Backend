@@ -4,6 +4,8 @@ import in.ac.iitj.instiapp.Repository.FacultyRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
 import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.database.entities.User.Faculty.Faculty;
+import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
+import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.services.FacultyService;
 import in.ac.iitj.instiapp.payload.User.Faculty.FacultyBaseDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto;
@@ -20,9 +22,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +34,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
 
 public class FacultyServiceTest {
 
@@ -47,6 +52,10 @@ public class FacultyServiceTest {
 
     @InjectMocks
     private FacultyServiceImpl facultyService; // Use the actual implementation here
+
+    private FacultyDetailedDto initialFacultyDetailedDto;
+    private FacultyDetailedDto updatedFacultyDetailedDto;
+    private Faculty mockFaculty;
 
     @BeforeEach
     void setUp() {
@@ -161,27 +170,38 @@ public class FacultyServiceTest {
     @Test
     @Order(3)
     public void testUpdateFaculty() {
-        // Mock input
-        String facultyUserName = "faculty123";
-        FacultyBaseDto mockFacultyBaseDto = new FacultyBaseDto(
-                facultyUserName,
-                "orgUser123",
-                "Updated faculty description",
-                "https://updated-faculty-website.com"
+
+        // Arrange
+        // Create a sample FacultyDetailedDto with nested objects
+        FacultyDetailedDto facultyDetailedDto = new FacultyDetailedDto(
+                "testFaculty",
+                "testOrg",
+                "Test Description",
+                "http://test-website.com"
         );
 
-        Faculty mockFaculty = new Faculty();  // Assuming you have a Faculty class for persistence
+        // Create a mock Faculty entity that would be returned by the mapper
+        Faculty mockFaculty = new Faculty();
+        // Set necessary properties on mockFaculty if needed
 
-        // Define mock behavior
-        when(facultyDtoMapper.toFaculty(mockFacultyBaseDto)).thenReturn(mockFaculty);
+        // Mock the mapper behavior
+        when(facultyDtoMapper.toFaculty(facultyDetailedDto)).thenReturn(mockFaculty);
 
-        // Call the method under test
-        facultyService.updateFaculty(mockFacultyBaseDto);
+        // Mock the repository behavior
+        doNothing().when(facultyRepository).updateFaculty(mockFaculty);
 
-        // Verify interactions
-        verify(facultyDtoMapper, times(1)).toFaculty(mockFacultyBaseDto);
+        // Act
+        facultyService.updateFaculty(facultyDetailedDto);
+
+        // Assert
+        // Verify that the mapper was called with the correct DTO
+        verify(facultyDtoMapper, times(1)).toFaculty(facultyDetailedDto);
+
+        // Verify that the repository's updateFaculty method was called with the mapped entity
         verify(facultyRepository, times(1)).updateFaculty(mockFaculty);
+
     }
+
 
     @Test
     @Order(4)

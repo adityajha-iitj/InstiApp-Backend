@@ -46,6 +46,12 @@ public class FacultyServiceImpl implements FacultyService {
     }
 
     @Override
+    public void save(FacultyBaseDto facultyBaseDto) {
+        Faculty faculty = facultyDtoMapper.toFaculty(facultyBaseDto);
+        facultyRepository.save(faculty);
+    }
+
+    @Override
     public void facultyExists(String userName){
         facultyRepository.facultyExists(userName);
     }
@@ -81,8 +87,8 @@ public class FacultyServiceImpl implements FacultyService {
     }
 
     @Override
-    public void updateFaculty(FacultyBaseDto facultyBaseDto){
-        Faculty faculty = facultyDtoMapper.toFaculty(facultyBaseDto);
+    public void updateFaculty(FacultyDetailedDto facultyDetailedDto){
+        Faculty faculty = facultyDtoMapper.toFaculty(facultyDetailedDto);
         facultyRepository.updateFaculty(faculty);
     }
 
