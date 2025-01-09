@@ -26,6 +26,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Rollback;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static in.ac.iitj.instiapp.Tests.EntityTestData.CalendarData.CALENDAR1;
@@ -181,7 +182,7 @@ public class OrganisationTest {
 
         Organisation organisation = OrganisationData.ORGANISATION3.toEntity();
         organisation.setId(organisationRepository.existOrganisation(USER1.userName));
-        organisation.setMedia(new Media(mediaRepository.getIdByPublicId(MediaData.MEDIA5.publicId)));
+        organisation.setMedia(Arrays.asList(new Media(mediaRepository.getIdByPublicId(MediaData.MEDIA5.publicId))));
         organisation.setType(new OrganisationType(organisationRepository.existsOrganisationType(ORGANISATION_TYPE1.name)));
         organisation.setDescription(ORGANISATION1.description);
         organisation.setWebsite(ORGANISATION1.website);

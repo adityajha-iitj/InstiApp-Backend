@@ -5,6 +5,8 @@ import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 
 @Entity
 @Getter
@@ -30,8 +32,8 @@ public class Organisation {
     @Column(nullable = false)
     String Description;
 
-    @OneToOne
-    Media media;
+    @OneToMany
+    List<Media> media;
 
     @Column(nullable = true)
     String Website;

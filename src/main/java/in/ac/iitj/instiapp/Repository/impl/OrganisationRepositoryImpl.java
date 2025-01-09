@@ -19,8 +19,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class OrganisationRepositoryImpl implements OrganisationRepository {
@@ -86,9 +88,18 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
         organisation.setType(entityManager.getReference(OrganisationType.class,organisation.getType().getId()));
 
 
-        if(organisation.getMedia().getId() != null)
-            organisation.setMedia(entityManager.getReference(Media.class,organisation.getMedia().getId()));
-        if(organisation.getParentOrganisation().getId() != null)
+        if(organisation.getMedia() != null && !organisation.getMedia().isEmpty()){
+            List<Media> mediaList = organisation.getMedia().stream()
+                    .map(media -> {
+                        if (media.getId() != null) {
+                            return entityManager.getReference(Media.class, media.getId());
+                        }
+                        return media;
+                    })
+                    .collect(Collectors.toList());
+            organisation.setMedia(mediaList);
+        }
+        if(organisation.getParentOrganisation() != null && organisation.getParentOrganisation().getId() != null)
             organisation.setParentOrganisation(entityManager.getReference(Organisation.class, organisation.getParentOrganisation().getId()));
         else {
             organisation.setParentOrganisation(null);
@@ -129,14 +140,31 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
             throw new EmptyResultDataAccessException("No organisation with name " + username + " exists",1);
         }
 
-
-        OrganisationDetailedDto organisationDetailedDto =  entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationDetailedDto(o.user.userName," +
-                "CASE when o.parentOrganisation is not null then  o.parentOrganisation.user.userName else NUll end," +
-                "o.type.name,o.Description," +
-                "CASE when o.media is NOT NULL then o.media.publicId else null end," +
-                "o.Website ) from Organisation o left join o.parentOrganisation left join o.media left join o.parentOrganisation.user where o.id = :id",OrganisationDetailedDto.class)
-                .setParameter("id",organisationId)
+        Object[] result = entityManager.createQuery(
+                        "select o.user.userName, " +
+                                "CASE when o.parentOrganisation is not null then o.parentOrganisation.user.userName else NULL end, " +
+                                "o.type.name, " +
+                                "o.Description, " +
+                                "o.Website " +
+                                "from Organisation o " +
+                                "left join o.parentOrganisation " +
+                                "left join o.parentOrganisation.user " +
+                                "where o.id = :id",
+                        Object[].class
+                )
+                .setParameter("id", organisationId)
                 .getSingleResult();
+
+        List<String> mediaPublicIds = entityManager.createQuery("select   m.publicId " + "from Organisation o left join o.media m where o.id = :id", String.class).setParameter("id", organisationId).getResultList();
+
+        OrganisationDetailedDto organisationDetailedDto = new OrganisationDetailedDto(
+                (String) result[0],              // username
+                (String) result[1],              // parentOrganisationUserName
+                (String) result[2],              // organisationTypeName
+                (String) result[3],              // Description
+                mediaPublicIds,                  // mediaPublicIds
+                (String) result[4]               // Website
+        );
 
 
         if(organisationDetailedDto.getParentOrganisation().getUser().getUserName() != null){
@@ -152,50 +180,55 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
     }
 
     @Override
-    public Optional<String> updateOrganisation(Organisation organisation) {
+    public Optional<List<String>> updateOrganisation(Organisation organisation) {
 
+        List<String> oldMediaPublicIds = new ArrayList<>();
+        try{
+            oldMediaPublicIds = entityManager.createQuery("select m.publicId from Organisation o join o.media m where o.id = :id", String.class).setParameter("id", organisation.getId()).getResultList();
+        } catch(NoResultException ignored){}
 
+        List<Long> newMediaIds = Optional.ofNullable(organisation.getMedia())
+                .map(mediaList -> mediaList.stream()
+                        .map(Media::getId)
+                        .collect(Collectors.toList()))
+                .orElse(null);
 
-
-            String oldMediaPublicId = null;
-            try {
-                oldMediaPublicId = entityManager.createQuery("select o.media.publicId from Organisation  o where o.id = :id",String.class)
-                        .setParameter("id",organisation.getId()).getSingleResult();
-            }catch (NoResultException ignored){}
-
-            jdbcTemplate.update("update  organisation set " +
-                    "parent_organisation_id = case when ? is null then parent_organisation_id else ? end," +
-                    "media_id = case when ? is null then media_id else ? end, " +
-                    "type_id = case  when ? is null then type_id  else ? end ," +
-                    "description = case  when ? is null then description else ? end," +
-                    "website = case when ? is null then website else ? end where id = ?",
-
-                    Optional.ofNullable(organisation.getParentOrganisation())
-                            .map(Organisation::getId).orElse(null),
-                    Optional.ofNullable(organisation.getParentOrganisation())
-                            .map(Organisation::getId).orElse(null),
-
-                    Optional.ofNullable(organisation.getMedia())
-                            .map(Media::getId).orElse(null),
-                    Optional.ofNullable(organisation.getMedia())
-                            .map(Media::getId).orElse(null),
-
-                    Optional.ofNullable(organisation.getType())
-                            .map(OrganisationType::getId).orElse(null),
-                    Optional.ofNullable(organisation.getType())
-                            .map(OrganisationType::getId).orElse(null),
-
-                    organisation.getDescription(),
-                    organisation.getDescription(),
-
-                    organisation.getWebsite(),
-                    organisation.getWebsite(),
-
-
+        // Update the organisation_media join table
+        if (newMediaIds != null) {
+            // First delete existing relationships
+            jdbcTemplate.update(
+                    "delete from organisation_media where organisation_id = ?",
                     organisation.getId()
-                    );
+            );
 
-            return Optional.ofNullable(oldMediaPublicId);
+            // Then insert new relationships
+            for (Long mediaId : newMediaIds) {
+                jdbcTemplate.update(
+                        "insert into organisation_media (organisation_id, media_id) values (?, ?)",
+                        organisation.getId(),
+                        mediaId
+                );
+            }
+        }
+
+        jdbcTemplate.update("UPDATE organisation SET " +
+                        "parent_organisation_id = COALESCE(?, parent_organisation_id), " +
+                        "type_id = COALESCE(?, type_id), " +
+                        "description = COALESCE(?, description), " +
+                        "website = COALESCE(?, website) " +
+                        "WHERE id = ?",
+
+                Optional.ofNullable(organisation.getParentOrganisation())
+                        .map(Organisation::getId).orElse(null),
+                Optional.ofNullable(organisation.getType())
+                        .map(OrganisationType::getId).orElse(null),
+
+                organisation.getDescription(),
+                organisation.getWebsite(),
+                organisation.getId()
+        );
+
+        return Optional.of(oldMediaPublicIds);
 
     }
 

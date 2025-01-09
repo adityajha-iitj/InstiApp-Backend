@@ -112,7 +112,7 @@ void deleteOrganisationType(String name);
      *
      * @return oldMediaPublicId
      */
-    Optional<String> updateOrganisation(Organisation organisation);
+    Optional<List<String>> updateOrganisation(Organisation organisation);
 
 
     /**

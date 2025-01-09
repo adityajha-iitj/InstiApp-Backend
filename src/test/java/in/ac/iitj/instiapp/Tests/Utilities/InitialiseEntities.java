@@ -33,6 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
 import static in.ac.iitj.instiapp.Tests.EntityTestData.CalendarData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.MediaData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData.*;
@@ -297,9 +299,9 @@ public class InitialiseEntities {
             Long mediaId2 = mediaRepository.getIdByPublicId(MEDIA2.publicId);
             Long mediaId3 = mediaRepository.getIdByPublicId(MEDIA3.publicId);
 
-            organisation1.setMedia(new Media(mediaId1));
-            organisation2.setMedia(new Media(mediaId2));
-            organisation3.setMedia(new Media(mediaId3));
+            organisation1.setMedia(Arrays.asList(new Media(mediaId1)));
+            organisation2.setMedia(Arrays.asList(new Media(mediaId2)));
+            organisation3.setMedia(Arrays.asList(new Media(mediaId3)));
 
 
             organisationRepository.save(organisation1);
