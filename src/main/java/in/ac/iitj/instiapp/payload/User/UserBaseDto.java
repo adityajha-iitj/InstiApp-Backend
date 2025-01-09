@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.payload.Views;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.Value;
 
 import java.io.Serializable;
@@ -13,7 +15,8 @@ import java.util.Map;
 /**
  * DTO for {@link in.ac.iitj.instiapp.database.entities.User.User}
  */
-@Value
+@Getter
+@Setter
 @AllArgsConstructor
 public class UserBaseDto implements Serializable {
 
