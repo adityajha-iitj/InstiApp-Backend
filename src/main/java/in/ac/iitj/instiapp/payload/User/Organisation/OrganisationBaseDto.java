@@ -2,9 +2,7 @@ package in.ac.iitj.instiapp.payload.User.Organisation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.Value;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -13,6 +11,8 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrganisationBaseDto implements Serializable {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -38,6 +38,7 @@ public class OrganisationBaseDto implements Serializable {
         this.Website = null;
         this.parentOrganisationUserUserName = null;
     }
+
 
 
 }
