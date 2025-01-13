@@ -10,6 +10,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import javax.swing.text.DateFormatter;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -69,18 +71,20 @@ public class MessRepositoryImpl implements in.ac.iitj.instiapp.Repository.MessRe
         if(Boolean.FALSE.equals(messMenuExists(year, month, day))) {
             throw new DataIntegrityViolationException("mess menu for year" + year + "month" + month + "day" + day + " doesn't exists");
         }
+        else {
 
-        String sql2 = "SELECT menu.id FROM mess_menu menu WHERE menu.year = ? AND menu.month = ? AND menu.day = ?";
+            String sql2 = "SELECT menu.id FROM mess_menu menu WHERE menu.year = ? AND menu.month = ? AND menu.day = ?";
 
-        Long id = jdbcTemplate.queryForObject(
-                sql2,
-                Long.class,
-                year, month, day
-        );
+            Long id = jdbcTemplate.queryForObject(
+                    sql2,
+                    Long.class,
+                    year, month, day
+            );
 
-        MessMenu menu_new= entityManager.getReference(MessMenu.class, id);
-        menu_new.setMenuItem(menuItem);
-        entityManager.merge(menu_new);
+            MessMenu menu_new = entityManager.getReference(MessMenu.class, id);
+            menu_new.setMenuItem(menuItem);
+            entityManager.merge(menu_new);
+        }
     }
 
     @Transactional
@@ -101,13 +105,14 @@ public class MessRepositoryImpl implements in.ac.iitj.instiapp.Repository.MessRe
 
     @Override
     public MenuOverrideDto getOverrideMessMenu(Date date) {
+        System.out.println(date);
         if (!menuOverrideExists(date)) {
             throw new EmptyResultDataAccessException("Menu Override not found for date " + date.toString(), 1);
         }
         return (MenuOverrideDto) entityManager.createQuery("select "+
                 "new in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MenuOverrideDto"+
                 "(mo.date , mo.menuItem.breakfast , mo.menuItem.lunch,mo.menuItem.snacks,mo.menuItem.dinner)" +
-                "from MenuOverride mo where mo.date = :date")
+                "from MenuOverride mo where date(mo.date) = :date ")
                 .setParameter("date" , date)
                 .getSingleResult();
 
@@ -115,7 +120,7 @@ public class MessRepositoryImpl implements in.ac.iitj.instiapp.Repository.MessRe
 
     @Override
     public boolean menuOverrideExists(Date date) {
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS(SELECT 1 FROM menu_override  WHERE date = ? )", Boolean.class, date));
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS(SELECT 1 FROM menu_override  WHERE date = cast(? as date))", Boolean.class,date));
     }
 
     @Transactional

@@ -10,6 +10,7 @@ import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusScheduleDto;
 import in.ac.iitj.instiapp.services.BusService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,12 @@ public class BusServiceImpl implements BusService {
     @Override
     @Transactional
     public void saveBusLocation(String name) {
-        busRepository.saveBusLocation(name);
+        if(name == null || name.isEmpty()) {
+            throw new DataIntegrityViolationException("name cannot be null or empty");
+        }
+        else {
+            busRepository.saveBusLocation(name);
+        }
     }
 
     @Override
@@ -44,6 +50,9 @@ public class BusServiceImpl implements BusService {
 
     @Override
     public void updateBusLocation(String oldName, String newName) {
+        if(oldName == null || oldName.isEmpty() || newName == null || newName.isEmpty()) {
+            throw new DataIntegrityViolationException("old name and new name cannot be  null or empty");
+        }
         busRepository.updateBusLocation(oldName, newName);
     }
 

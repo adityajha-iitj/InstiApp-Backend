@@ -10,6 +10,7 @@ import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MenuOverrideDto;
 import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MessMenuDto;
 import in.ac.iitj.instiapp.services.MessService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -27,41 +28,81 @@ public class MessServiceImpl implements MessService {
 
     @Override
     public void saveMessMenu(MessMenuDto menu) {
-        MessMenu menuEntity = MessDtoMapper.INSTANCE.dtoToMessMenu(menu);
-        messRepository.saveMessMenu( menuEntity );
+        if(menu.getYear() == null || menu.getMonth() == null || menu.getDay() == null) {
+            throw new DataIntegrityViolationException(" year month and day are mandatory fields");
+        }
+        else if (menu.getMenuItemBreakfast() == null || menu.getMenuItemLunch() == null || menu.getMenuItemSnacks() == null || menu.getMenuItemDinner() == null) {
+            throw new DataIntegrityViolationException("Data for all the breakfast lunch snacks and dinner should be given");
+
+        }
+        else {
+            MessMenu menuEntity = MessDtoMapper.INSTANCE.dtoToMessMenu(menu);
+            messRepository.saveMessMenu(menuEntity);
+        }
 
     }
 
     @Override
-    public List<MessMenuDto> getMessMenu(int year, int month) {
-        return messRepository.getMessMenu(year, month);
+    public List<MessMenuDto> getMessMenu(Integer year, Integer month) {
+        if(year == null || month == null){
+            throw new DataIntegrityViolationException("year and month are mandatory fields");
+        }
+        else {
+            return messRepository.getMessMenu(year, month);
+        }
     }
 
     @Override
-    public boolean messMenuExists(int year, int month, int day) {
+    public boolean messMenuExists(Integer year, Integer month, Integer day) {
         return messRepository.messMenuExists(year, month, day);
     }
 
     @Override
-    public void updateMessMenu(int year, int month, int day, MenuItem menuItem) {
-        messRepository.updateMessMenu(year, month, day, menuItem);
+    public void updateMessMenu(MessMenuDto menu) {
+        if(menu.getYear() == null || menu.getMonth() == null || menu.getDay() == null) {
+            throw new DataIntegrityViolationException(" year month and day are mandatory fields");
+        }
+        else if (menu.getMenuItemBreakfast() == null || menu.getMenuItemLunch() == null || menu.getMenuItemSnacks() == null || menu.getMenuItemDinner() == null) {
+            throw new DataIntegrityViolationException("Data for all the breakfast lunch snacks and dinner should be given");
 
+        }
+        else {
+            messRepository.updateMessMenu(menu.getYear(), menu.getMonth(), menu.getDay(), new MenuItem(menu.getMenuItemBreakfast(), menu.getMenuItemLunch(), menu.getMenuItemSnacks() ,menu.getMenuItemDinner()));
+        }
     }
 
     @Override
-    public void deleteMessMenu(int year, int month, int day) {
-        messRepository.deleteMessMenu(year, month, day);
+    public void deleteMessMenu(Integer year, Integer month, Integer day) {
+        if(year == null || month == null || day == null) {
+            throw new DataIntegrityViolationException("year and month are mandatory fields");
+        }
+        else {
+            messRepository.deleteMessMenu(year, month, day);
+        }
     }
 
     @Override
     public void saveOverrideMessMenu(MenuOverrideDto menuOverride) {
-        MenuOverride menu = MessDtoMapper.INSTANCE.menuOverrideDtoToMenuOverride(menuOverride);
-        messRepository.saveOverrideMessMenu( menu );
+        if(menuOverride.getDate() == null) {
+            throw new DataIntegrityViolationException("date is required");
+        }
+        else if(menuOverride.getMenuItemBreakfast() == null && menuOverride.getMenuItemLunch() == null && menuOverride.getMenuItemSnacks() == null && menuOverride.getMenuItemDinner() == null)  {
+            throw new DataIntegrityViolationException("At least one of the meal menu is required");
+        }
+        else {
+            MenuOverride menu = MessDtoMapper.INSTANCE.menuOverrideDtoToMenuOverride(menuOverride);
+            messRepository.saveOverrideMessMenu(menu);
+        }
     }
 
     @Override
     public MenuOverrideDto getOverrideMessMenu(Date date) {
-        return messRepository.getOverrideMessMenu(date);
+        if( date == null){
+            throw new DataIntegrityViolationException("Date Must Not be Null");
+        }
+        else {
+            return messRepository.getOverrideMessMenu(date);
+        }
     }
 
     @Override
@@ -71,11 +112,22 @@ public class MessServiceImpl implements MessService {
 
     @Override
     public void deleteOverrideMessMenu(Date date) {
-        messRepository.deleteOverrideMessMenu(date);
+        if(date == null){
+            throw new DataIntegrityViolationException("Date Must Not be Null");
+        }
+        else {
+            messRepository.deleteOverrideMessMenu(date);
+        }
     }
 
     @Override
-    public void updateOverrideMessMenu(MenuItem menuItem, Date date) {
-        messRepository.updateOverrideMessMenu(menuItem, date);
+    public void updateOverrideMessMenu(MenuOverrideDto menuOverride) {
+        if (menuOverride.getDate() == null) {
+            throw new DataIntegrityViolationException("date is required");
+        } else if (menuOverride.getMenuItemBreakfast() == null && menuOverride.getMenuItemLunch() == null && menuOverride.getMenuItemSnacks() == null && menuOverride.getMenuItemDinner() == null) {
+            throw new DataIntegrityViolationException("At least one of the meal menu is required");
+        } else {
+            messRepository.updateOverrideMessMenu(new MenuItem(menuOverride.getMenuItemBreakfast(), menuOverride.getMenuItemLunch(), menuOverride.getMenuItemSnacks(), menuOverride.getMenuItemDinner()), menuOverride.getDate());
+        }
     }
 }

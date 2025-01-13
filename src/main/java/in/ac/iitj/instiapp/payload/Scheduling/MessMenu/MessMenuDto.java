@@ -2,6 +2,7 @@ package in.ac.iitj.instiapp.payload.Scheduling.MessMenu;
 
 import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MessMenu;
 import lombok.Value;
+import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 

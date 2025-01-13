@@ -23,7 +23,7 @@ public interface MessService {
      * @param month
      * @return List of MessMEnuDto objects from the repository layer which is as it is passed to the controller layer
      */
-    List<MessMenuDto> getMessMenu(int year, int month);
+    List<MessMenuDto> getMessMenu(Integer year, Integer month);
 
     /**
      * @param year
@@ -31,22 +31,19 @@ public interface MessService {
      * @param day
      * @return True if the menu for that daya month and year exist else false
      */
-    boolean messMenuExists(int year, int month, int day);
+    boolean messMenuExists(Integer year, Integer month, Integer day);
 
     /**
-     * @param year
-     * @param month
-     * @param day
-     * @param menuItem
+     * @param menu takes the mess menu data dto which contain year month day and menu item
      */
-    void updateMessMenu(int year, int month, int day, MenuItem menuItem);
+    void updateMessMenu(MessMenuDto menu);
 
     /**
      * @param year
      * @param month
      * @param day
      */
-    void deleteMessMenu(int year, int month, int day);
+    void deleteMessMenu(Integer year, Integer month, Integer day);
 
 /*---------------------------------------------MENU OVERRIDE----------------------------------------------------------*/
 
@@ -74,8 +71,8 @@ public interface MessService {
     void deleteOverrideMessMenu(Date date);
 
     /**
-     * @param menuItem
-     * @param date
+     * @param override
+
      */
-    void updateOverrideMessMenu(MenuItem menuItem, Date date);
+    void updateOverrideMessMenu(MenuOverrideDto override);
 }

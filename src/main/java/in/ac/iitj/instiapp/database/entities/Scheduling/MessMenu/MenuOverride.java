@@ -18,9 +18,8 @@ public class MenuOverride {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
-    @ManyToOne
-    private MessMenu messMenu;
 
+    @Temporal(TemporalType.DATE)
     private Date date;
 
     private MenuItem menuItem;
