@@ -254,6 +254,12 @@ public class GrievanceServiceTest {
         );
     }
 
+    @Test
+    @Order(4)
+    public void testDeleteGrievance() {
+        //grievanceService.deleteGrievance();
+    }
+
 
 
 
