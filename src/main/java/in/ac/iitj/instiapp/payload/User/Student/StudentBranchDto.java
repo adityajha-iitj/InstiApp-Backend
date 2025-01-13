@@ -1,14 +1,17 @@
 package in.ac.iitj.instiapp.payload.User.Student;
 
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto;
-import lombok.Value;
+import lombok.*;
 
 import java.io.Serializable;
 
 /**
  * DTO for {@link in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch}
  */
-@Value
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
 public class StudentBranchDto implements Serializable {
     String name;
     OrganisationBaseDto organisation;
@@ -23,6 +26,7 @@ public class StudentBranchDto implements Serializable {
         this.organisation = null;
     }
 
+
     public StudentBranchDto(String name, String organisationUsername, Integer openingYear, Integer closingYear){
         this.name = name;
         this.organisation = new OrganisationBaseDto(organisationUsername);
@@ -30,4 +34,5 @@ public class StudentBranchDto implements Serializable {
         this.closingYear = closingYear;
 
     }
+
 }
