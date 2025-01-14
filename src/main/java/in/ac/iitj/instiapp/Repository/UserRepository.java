@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository {
@@ -116,11 +117,12 @@ public interface UserRepository {
 
     /**
      * to be used in combination with getUserDetailedDto
+     *
      * @param username
      * @return Empty list if user is not in any organisation
      * @throws org.springframework.dao.EmptyResultDataAccessException if username doesn't exist
      */
-    List<OrganisationRoleDto> getOrganisationRoleDTOsByUsername(String username, Pageable pageable);
+    Set<OrganisationRoleDto> getOrganisationRoleDTOsByUsername(String username, Pageable pageable);
 
 
     /**

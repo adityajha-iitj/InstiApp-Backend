@@ -5,9 +5,7 @@ import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationPermi
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
 import in.ac.iitj.instiapp.payload.Views;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.Value;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -18,11 +16,12 @@ import java.util.Set;
  */
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDetailedDto implements Serializable {
     String name;
     String userName;
     String email;
-
 
     // Public Constructor
     public UserDetailedDto(String name, String userName, String email, String userTypeName, String avatarUrl) {

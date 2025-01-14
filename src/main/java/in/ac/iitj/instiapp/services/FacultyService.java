@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public interface FacultyService {
 
-    public void facultyExists(String userName);
+    public Long facultyExists(String userName);
     public void save(FacultyDetailedDto facultyDetailedDto);
     public void save(FacultyBaseDto facultyBaseDto);
     public FacultyBaseDto getFaculty(String userName);

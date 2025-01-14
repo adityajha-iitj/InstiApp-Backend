@@ -52,8 +52,8 @@ public class FacultyServiceImpl implements FacultyService {
     }
 
     @Override
-    public void facultyExists(String userName){
-        facultyRepository.facultyExists(userName);
+    public Long facultyExists(String userName){
+        return facultyRepository.facultyExists(userName);
     }
 
     @Override
