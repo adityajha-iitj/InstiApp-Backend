@@ -38,8 +38,8 @@ public class GrievanceServiceImpl implements GrievanceService {
     }
 
     @Override
-    public void existGrievance(String publicId){
-        grievanceRepository.existGrievance(publicId);
+    public Long existGrievance(String publicId){
+        return grievanceRepository.existGrievance(publicId);
     }
 
     @Override

@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface GrievanceService {
 
-    public void existGrievance(String publicId);
+    public Long existGrievance(String publicId);
     public void save(GrievanceDto grievanceDto);
     public GrievanceDto getGrievance(String publicId);
     public void updateGrievance(String publicId);

@@ -16,8 +16,8 @@ import java.util.Set;
  */
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserDetailedDto implements Serializable {
     String name;
     String userName;
