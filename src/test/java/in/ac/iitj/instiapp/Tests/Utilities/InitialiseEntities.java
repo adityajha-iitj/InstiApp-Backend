@@ -19,6 +19,7 @@ import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationType;
+import in.ac.iitj.instiapp.database.entities.User.PermissionsData;
 import in.ac.iitj.instiapp.database.entities.User.Student.Alumni.Alumni;
 import in.ac.iitj.instiapp.database.entities.User.Student.Student.Student;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
@@ -91,6 +92,26 @@ public class InitialiseEntities {
 
 
 
+        }
+
+    }
+
+    @Component
+    @Import({PermissionsRepositoryImpl.class})
+    public static class InitialisePermission implements Initialise{
+
+        private final PermissionsRepository permissionsRepository;
+
+        @Autowired
+        public InitialisePermission(PermissionsRepository permissionsRepository){
+            this.permissionsRepository = permissionsRepository;
+        }
+
+
+        @Transactional
+        public void initialise(){
+            permissionsRepository.savePermission(PermissionsData.BUS_SCHEDULE.toEntity());
+            permissionsRepository.savePermission(PermissionsData.CALENDAR.toEntity());
         }
 
     }
