@@ -51,8 +51,8 @@ public class UserServiceImpl implements UserService {
         userRepository.save(usertype);
     }
 
-    public void getAllUserTypes(Pageable pageable){
-        userRepository.getAllUserTypes(pageable);
+    public List<String> getAllUserTypes(Pageable pageable){
+        return userRepository.getAllUserTypes(pageable);
     }
 
     public Long userTypeExists(String name){
@@ -108,16 +108,5 @@ public class UserServiceImpl implements UserService {
     public void delete(String userTypeName){
         userRepository.delete(userTypeName);
     }
-
-
-
-
-
-
-
-
-
-
-
 
 }

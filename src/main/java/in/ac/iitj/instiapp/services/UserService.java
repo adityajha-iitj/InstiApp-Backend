@@ -20,7 +20,7 @@ public interface UserService {
 
     public void save(Usertype usertype);
 
-    public void getAllUserTypes(Pageable pageable);
+    public List<String> getAllUserTypes(Pageable pageable);
 
     public Long userTypeExists(String name);
 

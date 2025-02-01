@@ -22,11 +22,11 @@ public interface CalendarEventsDtoMapper {
     @Mapping(source="isHide",target="isHide")
     Events toEvents(CalendarEventsDto calendarEventsDto);
 
-    @Mapping(source="title",target="title")
-    @Mapping(source="description",target="description")
-    @Mapping(source="date",target="date")
+    @Mapping(source="title",target="Title")
+    @Mapping(source="description",target="Description")
+    @Mapping(source="date",target="Date")
     @Mapping(source="startTime",target="startTime")
-    @Mapping(source="duration",target="duration")
+    @Mapping(source="duration",target="Duration")
     @Mapping(source="isAllDay",target="isAllDay")
     @Mapping(source="isRecurring",target="isRecurring")
     @Mapping(source="recurrence.frequency",target="recurrenceFrequency")
