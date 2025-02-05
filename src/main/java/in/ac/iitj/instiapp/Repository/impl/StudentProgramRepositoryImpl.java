@@ -3,21 +3,24 @@ package in.ac.iitj.instiapp.Repository.impl;
 import in.ac.iitj.instiapp.Repository.User.Student.StudentProgramRepository;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentProgram;
 import jakarta.persistence.EntityManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Objects;
 
+@Repository
 public class StudentProgramRepositoryImpl implements StudentProgramRepository {
 
     private final EntityManager entityManager;
     private final JdbcTemplate jdbcTemplate;
 
 
-
+    @Autowired
     public StudentProgramRepositoryImpl(EntityManager entityManager, JdbcTemplate jdbcTemplate) {
         this.entityManager = entityManager;
         this.jdbcTemplate = jdbcTemplate;

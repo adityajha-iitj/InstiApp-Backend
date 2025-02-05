@@ -37,6 +37,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.*;
+
 
 public class GrievanceServiceTest {
 
@@ -101,30 +103,24 @@ public class GrievanceServiceTest {
         GrievanceDto result = grievanceService.getGrievance(publicId);
 
         // Assert
-        Assertions.assertNotNull(result);
-
-        // Validate GrievanceDto fields
-        Assertions.assertEquals(publicId, result.getPublicId());
-        Assertions.assertEquals("Sample Title", result.getTitle());
-        Assertions.assertEquals("Sample Description", result.getDescription());
-        Assertions.assertTrue(result.getResolved());
+        assertThat(result).isNotNull()
+                .extracting(GrievanceDto::getPublicId, GrievanceDto::getTitle, GrievanceDto::getDescription, GrievanceDto::getResolved)
+                .containsExactly(publicId, "Sample Title", "Sample Description", true);
 
         // Validate UserBaseDto fields
-        Assertions.assertNotNull(result.getUserFrom());
-        Assertions.assertEquals(username, result.getUserFrom().getUserName());
-        Assertions.assertEquals("John Doe", result.getUserFrom().getName());
+        assertThat(result.getUserFrom()).isNotNull()
+                .extracting(UserBaseDto::getUserName, UserBaseDto::getName)
+                .containsExactly(username, "John Doe");
 
         // Validate OrganisationRoleDto fields
-        Assertions.assertNotNull(result.getOrganisationRole());
-        Assertions.assertEquals(orgUsername, result.getOrganisationRole().getOrganisationUsername());
-        Assertions.assertEquals(roleName, result.getOrganisationRole().getRoleName());
-        Assertions.assertEquals(permission, result.getOrganisationRole().getPermission());
+        assertThat(result.getOrganisationRole()).isNotNull()
+                .extracting(OrganisationRoleDto::getOrganisationUsername, OrganisationRoleDto::getRoleName, OrganisationRoleDto::getPermission)
+                .containsExactly(orgUsername, roleName, permission);
 
         // Validate MediaBaseDto fields
-        Assertions.assertNotNull(result.getMedia());
-        Assertions.assertEquals(mediaPublicId, result.getMedia().getPublicId());
-        Assertions.assertEquals(Mediatype.Image, result.getMedia().getType());
-        Assertions.assertEquals("http://example.com/media123", result.getMedia().getPublicUrl());
+        assertThat(result.getMedia()).isNotNull()
+                .extracting(MediaBaseDto::getPublicId, MediaBaseDto::getType, MediaBaseDto::getPublicUrl)
+                .containsExactly(mediaPublicId, Mediatype.Image, "http://example.com/media123");
 
         // Verify repository interactions
         Mockito.verify(grievanceRepository).getGrievance(publicId);
@@ -136,12 +132,12 @@ public class GrievanceServiceTest {
     @Test
     @Order(2)
     public void testUpdateGrievance() {
-         String testPublicId;
-         GrievanceDto testGrievanceDto;
-         Grievance testGrievance;
+        String testPublicId;
+        GrievanceDto testGrievanceDto;
+        Grievance testGrievance;
 
         // Initialize test data
-                testPublicId = "test-grievance-123";
+        testPublicId = "test-grievance-123";
         testGrievanceDto = new GrievanceDto(
                 testPublicId,
                 "Test Grievance",
@@ -164,12 +160,12 @@ public class GrievanceServiceTest {
         // Act
         grievanceService.updateGrievance(testPublicId);
 
-        // Assert
-        verify(grievanceRepository, times(1)).getGrievance(testPublicId);
-        verify(grievanceDtoMapper, times(1)).toGrievance(testGrievanceDto);
-        verify(grievanceRepository, times(1)).updateGrievance(testPublicId, testGrievance);
-
+        // Assert using AssertJ and Mockito
+        verify(grievanceRepository).getGrievance(testPublicId);
+        verify(grievanceDtoMapper).toGrievance(testGrievanceDto);
+        verify(grievanceRepository).updateGrievance(testPublicId, testGrievance);
     }
+
 
     @Test
     @Order(3)
@@ -227,22 +223,22 @@ public class GrievanceServiceTest {
                 pageable
         );
 
-        // Assert
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(2, result.size()); // We expect 2 grievances as returned by mock
+        // Assert using AssertJ
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(2); // We expect 2 grievances as returned by mock
 
         // Validate GrievanceDto fields
         GrievanceDto firstGrievance = result.get(0);
-        Assertions.assertEquals("grievance123", firstGrievance.getPublicId());
-        Assertions.assertEquals(title, firstGrievance.getTitle());
-        Assertions.assertEquals(description, firstGrievance.getDescription());
-        Assertions.assertTrue(firstGrievance.getResolved());
+        assertThat(firstGrievance.getPublicId()).isEqualTo("grievance123");
+        assertThat(firstGrievance.getTitle()).isEqualTo(title);
+        assertThat(firstGrievance.getDescription()).isEqualTo(description);
+        assertThat(firstGrievance.getResolved()).isTrue();
 
         GrievanceDto secondGrievance = result.get(1);
-        Assertions.assertEquals("grievance124", secondGrievance.getPublicId());
-        Assertions.assertEquals(title, secondGrievance.getTitle());
-        Assertions.assertNotEquals(description, secondGrievance.getDescription()); // Description should differ
-        Assertions.assertTrue(secondGrievance.getResolved());
+        assertThat(secondGrievance.getPublicId()).isEqualTo("grievance124");
+        assertThat(secondGrievance.getTitle()).isEqualTo(title);
+        assertThat(secondGrievance.getDescription()).isNotEqualTo(description); // Description should differ
+        assertThat(secondGrievance.getResolved()).isTrue();
 
         // Verify that repository was called with the expected parameters
         Mockito.verify(grievanceRepository).getGrievancesByFilter(
@@ -253,6 +249,7 @@ public class GrievanceServiceTest {
                 pageable
         );
     }
+
 
     @Test
     @Order(4)

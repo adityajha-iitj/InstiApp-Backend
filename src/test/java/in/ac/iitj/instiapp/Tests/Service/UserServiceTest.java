@@ -27,9 +27,9 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import static org.assertj.core.api.Assertions.*;
 
 public class UserServiceTest {
 
@@ -62,7 +62,7 @@ public class UserServiceTest {
         Usertype userTypeName4 = new Usertype(4L,"Organisation");
 
         List<String> usertypeList = Arrays.asList(userTypeName1.getName(), userTypeName2.getName(), userTypeName3.getName(), userTypeName4.getName());
-        Pageable pageable = PageRequest.of(0,10);
+        Pageable pageable = PageRequest.of(0, 10);
 
         // Mock the repository call
         when(userRepository.getAllUserTypes(pageable)).thenReturn(usertypeList);
@@ -70,16 +70,16 @@ public class UserServiceTest {
         // Call the service method
         List<String> result = userService.getAllUserTypes(pageable);
 
-        // Verify interactions and assert results
+        // Verify interactions and assert results using AssertJ
         verify(userRepository, times(1)).getAllUserTypes(pageable);
-        assertNotNull(result);
-        assertEquals(4, result.size());
-        assertEquals("Admin", result.get(0));
-        assertEquals("Student", result.get(1));
-        assertEquals("Faculty", result.get(2));
-        assertEquals("Organisation", result.get(3));
-
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(4);
+        assertThat(result.get(0)).isEqualTo("Admin");
+        assertThat(result.get(1)).isEqualTo("Student");
+        assertThat(result.get(2)).isEqualTo("Faculty");
+        assertThat(result.get(3)).isEqualTo("Organisation");
     }
+
 
     @Test
     @Order(2)
@@ -96,10 +96,10 @@ public class UserServiceTest {
 
         verify(userRepository, times(1)).userTypeExists(name1);
         verify(userRepository, times(1)).userTypeExists(name2);
-        assertNotNull(result1);
-        assertNotNull(result2);
-        assertEquals(1L, result1);
-        assertEquals(-1L, result2);
+        assertThat(result1).isNotNull();
+        assertThat(result2).isNotNull();
+        assertThat(result1).isEqualTo(1L);
+        assertThat(result2).isEqualTo(-1L);
     }
 
     @Test
@@ -126,13 +126,14 @@ public class UserServiceTest {
         // Fetch updated user types
         List<String> result = userService.getAllUserTypes(pageable);
 
-        // Verify interactions and assert results
+        // Verify interactions and assert results using AssertJ
         verify(userRepository, times(1)).getAllUserTypes(pageable);
-        assertNotNull(result);
-        assertEquals(4, result.size());
-        assertFalse(result.contains(oldName)); // Old name should not exist
-        assertTrue(result.contains(newName));  // New name should exist
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(4);
+        assertThat(result).doesNotContain(oldName); // Old name should not exist
+        assertThat(result).contains(newName);  // New name should exist
     }
+
 
     @Test
     @Order(4)
@@ -155,10 +156,13 @@ public class UserServiceTest {
 
         // Fetch updated user types and verify "Student" is removed
         List<String> result = userService.getAllUserTypes(pageable);
-        assertNotNull(result);
-        assertEquals(3, result.size());
-        assertFalse(result.contains(userTypeName));
+
+        // Verify interactions and assert results using AssertJ
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(3);
+        assertThat(result).doesNotContain(userTypeName);
     }
+
 
     @Test
     @Order(5)
@@ -174,15 +178,16 @@ public class UserServiceTest {
         // Call the service method
         UserBaseDto result = userService.getUserLimited(username);
 
-        // Verify interactions and assert results
+        // Verify interactions and assert results using AssertJ
         verify(userRepository, times(1)).getUserLimited(username);
-        assertNotNull(result);
-        assertEquals("John Doe", result.getName());
-        assertEquals("john_doe", result.getUserName());
-        assertEquals("john.doe@example.com", result.getEmail());
-        assertEquals("Student", result.getUserTypeName());
-        assertEquals("avatar_url", result.getAvatarUrl());
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("John Doe");
+        assertThat(result.getUserName()).isEqualTo("john_doe");
+        assertThat(result.getEmail()).isEqualTo("john.doe@example.com");
+        assertThat(result.getUserTypeName()).isEqualTo("Student");
+        assertThat(result.getAvatarUrl()).isEqualTo("avatar_url");
     }
+
 
     @Test
     @Order(6)
@@ -206,20 +211,20 @@ public class UserServiceTest {
         // Call the service method
         UserDetailedDto result = userService.getUserDetailed(username, isPrivate, pageable);
 
-        // Verify interactions and assert results
+        // Verify interactions and assert results using AssertJ
         verify(userRepository, times(1)).getUserDetailed(username, isPrivate);
         verify(userRepository, times(1)).getOrganisationRoleDTOsByUsername(username, pageable);
 
-        assertNotNull(result);
-        assertEquals("John Doe", result.getName());
-        assertEquals("john_doe", result.getUserName());
-        assertEquals("john.doe@example.com", result.getEmail());
-        assertEquals("Student", result.getUserTypeName());
-        assertEquals("avatar_url", result.getAvatarUrl());
-        assertEquals(mockRoles.size(), result.getOrganisationRoleSet().size());
-        assertTrue(result.getOrganisationRoleSet().contains(role1));
-        assertTrue(result.getOrganisationRoleSet().contains(role2));
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("John Doe");
+        assertThat(result.getUserName()).isEqualTo("john_doe");
+        assertThat(result.getEmail()).isEqualTo("john.doe@example.com");
+        assertThat(result.getUserTypeName()).isEqualTo("Student");
+        assertThat(result.getAvatarUrl()).isEqualTo("avatar_url");
+        assertThat(result.getOrganisationRoleSet()).hasSize(mockRoles.size());
+        assertThat(result.getOrganisationRoleSet()).contains(role1, role2);
     }
+
 
     @Test
     @Order(7)
@@ -242,14 +247,15 @@ public class UserServiceTest {
         // Verify interactions
         verify(userRepository, times(1)).getListUserLimitedByUsertype(userType, pageable);
 
-        // Assertions
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals("John Doe", result.get(0).getName());
-        assertEquals("jane_doe", result.get(1).getUserName());
-        assertEquals("Student", result.get(0).getUserTypeName());
-        assertEquals("Student", result.get(1).getUserTypeName());
+        // Assertions using AssertJ
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getName()).isEqualTo("John Doe");
+        assertThat(result.get(1).getUserName()).isEqualTo("jane_doe");
+        assertThat(result.get(0).getUserTypeName()).isEqualTo("Student");
+        assertThat(result.get(1).getUserTypeName()).isEqualTo("Student");
     }
+
 
     @Test
     @Order(8)
@@ -266,11 +272,13 @@ public class UserServiceTest {
 
         verify(userRepository, times(1)).getOrganisationPermission(username, organisationUsername);
 
-        assertTrue(result.isPresent());
-        assertEquals("org_xyz", result.get().getOrganisationUsername());
-        assertEquals("Admin", result.get().getRoleName());
-        assertEquals(OrganisationPermission.MASTER, result.get().getPermission());
+        // Assertions using AssertJ
+        assertThat(result).isPresent();
+        assertThat(result.get().getOrganisationUsername()).isEqualTo("org_xyz");
+        assertThat(result.get().getRoleName()).isEqualTo("Admin");
+        assertThat(result.get().getPermission()).isEqualTo(OrganisationPermission.MASTER);
     }
+
 
     @Test
     @Order(9)
@@ -294,14 +302,15 @@ public class UserServiceTest {
         // Verify interactions and assert results
         verify(userRepository, times(1)).getOrganisationRoleDTOsByUsername(username, pageable);
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertTrue(result.contains(role1));
-        assertTrue(result.contains(role2));
-        assertEquals("org1", role1.getOrganisationUsername());
-        assertEquals("Admin", role1.getRoleName());
-        assertEquals(OrganisationPermission.MASTER, role1.getPermission());
+        // Assertions using AssertJ
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(2);
+        assertThat(result).contains(role1, role2);
+        assertThat(role1.getOrganisationUsername()).isEqualTo("org1");
+        assertThat(role1.getRoleName()).isEqualTo("Admin");
+        assertThat(role1.getPermission()).isEqualTo(OrganisationPermission.MASTER);
     }
+
 
     @Test
     @Order(10)
@@ -318,9 +327,11 @@ public class UserServiceTest {
         // Verify interactions and assert results
         verify(userRepository, times(1)).usernameExists(username);
 
-        assertNotNull(result);
-        assertEquals(mockId, result);
+        // Assertions using AssertJ
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(mockId);
     }
+
 
 
 
