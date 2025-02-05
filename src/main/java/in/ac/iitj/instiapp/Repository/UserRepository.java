@@ -49,6 +49,8 @@ public interface UserRepository {
     Long userTypeExists(String name);
 
 
+    List<Long> getUserTypeIds(List<String> userTypeNames, Pageable pageable);
+
 
     /**
      * @param oldName

@@ -1,47 +1,37 @@
 package in.ac.iitj.instiapp.payload;
 
-import in.ac.iitj.instiapp.database.entities.Media.Mediatype;
-import lombok.Getter;
-import lombok.Setter;
+import in.ac.iitj.instiapp.payload.Media.MediaBaseDto;
+import in.ac.iitj.instiapp.payload.User.GroupDto;
+import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import lombok.Value;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * DTO for {@link in.ac.iitj.instiapp.database.entities.Announcements}
+ * DTO for {@link in.ac.iitj.instiappa.database.entities.Announcements}
  */
 @Value
 public class AnnouncementsDto implements Serializable {
-    String userName;
-    String userUserName;
-    String userEmail;
-    String userAvatarUrl;
+    UserBaseDto userBaseDto;
     String Title;
     String Description;
     Date dateOfAnnouncement;
-    Set<MediaDto> media;
-    Set<String> groupsListNames;
-    Set<UserDto> users;
+    Set<MediaBaseDto> media;
+    GroupDto groupsListNames;
+    String publicId;
 
-    /**
-     * DTO for the Media that will be displayed in Announcements
-     */
-    @Value
-    public static class MediaDto implements Serializable {
-        Mediatype type;
-        String publicId;
-        String assetId;
-        String publicUrl;
+
+    public AnnouncementsDto(String username, String title, String description, Date dateOfAnnouncement, Set<String> mediaPublicIds, String groupPublicId,String publicId) {
+        this.userBaseDto = new UserBaseDto(username);
+        this.Title = title;
+        this.Description = description;
+        this.dateOfAnnouncement = dateOfAnnouncement;
+        this.media = mediaPublicIds.stream().map(MediaBaseDto::new).collect(Collectors.toSet());
+        this.groupsListNames = new GroupDto(groupPublicId);
+        this.publicId = publicId;
     }
 
-    /**
-     * DTO for the users that the announcements will the displayed
-     */
-    @Value
-    public static class UserDto implements Serializable {
-        String userName;
-        String avatarUrl;
-    }
 }

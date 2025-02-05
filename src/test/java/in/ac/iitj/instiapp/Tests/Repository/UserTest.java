@@ -39,7 +39,7 @@ public class UserTest {
 
 
     @Autowired
-    public UserTest(UserRepository userRepository, InitialiseEntities.Initialise initialise) {
+    public UserTest(UserRepository userRepository, InitialiseEntities.InitialiseUser initialise) {
         this.userRepository = userRepository;
         this.initialise = initialise;
 

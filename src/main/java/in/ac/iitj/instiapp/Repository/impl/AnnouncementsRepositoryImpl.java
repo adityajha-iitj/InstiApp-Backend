@@ -28,90 +28,42 @@ public class AnnouncementsRepositoryImpl implements in.ac.iitj.instiapp.Reposito
         this.entityManager = entityManager;
     }
 
-    @Transactional
-    public void createAnnouncement(AnnouncementsDto announcementsDto) {
-        // Fetch related User entity based on user details
-        User user = entityManager.find(User.class, announcementsDto.getUserUserName());
 
-        // Create and set the Media entities
-        Set<Media> mediaSet = new HashSet<>();
-        if (announcementsDto.getMedia() != null) {
-            announcementsDto.getMedia().forEach(mediaDto -> {
-                Media media = entityManager.find(Media.class, mediaDto.getPublicUrl());
-                mediaSet.add(media);
-            });
-        }
 
-        // Create and populate the Announcements entity
-        Announcements announcement = new Announcements();
-        announcement.setUser(user);
-        announcement.setTitle(announcementsDto.getTitle());
-        announcement.setDescription(announcementsDto.getDescription());
-        announcement.setDateOfAnnouncement(new Date());
-        announcement.setMedia(mediaSet);
+    @Override
+    public void createAnnouncement(Announcements announcements) {
 
-        // Persist the announcement entity
-        entityManager.persist(announcement);
+        entityManager.persist(announcements);
     }
 
-    @Transactional
-    public void editAnnouncement(Long announcementId, AnnouncementsDto announcementsDto) {
-        // Fetch the existing Announcements entity
-        Announcements announcement = entityManager.find(Announcements.class, announcementId);
-        if (announcement == null) {
-            throw new IllegalArgumentException("Announcement not found with ID: " + announcementId);
-        }
-
-        // Update fields from DTO
-        announcement.setTitle(announcementsDto.getTitle());
-        announcement.setDescription(announcementsDto.getDescription());
-        announcement.setDateOfAnnouncement(new Date());
-
-        // Update Media entities
-        Set<Media> mediaSet = new HashSet<>();
-        if (announcementsDto.getMedia() != null) {
-            announcementsDto.getMedia().forEach(mediaDto -> {
-                Media media = entityManager.find(Media.class, mediaDto.getPublicUrl());
-                mediaSet.add(media);
-            });
-        }
-        announcement.setMedia(mediaSet);
-
-        // Merge updated entity
-        entityManager.merge(announcement);
+    @Override
+    public List<AnnouncementsDto> getByGroupIds(List<Long> groupIds) {
+        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.AnnouncementsDto(" +
+                "an.user.userName, " +
+                "an.Title, " +
+                "an.Description, " +
+                "an.dateOfAnnouncement," +
+                "case when anm is not null then anm.publicId else null end, " +
+                "an.group.publicId," +
+                "an.publicId " +
+                ") from Announcements  an left join an.media anm",AnnouncementsDto.class)
+                .getResultList();
     }
-    @Transactional
-    public void deleteAnnouncement(Long announcementId) {
-        // Fetch the existing Announcements entity
-        Announcements announcement = entityManager.find(Announcements.class, announcementId);
-        if (announcement == null) {
-            throw new IllegalArgumentException("Announcement not found with ID: " + announcementId);
-        }
 
-        // Remove the entity
-        entityManager.remove(announcement);
+    @Override
+    public void updateAnnouncement(String publicId, Announcements announcements) {
+
+    }
+
+    @Override
+    public void deleteAnnouncement(String publicId) {
+
     }
 
     @Override
     public List<AnnouncementsDto> getAllAnnouncements(Pageable pageable) {
-        Query query = entityManager.createQuery(
-                "SELECT new in.ac.iitj.instiapp.payload.AnnouncementsDto( " +
-                        "    a.user.userName, a.user.userName, a.user.email, a.user.avatarUrl, " +  // User details
-                        "    a.Title, a.Description, a.dateOfAnnouncement, " +  // Announcement details
-                        "    (SELECT m.publicUrl FROM Media m), " +  // Media details (accessing the publicUrl)
-                        "    a.groupsList, " +  // Groups names
-                        "    a.users " +  // Users details
-                        ") FROM Announcements a",
-                AnnouncementsDto.class
-        );
-        query.setFirstResult((int) pageable.getOffset());
-        query.setMaxResults(pageable.getPageSize());
-
-        return query.getResultList();
+        return List.of();
     }
-
-
-
 
 
 }

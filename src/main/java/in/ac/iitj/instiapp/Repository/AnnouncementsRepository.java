@@ -17,24 +17,24 @@ public interface AnnouncementsRepository {
     /**
      * Creates a new announcement in the database.
      *
-     * @param announcementsDto the DTO containing the details of the announcement to be created.
+     * @param announcements userId shouldn't be null
+     *                      groupId shouldn't be null
+     *                      If Media media Id's shouldn't be null else it should be empty list
      */
-    void createAnnouncement(AnnouncementsDto announcementsDto);
+    void createAnnouncement(Announcements announcements);
+
+
+    List<AnnouncementsDto> getByGroupIds(List<Long> groupIds);
 
     /**
      * Edits an existing announcement in the database.
-     *
-     * @param announcementsDto the DTO containing the updated details of the announcement.
-     * @param announcementId   the ID of the announcement to be edited.
-     */
-    void editAnnouncement(Long announcementId, AnnouncementsDto announcementsDto);
+    */
+    void updateAnnouncement(String publicId, Announcements announcements);
 
     /**
      * Deletes an announcement from the database.
-     *
-     * @param announcementId the ID of the announcement to be deleted.
      */
-    void deleteAnnouncement(Long announcementId);
+    void deleteAnnouncement(String publicId);
     /**
      * Gets all the latest versions of the announcemnts
      */

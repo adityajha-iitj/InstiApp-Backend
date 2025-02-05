@@ -1,7 +1,7 @@
 package in.ac.iitj.instiapp.database.entities;
 
 import in.ac.iitj.instiapp.database.entities.Media.Media;
-import in.ac.iitj.instiapp.database.entities.User.Groups;
+import in.ac.iitj.instiapp.database.entities.User.Group;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,6 +21,8 @@ public class Announcements {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
+    String publicId;
+
     @ManyToOne
     @JoinColumn(name = "announcer", nullable = false)
     User user;
@@ -37,10 +39,7 @@ public class Announcements {
     @OneToMany
     Set<Media> media;
 
-    @OneToMany
-    @JoinTable(name = "announcements_groups_list")
-    Set<Groups> groupsList;
-
-    @OneToMany
-    Set<User> users;
+    @OneToOne
+    @JoinColumn(name = "groups_id")
+    Group group;
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.security.Timestamp;
+import java.time.Instant;
 
 @Entity
 @Table(name = "jwt_refresh_token")
@@ -26,6 +27,5 @@ public class JWTRefreshToken {
     @Column(nullable = false)
     String refreshToken;
 
-    // Not implemented on database level.TODO in repository
-    Timestamp refreshTokenExpires;
+    Instant refreshTokenExpires;
 }

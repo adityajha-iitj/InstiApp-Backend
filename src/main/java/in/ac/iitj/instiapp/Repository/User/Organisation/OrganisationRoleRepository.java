@@ -23,6 +23,14 @@ public interface OrganisationRoleRepository {
     Long existOrganisationRole(String organisationName, String roleName);
 
 
+    /**
+     * Note Length of both lists should be same
+     * @param organisationName
+     * @param organisationRoleName
+     * @return
+     */
+    List<Long> getOrganisationRoleIds(List<String> organisationName, List<String> organisationRoleName, Pageable pageable);
+
 
     /**
      * Only changes the roleName and rolePermission
@@ -53,6 +61,8 @@ public interface OrganisationRoleRepository {
      * @throws org.springframework.dao.DataIntegrityViolationException If the user already exists on any other position of organisation
      */
     void insertIntoOrganisationRole(String organisationUsername, String organisationRoleName,Long idOfPerson);
+
+
 
 
 

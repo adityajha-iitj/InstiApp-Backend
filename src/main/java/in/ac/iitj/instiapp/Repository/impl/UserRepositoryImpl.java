@@ -55,6 +55,15 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public List<Long> getUserTypeIds(List<String> userTypeNames, Pageable pageable) {
+        return entityManager.createQuery("select id from Usertype  where  name in :names", Long.class)
+                .setParameter("names", userTypeNames)
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+    }
+
+    @Override
     public void update(String oldName, String newName) {
 
         if(userTypeExists(oldName) == -1L){

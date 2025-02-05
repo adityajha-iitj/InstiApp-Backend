@@ -58,6 +58,14 @@ public interface StudentBranchRepository {
 
 
     /**
+     * @param names
+     * @return Doesn't returns Id if the name doesn't exist
+     */
+    List<Long> getBranchIdsFromNames(List<String> names, Pageable pageable);
+
+
+
+    /**
      * USE With caution as it might have cascading effects and may introduce database blocks
      * @assumptions First delete all the students with specific program including there users
      */

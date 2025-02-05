@@ -101,6 +101,16 @@ public class StudentBranchRepositoryImpl implements StudentBranchRepository {
     }
 
     @Override
+    public List<Long> getBranchIdsFromNames(List<String> names, Pageable pageable) {
+        return  entityManager.createQuery("select id from StudentBranch  where name in :names", Long.class)
+                .setParameter("names", names)
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+    }
+
+
+    @Override
     public void deleteStudentBranch(String name) {
         // todo
     }

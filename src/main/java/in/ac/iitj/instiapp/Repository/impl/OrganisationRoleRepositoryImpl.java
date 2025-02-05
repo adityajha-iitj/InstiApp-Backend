@@ -53,6 +53,17 @@ public class OrganisationRoleRepositoryImpl implements OrganisationRoleRepositor
     }
 
     @Override
+    public List<Long> getOrganisationRoleIds(List<String> organisationName, List<String> organisationRoleName, Pageable pageable) {
+        return entityManager.createQuery("select id from OrganisationRole  where organisation.user.userName in :names and roleName in :roleNames",Long.class)
+                .setParameter("names", organisationName)
+                .setParameter("roleNames", organisationRoleName)
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+    }
+
+
+    @Override
     public void updateOrganisationRole(OrganisationRole oldOrganisationRole,OrganisationRole newOrganisationRole){
         if(existOrganisationRole(oldOrganisationRole.getOrganisation().getUser().getName(), oldOrganisationRole.getRoleName()) == -1L){
             throw new EmptyResultDataAccessException("No role " + oldOrganisationRole.getRoleName() + "exists", 1);

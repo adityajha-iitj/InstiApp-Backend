@@ -33,6 +33,9 @@ public interface StudentProgramRepository {
      */
     List<String> getListOfStudentPrograms(Pageable pageable, boolean all);
 
+
+    List<Long> getIdsFromProgramName(List<String> programNames, Pageable pageable);
+
     /**
      * @param oldName
      * @param newName

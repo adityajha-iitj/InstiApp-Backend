@@ -52,6 +52,15 @@ public class StudentProgramRepositoryImpl implements StudentProgramRepository {
     }
 
     @Override
+    public List<Long> getIdsFromProgramName(List<String> programNames, Pageable pageable) {
+       return entityManager.createQuery("select id from StudentProgram  where  name in :names", Long.class)
+                .setParameter("names", programNames)
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+    }
+
+    @Override
     public void updateStudentProgram(String oldName, String newName, boolean isActive) {
         if(existsStudentProgram(oldName) == -1L){
             throw new EmptyResultDataAccessException("Student Program does not exist with name " + oldName, 1);
