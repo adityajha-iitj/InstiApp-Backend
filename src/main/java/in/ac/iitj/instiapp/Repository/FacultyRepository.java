@@ -60,4 +60,6 @@ public interface FacultyRepository {
 
     Long facultyExists(String username);
 
+    void deleteFaculty(String username);
+
 }

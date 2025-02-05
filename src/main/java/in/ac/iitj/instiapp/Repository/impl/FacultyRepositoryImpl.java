@@ -115,4 +115,8 @@ public class FacultyRepositoryImpl implements FacultyRepository {
                 .getResultList();
     }
 
+    @Override
+    public void deleteFaculty(String username) {
+        // TODO
+    }
 }

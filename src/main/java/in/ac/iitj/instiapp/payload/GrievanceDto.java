@@ -17,6 +17,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 public class GrievanceDto implements Serializable {
+    String publicId;
     String Title;
     String Description;
     UserBaseDto userFrom;
@@ -24,7 +25,8 @@ public class GrievanceDto implements Serializable {
     Boolean resolved;
     MediaBaseDto media;
 
-    public GrievanceDto(String title, String description, String username, String orgUsername, String roleName, OrganisationPermission permission, Boolean resolved, String mediaPublicId) {
+    public GrievanceDto(String publicId, String title, String description, String username, String orgUsername, String roleName, OrganisationPermission permission, Boolean resolved, String mediaPublicId) {
+        this.publicId = publicId;
         this.Title = title;
         this.Description = description;
         this.userFrom = new UserBaseDto(username);

@@ -19,6 +19,7 @@ import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationType;
+import in.ac.iitj.instiapp.database.entities.User.PermissionsData;
 import in.ac.iitj.instiapp.database.entities.User.Student.Alumni.Alumni;
 import in.ac.iitj.instiapp.database.entities.User.Student.Student.Student;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
@@ -32,6 +33,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
 
 import static in.ac.iitj.instiapp.Tests.EntityTestData.CalendarData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.MediaData.*;
@@ -89,6 +92,26 @@ public class InitialiseEntities {
 
 
 
+        }
+
+    }
+
+    @Component
+    @Import({PermissionsRepositoryImpl.class})
+    public static class InitialisePermission implements Initialise{
+
+        private final PermissionsRepository permissionsRepository;
+
+        @Autowired
+        public InitialisePermission(PermissionsRepository permissionsRepository){
+            this.permissionsRepository = permissionsRepository;
+        }
+
+
+        @Transactional
+        public void initialise(){
+            permissionsRepository.savePermission(PermissionsData.BUS_SCHEDULE.toEntity());
+            permissionsRepository.savePermission(PermissionsData.CALENDAR.toEntity());
         }
 
     }
@@ -297,9 +320,9 @@ public class InitialiseEntities {
             Long mediaId2 = mediaRepository.getIdByPublicId(MEDIA2.publicId);
             Long mediaId3 = mediaRepository.getIdByPublicId(MEDIA3.publicId);
 
-            organisation1.setMedia(new Media(mediaId1));
-            organisation2.setMedia(new Media(mediaId2));
-            organisation3.setMedia(new Media(mediaId3));
+            organisation1.setMedia(Arrays.asList(new Media(mediaId1)));
+            organisation2.setMedia(Arrays.asList(new Media(mediaId2)));
+            organisation3.setMedia(Arrays.asList(new Media(mediaId3)));
 
 
             organisationRepository.save(organisation1);

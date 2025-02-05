@@ -5,6 +5,7 @@ import in.ac.iitj.instiapp.payload.Media.MediaBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Value;
 
@@ -18,12 +19,13 @@ import java.util.Map;
  */
 @Data
 @Setter
+@NoArgsConstructor
 public class OrganisationDetailedDto implements Serializable {
     UserDetailedDto user;
     OrganisationBaseDto parentOrganisation;
     String typeName;
     String Description;
-    MediaBaseDto media;
+    List<MediaBaseDto> media;
     String Website;
 
 
@@ -32,12 +34,12 @@ public class OrganisationDetailedDto implements Serializable {
 
 
     public OrganisationDetailedDto(String username,String parentOrganisationUserName, String organisationTypeName,
-                                   String Description, String mediaPublicId, String website) {
+                                   String Description, List<String> mediaPublicId, String website) {
         this.user = new UserDetailedDto(username);
         this.parentOrganisation = new OrganisationBaseDto(parentOrganisationUserName);
         this.typeName = organisationTypeName;
         this.Description = Description;
-        this.media = new MediaBaseDto(mediaPublicId);
+        this.media = mediaPublicId != null ? mediaPublicId.stream().map(MediaBaseDto::new).toList() : new ArrayList<>();
         this.Website = website;
         this.usersWithPORs = new ArrayList<>();
     }

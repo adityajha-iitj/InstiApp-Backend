@@ -15,7 +15,6 @@ import java.util.Set;
 public class CalendarDto implements Serializable {
     String public_id;
     String userName;
-    String userUserName;
     String userEmail;
     Set<CalendarEventsDto> events;
 
@@ -27,13 +26,13 @@ public class CalendarDto implements Serializable {
     public static class CalendarEventsDto implements Serializable {
         String Title;
         String Description;
-        Integer Date;
+        Date Date;
         Time startTime;
         Time Duration;
         Boolean isAllDay;
         Boolean isRecurring;
         CalendarFrequency recurrenceFrequency;
-        java.util.Date recurrenceUntil;
+        Date recurrenceUntil;
         Integer recurrenceCount;
         Integer recurrenceInterval;
         Boolean isHide;

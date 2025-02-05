@@ -16,8 +16,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
@@ -157,12 +159,18 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<OrganisationRoleDto> getOrganisationRoleDTOsByUsername(String username, Pageable pageable) {
-        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto(uor.organisation.user.userName, uor.roleName, uor.permission) from User  u join u.organisationRoleSet uor where u.userName = :username",OrganisationRoleDto .class)
-                .setParameter("username",username)
+    public Set<OrganisationRoleDto> getOrganisationRoleDTOsByUsername(String username, Pageable pageable) {
+        List<OrganisationRoleDto> roleDtoList = entityManager.createQuery(
+                        "select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto(uor.organisation.user.userName, uor.roleName, uor.permission) " +
+                                "from User u join u.organisationRoleSet uor where u.userName = :username",
+                        OrganisationRoleDto.class)
+                .setParameter("username", username)
                 .setMaxResults(pageable.getPageSize())
-                .setFirstResult((int)pageable.getOffset())
+                .setFirstResult((int) pageable.getOffset())
                 .getResultList();
+
+        // Convert List to Set to remove duplicates and return
+        return new LinkedHashSet<>(roleDtoList);
     }
 
 

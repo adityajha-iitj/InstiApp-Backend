@@ -115,7 +115,7 @@ public class GrievanceRepositoryImpl implements GrievanceRepository {
 
     public List<GrievanceDto> getGrievancesByFilter(Optional<String> title, Optional<String> description,Optional<String> organisationName, Optional<Boolean> resolved,Pageable pageable){
 
-            return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.GrievanceDto(gr.Title,gr.Description,gr.userFrom.userName,gr.organisationRole.organisation.user.userName,gr.organisationRole.roleName,gr.organisationRole.permission,gr.resolved,gr.media.publicId) from Grievance gr where"+
+            return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.GrievanceDto(gr.publicId,gr.Title,gr.Description,gr.userFrom.userName,gr.organisationRole.organisation.user.userName,gr.organisationRole.roleName,gr.organisationRole.permission,gr.resolved,gr.media.publicId) from Grievance gr where"+
                                     "(:title is null or gr.Title = :title) and " +
                                     "(:description is null or gr.Description = :description) and " +
                                     "(:organisationName is null or gr.organisationRole.organisation.user.userName = :organisationName) and "+
@@ -174,7 +174,7 @@ public class GrievanceRepositoryImpl implements GrievanceRepository {
 
     public GrievanceDto getGrievance(String publicId){
 
-        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.GrievanceDto(gr.Title,gr.Description,gr.userFrom.userName,gr.organisationRole.organisation.user.userName,gr.organisationRole.roleName,gr.organisationRole.permission,gr.resolved,gr.media.publicId)"+
+        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.GrievanceDto(gr.publicId,gr.Title,gr.Description,gr.userFrom.userName,gr.organisationRole.organisation.user.userName,gr.organisationRole.roleName,gr.organisationRole.permission,gr.resolved,gr.media.publicId)"+
                         " from Grievance gr " +
                         "where gr.publicId = :publicId",GrievanceDto.class)
                 .setParameter("publicId",publicId)
