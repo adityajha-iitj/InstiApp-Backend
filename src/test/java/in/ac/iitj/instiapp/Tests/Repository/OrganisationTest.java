@@ -7,6 +7,7 @@ import in.ac.iitj.instiapp.Repository.impl.OrganisationRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.MediaData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationTypeData;
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.User.InitialiseOrganisation;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.Tests.Utilities.Utils;
 import in.ac.iitj.instiapp.database.entities.Media.Media;
@@ -37,7 +38,7 @@ import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.USER3;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserTypeData.USER_TYPE1;
 
 @DataJpaTest
-@Import({OrganisationRepositoryImpl.class, InitialiseEntities.InitialiseOrganisation.class})
+@Import({OrganisationRepositoryImpl.class, InitialiseOrganisation.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OrganisationTest {
@@ -53,7 +54,7 @@ public class OrganisationTest {
     }
 
     @BeforeAll
-    public static void setUp(@Autowired InitialiseEntities.InitialiseOrganisation initialise) {
+    public static void setUp(@Autowired InitialiseOrganisation initialise) {
         initialise.initialise();
     }
 

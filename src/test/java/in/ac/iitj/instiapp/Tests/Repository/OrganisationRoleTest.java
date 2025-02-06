@@ -6,6 +6,8 @@ import in.ac.iitj.instiapp.Repository.impl.OrganisationRoleRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.UserData;
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.User.InitialiseOrganisationRole;
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.User.InitialiseUser;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.Tests.Utilities.Utils;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
@@ -31,7 +33,7 @@ import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationTypeData.ORGA
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.*;
 
 @DataJpaTest
-@Import({OrganisationRoleRepositoryImpl.class, InitialiseEntities.InitialiseUser.class})
+@Import({OrganisationRoleRepositoryImpl.class, InitialiseUser.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OrganisationRoleTest {
@@ -44,7 +46,7 @@ public class OrganisationRoleTest {
     }
 
     @BeforeAll
-    public static void setUp(@Autowired InitialiseEntities.InitialiseOrganisationRole initialise) {
+    public static void setUp(@Autowired InitialiseOrganisationRole initialise) {
         initialise.initialise();
     }
 

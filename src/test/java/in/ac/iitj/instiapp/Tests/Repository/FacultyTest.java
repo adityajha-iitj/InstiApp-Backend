@@ -5,6 +5,7 @@ import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
 import in.ac.iitj.instiapp.Repository.impl.FacultyRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.*;
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.User.InitialiseFaculty;
 import in.ac.iitj.instiapp.database.entities.User.Faculty.Faculty;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.User;
@@ -28,7 +29,7 @@ import java.util.Optional;
 
 
 @DataJpaTest
-@Import({InitialiseEntities.InitialiseFaculty.class, FacultyRepositoryImpl.class})
+@Import({InitialiseFaculty.class, FacultyRepositoryImpl.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class FacultyTest {
@@ -48,7 +49,7 @@ public class FacultyTest {
     }
 
     @BeforeAll
-    public static void setUp(@Autowired InitialiseEntities.InitialiseFaculty initialiseFaculty) {
+    public static void setUp(@Autowired InitialiseFaculty initialiseFaculty) {
         initialiseFaculty.initialise();
     }
 

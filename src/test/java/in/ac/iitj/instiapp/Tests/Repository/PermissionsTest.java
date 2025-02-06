@@ -5,6 +5,7 @@ import in.ac.iitj.instiapp.Repository.PermissionsRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
 import in.ac.iitj.instiapp.Repository.impl.MessRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.PermissionsRepositoryImpl;
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.InitialisePermission;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.database.entities.User.Permissions;
 import in.ac.iitj.instiapp.database.entities.User.PermissionsData;
@@ -23,7 +24,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationTypeData.*;
 
 @DataJpaTest
-@Import({PermissionsRepositoryImpl.class, InitialiseEntities.InitialisePermission.class})
+@Import({PermissionsRepositoryImpl.class, InitialisePermission.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) //  Cannot be removed as the repository uses postgres specific schema for queries
 public class PermissionsTest {
@@ -36,7 +37,7 @@ public class PermissionsTest {
     }
 
     @BeforeAll
-    public static void setUp(@Autowired InitialiseEntities.InitialisePermission initialise) {
+    public static void setUp(@Autowired InitialisePermission initialise) {
         initialise.initialise();
     }
 

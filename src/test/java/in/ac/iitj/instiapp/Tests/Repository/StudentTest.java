@@ -16,6 +16,7 @@ import in.ac.iitj.instiapp.Tests.EntityTestData.StudentProgramData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.StudentProgramData.*;
 import in.ac.iitj.instiapp.Tests.EntityTestData.UserData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.UserData.*;
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.User.InitialiseStudent;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.database.entities.User.Student.Student.Student;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
@@ -36,7 +37,7 @@ import java.util.Optional;
 
 
 @DataJpaTest
-@Import({StudentRepositoryImpl.class, InitialiseEntities.InitialiseStudent.class , StudentBranchRepositoryImpl.class , StudentProgramRepositoryImpl.class , UserRepositoryImpl.class})
+@Import({StudentRepositoryImpl.class, InitialiseStudent.class , StudentBranchRepositoryImpl.class , StudentProgramRepositoryImpl.class , UserRepositoryImpl.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class StudentTest {
@@ -56,7 +57,7 @@ public class StudentTest {
 
 
     @BeforeAll
-    public static void setup(@Autowired InitialiseEntities.InitialiseStudent initialiseStudent) {
+    public static void setup(@Autowired InitialiseStudent initialiseStudent) {
 
         initialiseStudent.initialise();
 

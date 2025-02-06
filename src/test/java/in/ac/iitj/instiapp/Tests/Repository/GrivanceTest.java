@@ -4,6 +4,7 @@ import in.ac.iitj.instiapp.Repository.GrievanceRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
 import in.ac.iitj.instiapp.Repository.impl.GrievanceRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.*;
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.InitialiseGrievance;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.database.entities.Grievance;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
@@ -38,7 +39,7 @@ import java.util.Optional;
 import static jdk.dynalink.linker.support.Guards.isNotNull;
 
 @DataJpaTest
-@Import({InitialiseEntities.InitialiseGrievance.class, GrievanceRepositoryImpl.class})
+@Import({InitialiseGrievance.class, GrievanceRepositoryImpl.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class GrivanceTest {
@@ -66,7 +67,7 @@ public class GrivanceTest {
     }
 
     @BeforeAll
-    public static void setUp(@Autowired InitialiseEntities.InitialiseGrievance initialiseGrievance) {
+    public static void setUp(@Autowired InitialiseGrievance initialiseGrievance) {
         initialiseGrievance.initialise();
 
     }

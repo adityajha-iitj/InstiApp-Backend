@@ -6,6 +6,7 @@ import in.ac.iitj.instiapp.Tests.EntityTestData.LocationData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.LostnFoundData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.MediaData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.UserData;
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.InitialiseLostnFound;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
 import org.junit.jupiter.api.*;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @DataJpaTest
-@Import({LostnFoundRepositoryImpl.class , InitialiseEntities.InitialiseLostnFound.class})
+@Import({LostnFoundRepositoryImpl.class , InitialiseLostnFound.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class LostnFoundTest {
@@ -35,7 +36,7 @@ public class LostnFoundTest {
     }
 
     @BeforeAll
-    public static void setup(@Autowired InitialiseEntities.InitialiseLostnFound lostnFound)  {
+    public static void setup(@Autowired InitialiseLostnFound lostnFound)  {
         lostnFound.initialise();
     }
 

@@ -3,6 +3,7 @@ package in.ac.iitj.instiapp.Tests.Repository;
 
 import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.User.InitialiseUser;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.Tests.Utilities.Utils;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
@@ -27,7 +28,7 @@ import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserTypeData.*;
 
 @DataJpaTest
-@Import({UserRepositoryImpl.class, InitialiseEntities.InitialiseUser.class})
+@Import({UserRepositoryImpl.class, InitialiseUser.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserTest {
 
@@ -39,7 +40,7 @@ public class UserTest {
 
 
     @Autowired
-    public UserTest(UserRepository userRepository, InitialiseEntities.InitialiseUser initialise) {
+    public UserTest(UserRepository userRepository, InitialiseUser initialise) {
         this.userRepository = userRepository;
         this.initialise = initialise;
 
@@ -194,6 +195,15 @@ public class UserTest {
 
     @Test
     @Order(12)
+    public void testEmailExists(){
+        Assertions.assertThat(userRepository.emailExists(USER1.email)).isTrue();
+        Assertions.assertThat(userRepository.emailExists(USER2.email)).isTrue();
+        Assertions.assertThat(userRepository.emailExists(USER3.email)).isTrue();
+        Assertions.assertThat(userRepository.emailExists(USER4.email)).isFalse();
+    }
+
+    @Test
+    @Order(13)
     @Rollback(value = true)
     public void testUpdateOauth2Info(){
 
@@ -213,7 +223,7 @@ public class UserTest {
 
 
     @Test
-    @Order(13)
+    @Order(14)
     @Rollback(value = true)
     public void testSetUserType(){
         Assertions.assertThatThrownBy(() ->{
@@ -236,7 +246,7 @@ public class UserTest {
 
 
     @Test
-    @Order(14)
+    @Order(15)
     public void testUpdatePhoneNumber(){
 
         Assertions.assertThatThrownBy(() ->{

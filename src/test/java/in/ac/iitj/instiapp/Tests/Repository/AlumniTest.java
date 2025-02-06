@@ -8,6 +8,7 @@ import in.ac.iitj.instiapp.Tests.EntityTestData.AlumniData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.StudentBranchData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.StudentProgramData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.UserData;
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.User.InitialiseAlumni;
 import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.Tests.Utilities.Utils;
 import in.ac.iitj.instiapp.database.entities.User.Student.StudentBranch;
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 @DataJpaTest
-@Import({InitialiseEntities.InitialiseAlumni.class})
+@Import({InitialiseAlumni.class})
 public class AlumniTest {
 
     private final AlumniRepository alumniRepository;
@@ -47,7 +48,7 @@ public class AlumniTest {
 
 
     @BeforeAll
-    public static void setUp(@Autowired InitialiseEntities.InitialiseAlumni initialiseAlumni){
+    public static void setUp(@Autowired InitialiseAlumni initialiseAlumni){
         initialiseAlumni.initialise();
     }
 
