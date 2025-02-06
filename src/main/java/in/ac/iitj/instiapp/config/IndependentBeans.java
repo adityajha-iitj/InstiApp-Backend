@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.security.SecureRandom;
 
 @Component
 public class IndependentBeans {
@@ -18,5 +19,10 @@ public class IndependentBeans {
     @Bean
     public Dotenv getDotEnv(){
         return  Dotenv.load();
+    }
+
+    @Bean
+    public SecureRandom getSecureRandom(){
+        return new SecureRandom();
     }
 }

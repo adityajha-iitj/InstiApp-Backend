@@ -132,6 +132,13 @@ public interface UserRepository {
      */
     Long usernameExists(String username);
 
+
+    /**
+     * @param email
+     * @return false if email doesn't exists in database
+     */
+    Boolean emailExists(String email);
+
     /**
      * @apiNote The api using this functions if refreshes on userInteraction should have strict rateLimits To prevent exceeding quotas
      * for oauth2

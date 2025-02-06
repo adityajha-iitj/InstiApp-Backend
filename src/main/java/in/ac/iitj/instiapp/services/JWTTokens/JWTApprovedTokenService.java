@@ -63,4 +63,7 @@ public class JWTApprovedTokenService {
         return jwtService.extractAllClaims(token);
     }
 
+    public int getEXPIRATION_TIME() {
+        return Math.toIntExact(EXPIRATION_TIME);
+    }
 }

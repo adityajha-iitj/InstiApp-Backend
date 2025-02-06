@@ -1,9 +1,11 @@
 package in.ac.iitj.instiapp.services;
 
+import in.ac.iitj.instiapp.payload.Auth.SignupDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
+import io.jsonwebtoken.Claims;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -14,9 +16,8 @@ import java.util.Set;
 
 public interface UserService {
 
-    public Long save(UserBaseDto userBaseDto);
 
-    public Long save(UserDetailedDto userDetailedDto);
+    public String save(SignupDto signupDto, Claims claim);
 
     public void save(Usertype usertype);
 

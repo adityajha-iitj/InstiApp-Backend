@@ -2,7 +2,9 @@ package in.ac.iitj.instiapp.database.entities.Auth;
 
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.security.Timestamp;
@@ -12,6 +14,8 @@ import java.time.Instant;
 @Table(name = "jwt_refresh_token")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class JWTRefreshToken {
 
     @jakarta.persistence.Id

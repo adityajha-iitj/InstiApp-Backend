@@ -180,6 +180,13 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Boolean emailExists(String email) {
+        return entityManager.createQuery("select exists(select id from User  u where  u.email = :email)", Boolean.class)
+                .setParameter("email", email)
+                .getSingleResult();
+    }
+
+    @Override
     public void updateOauth2Info(String newName, String avatarURL, String userName) {
         if(usernameExists(userName) == -1L){
             throw new EmptyResultDataAccessException("No user found with username " + userName,1);

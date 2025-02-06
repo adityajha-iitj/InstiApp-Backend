@@ -24,14 +24,14 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<Long> saveUser(@RequestBody UserBaseDto userBaseDto) {
-        try{
-            Long userId = userService.save(userBaseDto);
-            return new ResponseEntity<>(userId, HttpStatus.CREATED);
-        } catch(Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-    }
+//    @PostMapping("/save")
+//    public ResponseEntity<Long> saveUser(@RequestBody UserBaseDto userBaseDto) {
+//        try{
+//            Long userId = userService.save(userBaseDto);
+//            return new ResponseEntity<>(userId, HttpStatus.CREATED);
+//        } catch(Exception e) {
+//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//
+//    }
 }

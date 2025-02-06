@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.sql.Timestamp;
 
@@ -12,6 +13,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 public class OAuth2Tokens {
 
     @jakarta.persistence.Id
@@ -32,16 +34,13 @@ public class OAuth2Tokens {
     String refreshToken;
 
 
-    @Column(nullable = false)
-    Timestamp refreshTokenExpiresAt;
 
-
-    public OAuth2Tokens(String username, String deviceId, String accessToken, String refreshToken, Timestamp refreshTokenExpiresAt) {
+    public OAuth2Tokens(String username, String deviceId, String accessToken, String refreshToken ) {
         this.Id = null;
         this.user = new User(username);
         this.deviceId = deviceId;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-        this.refreshTokenExpiresAt = refreshTokenExpiresAt;
+
     }
 }

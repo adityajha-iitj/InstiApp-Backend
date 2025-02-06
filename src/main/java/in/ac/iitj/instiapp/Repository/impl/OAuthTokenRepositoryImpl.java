@@ -25,10 +25,9 @@ public class OAuthTokenRepositoryImpl implements OAuth2TokenRepository {
     public void save(OAuth2Tokens oAuth2Token) {
 
         if(getByUsernameAndDeviceId(oAuth2Token.getUser().getUserName(), oAuth2Token.getDeviceId()).isPresent()) {
-            jdbcTemplate.update("update  oauth2tokens set access_token = ?, refresh_token = ? , refresh_token_expires_at = ? where user_id = ? and device_id = ? ",
+            jdbcTemplate.update("update  oauth2tokens set access_token = ?, refresh_token = ? where user_id = ? and device_id = ? ",
                     oAuth2Token.getAccessToken(),
                     oAuth2Token.getRefreshToken(),
-                    oAuth2Token.getRefreshTokenExpiresAt(),
                     oAuth2Token.getUser().getId(),
                     oAuth2Token.getDeviceId()
                     );
@@ -41,7 +40,7 @@ public class OAuthTokenRepositoryImpl implements OAuth2TokenRepository {
     public Optional<OAuth2Tokens > getByUsernameAndDeviceId(String username, String deviceId) {
 
         try{
-        return Optional.of(entityManager.createQuery("select new OAuth2Tokens(ot.user.userName, ot.deviceId, ot.accessToken, ot.refreshToken, ot.refreshTokenExpiresAt) from OAuth2Tokens ot where ot.user.userName = :username and ot.deviceId = :deviceId",OAuth2Tokens.class)
+        return Optional.of(entityManager.createQuery("select new OAuth2Tokens(ot.user.userName, ot.deviceId, ot.accessToken, ot.refreshToken) from OAuth2Tokens ot where ot.user.userName = :username and ot.deviceId = :deviceId",OAuth2Tokens.class)
                 .setParameter("username", username)
                 .setParameter("deviceId", deviceId)
                 .getSingleResult());}
