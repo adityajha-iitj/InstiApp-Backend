@@ -3,6 +3,7 @@ package in.ac.iitj.instiapp.Tests.Service;
 
 import in.ac.iitj.instiapp.Repository.MessRepository;
 import in.ac.iitj.instiapp.Repository.impl.MessRepositoryImpl;
+import in.ac.iitj.instiapp.mappers.Scheduling.MessMenu.MessDtoMapper;
 import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MenuOverrideDto;
 import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MessMenuDto;
 import in.ac.iitj.instiapp.services.MessService;
@@ -29,7 +30,8 @@ public class MessServiceTest {
     @Autowired
     private MessService messService;
 
-    @Autowired  // Add this if you want to mock the repository
+
+      @Autowired  // Add this if you want to mock the repository
     private MessRepository messRepository;
 
 
@@ -69,7 +71,11 @@ public class MessServiceTest {
     @Test
     @Order(3)
     public void testUpdateMessMenu(){
-        messService.updateMessMenu(MENU1.year,MENU1.month,MENU1.day , MENU3.menuItemData.toEntity());
+        MessMenuDto messMenuDto = MENU3.messMenuDto();
+        messMenuDto.setYear(MENU1.year);
+        messMenuDto.setMonth(MENU1.month);
+        messMenuDto.setDay(MENU1.day);
+        messService.updateMessMenu( messMenuDto);
         List<MessMenuDto> messMenuDtos = messService.getMessMenu(MENU1.year,MENU1.month);
         Assertions.assertEquals(MENU3.menuItemData.breakfast , messMenuDtos.get(1).getMenuItemBreakfast());
         Assertions.assertEquals(MENU3.menuItemData.lunch , messMenuDtos.get(1).getMenuItemLunch());
@@ -105,8 +111,11 @@ public class MessServiceTest {
     @Test
     @Order(7)
     public void testUpdateMenuOverride(){
-        messService.updateOverrideMessMenu(MESS_OVERRIDE2.toEntity().getMenuItem(), MESS_OVERRIDE1.date);
-        MenuOverrideDto menuOverrideDto = messService.getOverrideMessMenu(MESS_OVERRIDE1.date);
+
+        MenuOverrideDto menuOverrideDto = MESS_OVERRIDE2.toDto();
+        menuOverrideDto.setDate(MESS_OVERRIDE1.date);
+        messService.updateOverrideMessMenu(menuOverrideDto);
+        menuOverrideDto = messService.getOverrideMessMenu(MESS_OVERRIDE1.date);
         Assertions.assertEquals(MESS_OVERRIDE2.menuItemData.breakfast , menuOverrideDto.getMenuItemBreakfast());
         Assertions.assertEquals(MESS_OVERRIDE2.menuItemData.lunch , menuOverrideDto.getMenuItemLunch());
         Assertions.assertEquals(MESS_OVERRIDE2.menuItemData.snacks , menuOverrideDto.getMenuItemSnacks());

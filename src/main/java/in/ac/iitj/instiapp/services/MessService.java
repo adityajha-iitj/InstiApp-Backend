@@ -34,12 +34,9 @@ public interface MessService {
     boolean messMenuExists(int year, int month, int day);
 
     /**
-     * @param year
-     * @param month
-     * @param day
-     * @param menuItem
+     *menu
      */
-    void updateMessMenu(int year, int month, int day, MenuItem menuItem);
+    void updateMessMenu(MessMenuDto menu);
 
     /**
      * @param year
@@ -74,8 +71,7 @@ public interface MessService {
     void deleteOverrideMessMenu(Date date);
 
     /**
-     * @param menuItem
-     * @param date
+
      */
-    void updateOverrideMessMenu(MenuItem menuItem, Date date);
+    void updateOverrideMessMenu(MenuOverrideDto menuOverrideDto);
 }

@@ -43,8 +43,17 @@ public class MessServiceImpl implements MessService {
     }
 
     @Override
-    public void updateMessMenu(int year, int month, int day, MenuItem menuItem) {
-        messRepository.updateMessMenu(year, month, day, menuItem);
+    public void updateMessMenu(MessMenuDto messMenuDto) {
+        messRepository.updateMessMenu(messMenuDto.getYear(),
+                messMenuDto.getMonth(),
+                messMenuDto.getDay(),
+                new MenuItem(
+                        messMenuDto.getMenuItemBreakfast(),
+                        messMenuDto.getMenuItemLunch(),
+                        messMenuDto.getMenuItemSnacks(),
+                        messMenuDto.getMenuItemDinner()
+                )
+                );
 
     }
 
@@ -75,7 +84,13 @@ public class MessServiceImpl implements MessService {
     }
 
     @Override
-    public void updateOverrideMessMenu(MenuItem menuItem, Date date) {
-        messRepository.updateOverrideMessMenu(menuItem, date);
+    public void updateOverrideMessMenu(MenuOverrideDto menuOverrideDto) {
+        messRepository.updateOverrideMessMenu(
+                new MenuItem(menuOverrideDto.getMenuItemBreakfast(),
+                            menuOverrideDto.getMenuItemLunch(),
+                            menuOverrideDto.getMenuItemSnacks(),
+                            menuOverrideDto.getMenuItemDinner()
+                        )
+                , menuOverrideDto.getDate());
     }
 }

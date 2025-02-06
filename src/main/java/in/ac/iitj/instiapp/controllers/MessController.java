@@ -1,6 +1,7 @@
 package in.ac.iitj.instiapp.controllers;
 
 import in.ac.iitj.instiapp.constraints.Validations;
+import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuItem;
 import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MenuOverrideDto;
 import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MessMenuDto;
 import in.ac.iitj.instiapp.services.MessService;
@@ -39,7 +40,7 @@ public class MessController {
 
     @PutMapping("/mess-menu")
     public void updateMessMenu(@Valid @RequestBody MessMenuDto menu) {
-        messService.updateMessMenu(menu);
+        messService.updateMessMenu( menu );
     }
 
     @DeleteMapping("/mess-menu")
