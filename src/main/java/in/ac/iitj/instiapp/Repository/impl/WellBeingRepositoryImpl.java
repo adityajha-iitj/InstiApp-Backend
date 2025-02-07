@@ -36,7 +36,6 @@ public class WellBeingRepositoryImpl implements WellBeingRepository {
         User user = entityManager.getReference(User.class, member.getUser().getId());
         member.setUser(user);
         entityManager.persist(member);
-
     }
 
     @Override
@@ -88,10 +87,9 @@ public class WellBeingRepositoryImpl implements WellBeingRepository {
 
     @Override
     public Long deleteMember(String username) {
-
-        if(memberExists(username)) {
-            jdbcTemplate.queryForObject("DELETE FROM well_being_member w USING users u WHERE u.id = w.user_id AND u.user_name = :userName RETURNING u.id;\n",Long.class, username);
+        if(!memberExists(username)) {
+            throw new EmptyResultDataAccessException("the member with username " + username + " does not exist",1);
         }
-        throw new EmptyResultDataAccessException("the member with username " + username + " does not exist",1);
+        return jdbcTemplate.queryForObject("DELETE FROM well_being_member w USING users u WHERE u.id = w.user_id AND u.user_name = ? RETURNING u.id", Long.class, username);
     }
 }
