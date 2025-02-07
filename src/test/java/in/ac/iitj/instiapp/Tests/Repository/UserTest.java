@@ -20,6 +20,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Rollback;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static in.ac.iitj.instiapp.Tests.EntityTestData.CalendarData.CALENDAR1;
@@ -249,6 +251,29 @@ public class UserTest {
         userRepository.updatePhoneNumber(USER1.userName,USER4.phoneNumber);
 
         Assertions.assertThat(userRepository.getUserDetailed(USER1.userName,true).getPhoneNumber()).isEqualTo(USER4.phoneNumber);
+    }
+
+    @Test
+    @Order(15)
+    public void testGetUserTypeIds(){
+
+        List<String> userTypeNames = Arrays.asList(USER_TYPE1.name, USER_TYPE2.name);
+
+        List<Long> userTypeIdsList = userRepository.getUserTypeIds(userTypeNames, PageRequest.of(0,10));
+
+        Assertions.assertThat(userTypeIdsList).isNotNull();
+        Assertions.assertThat(userTypeIdsList.size()).isEqualTo(2);
+
+        Assertions.assertThat(userTypeIdsList).contains(userRepository.userTypeExists(USER_TYPE1.name), userRepository.userTypeExists(USER_TYPE2.name));
+
+        //testing pagination
+        List<Long> limitedUserTypeIds = userRepository.getUserTypeIds(userTypeNames, PageRequest.of(0, 1));
+        Assertions.assertThat(limitedUserTypeIds.size()).isEqualTo(1);
+
+        //testing empty list
+        List<Long> emptyResult = userRepository.getUserTypeIds(Collections.emptyList(), PageRequest.of(0, 10));
+        Assertions.assertThat(emptyResult).isEmpty();
+
     }
 
 
