@@ -1,20 +1,23 @@
 package in.ac.iitj.instiapp.controllers;
 
 import in.ac.iitj.instiapp.constraints.Validations;
+import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuItem;
 import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MenuOverrideDto;
 import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MessMenuDto;
 import in.ac.iitj.instiapp.services.MessService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.MenuItem;
 
+import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-@RestController
+@RestController("/api")
 public class MessController {
 
     private final MessService messService;
@@ -39,7 +42,11 @@ public class MessController {
 
     @PutMapping("/mess-menu")
     public void updateMessMenu(@Valid @RequestBody MessMenuDto menu) {
-        messService.updateMessMenu(menu);
+        MenuItem menuitem = new MenuItem();
+        menuitem.setBreakfast(menu.getMenuItemBreakfast());
+        menuitem.setLunch(menu.getMenuItemLunch());
+        menuitem.setDinner(menu.getMenuItemDinner());
+        messService.updateMessMenu(menu.getYear(),menu.getMonth(),menu.getDay(),menuitem);
     }
 
     @DeleteMapping("/mess-menu")
@@ -78,7 +85,11 @@ public class MessController {
 
     @PutMapping("/menu-override")
     public void updateOverrideMessMenu(@RequestBody MenuOverrideDto menu) {
-        messService.updateOverrideMessMenu(menu);
+        MenuItem menuitem = new MenuItem();
+        menuitem.setBreakfast(menu.getMenuItemBreakfast());
+        menuitem.setLunch(menu.getMenuItemLunch());
+        menuitem.setDinner(menu.getMenuItemDinner());
+        messService.updateOverrideMessMenu(menuitem,menu.getDate());
     }
 
     @DeleteMapping("/menu-override")
