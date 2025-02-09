@@ -1,350 +1,294 @@
-//package in.ac.iitj.instiapp.Tests.Service;
-//
-//
-//
-//import in.ac.iitj.instiapp.Repository.BusRepository;
-//import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusOverride;
-//import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusRun;
-//import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusSchedule;
-//import in.ac.iitj.instiapp.mappers.Scheduling.Buses.BusRunDtoMapper;
-//import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusOverrideDto;
-//import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusScheduleDto;
-//import in.ac.iitj.instiapp.services.BusService;
-//import in.ac.iitj.instiapp.services.impl.BusServiceImpl;
-//import jakarta.persistence.EntityManager;
-//import org.assertj.core.api.Assertions;
-//import org.junit.jupiter.api.*;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.context.annotation.Import;
-//import org.springframework.dao.DataIntegrityViolationException;
-//import org.springframework.dao.EmptyResultDataAccessException;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.test.annotation.Rollback;
-//
-//import java.util.Calendar;
-//import java.util.List;
-//
-//import static in.ac.iitj.instiapp.Tests.EntityTestData.Scheduling.Buses.BusLocationData.*;
-//import static in.ac.iitj.instiapp.Tests.EntityTestData.Scheduling.Buses.BusOverrideData.*;
-//import static in.ac.iitj.instiapp.Tests.EntityTestData.Scheduling.Buses.BusRunData.*;
-//import static in.ac.iitj.instiapp.Tests.EntityTestData.Scheduling.Buses.BusScheduleData.*;
-//import static in.ac.iitj.instiapp.Tests.EntityTestData.Scheduling.Buses.BusScheduleData.BUS_SCHEDULE4;
-//import static in.ac.iitj.instiapp.Tests.EntityTestData.Scheduling.Buses.BusSnippetData.BUS_SNIPPET3;
-//import static in.ac.iitj.instiapp.mappers.Scheduling.Buses.BusScheduleDtoMapper.busOverrideDtoMapper;
-//
-//@SpringBootTest
-//@Import({BusServiceImpl.class})
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-//@TestMethodOrder(MethodOrderer.OrderAnnotation.class )
-//public class BusServiceTest {
-//
-//    @Autowired
-//    BusService service;
-//    @Autowired
-//    BusRepository repo;
-//    @Autowired
-//    EntityManager entityManager;
-//    @Autowired
-//    private BusRunDtoMapper busRunDtoMapper;
-//
-//    @BeforeAll
-//    public static void setUp(@Autowired BusService service) {
-//        service.saveBusLocation(BUS_LOCATION1.toEntity().getName());
-//        service.saveBusLocation(BUS_LOCATION2.toEntity().getName());
-//        service.saveBusLocation(BUS_LOCATION3.toEntity().getName());
-//
-//
-//        service.saveBusSchedule(BUS_SCHEDULE1.busname);
-//        service.saveBusSchedule(BUS_SCHEDULE2.busname);
-//
-//        service.saveBusRun(BUS_RUN1.toEntity(), BUS_SCHEDULE1.busname);
-//        service.saveBusRun(BUS_RUN2.toEntity(), BUS_SCHEDULE2.busname);
-//        service.saveBusRun(BUS_RUN3.toEntity(), BUS_SCHEDULE2.busname);
-//
-//        service.saveBusOverride(BUS_SCHEDULE1.busname, BUS_OVERRIDE1.toEntity());
-//        service.saveBusOverride(BUS_SCHEDULE2.busname, BUS_OVERRIDE2.toEntity());
-//        service.saveBusOverride(BUS_SCHEDULE1.busname, BUS_OVERRIDE4.toEntity());
-//    }
-//
-//
-//    @Test
-//    @Order(1)
-//    @Rollback(value = true)
-//    public void testSaveBusLocation() {
-//
-//        Assertions.assertThat(service.isBusLocationExist(BUS_LOCATION4.name)).isEqualTo(-1L);
-//        Assertions.assertThatThrownBy(
-//                () -> service.saveBusLocation(BUS_LOCATION1.name)
-//        ).isInstanceOf(DataIntegrityViolationException.class);
-//
-//    }
-//
-//    // From Here BusLocation1 , BusLocation2, BusLocation3 exist in database
-//
-//
-//    @Test
-//    @Order(2)
-//    public void testGetListOfBusLocations() {
-//
-//        Pageable pageable = PageRequest.of(0, 10);
-//        List<String> locations = service.getBusLocations(pageable);
-//        Assertions.assertThat(locations).containsExactlyInAnyOrder(BUS_LOCATION1.name, BUS_LOCATION2.name, BUS_LOCATION3.name);
-//
-//    }
-//
-//    @Test
-//    @Order(3)
-//    public void testIsBusLocationExist() {
-//        Assertions.assertThat(service.isBusLocationExist(BUS_LOCATION1.name)).isNotNull().isNotEqualTo(-1L);
-//        Assertions.assertThat(service.isBusLocationExist(BUS_LOCATION4.name)).isEqualTo(-1L);
-//    }
-//
-//
-//    @Test
-//    @Order(4)
-//    @Rollback(value = true) // so that BUS_SCHEDULE3 doesn't get saved
-//    public void testSaveBusSchedule() {
-//        Assertions.assertThatThrownBy(
-//                () -> service.saveBusSchedule(BUS_SCHEDULE1.busname)
-//        ).isInstanceOf(DataIntegrityViolationException.class);
-//
-//        Assertions.assertThat(service.existsBusSchedule(BUS_SCHEDULE3.busname)).isEqualTo(-1L);
-//        service.saveBusSchedule(BUS_SCHEDULE3.busname);
-//        Assertions.assertThat(service.existsBusSchedule(BUS_SCHEDULE3.busname)).isNotNull().isNotEqualTo(-1L);
-//    }
-//
-//    @Test
-//    @Order(5)
-//    public void testGetBusSchedule() {
-//        Pageable pageable = PageRequest.of(0, 10);
-//
-//        BusScheduleDto busScheduleDto = service.getBusSchedule(BUS_SCHEDULE1.busname);
-//
-//        Assertions.assertThatCode(() -> {
-//            Assertions.assertThat(busScheduleDto.getBusNumber()).isEqualTo(BUS_SCHEDULE1.busname);
-//            Assertions.assertThat(busScheduleDto.getRuns()).usingRecursiveFieldByFieldElementComparatorIgnoringFields("Id").containsExactlyInAnyOrder(
-//                    busRunDtoMapper.toDto(BUS_RUN1.toEntity())
-//            );
-//            Assertions.assertThat(busScheduleDto.getBusOverrides()).isEmpty();
-//        }).doesNotThrowAnyException();
-//    }
-//
-//    @Test
-//    @Order(6)
-//    public void testGetBusNumbers() {
-//        Assertions.assertThat(service.getBusNumbers(PageRequest.of(0, 10))).containsExactlyInAnyOrder(BUS_SCHEDULE1.busname, BUS_SCHEDULE2.busname, BUS_SCHEDULE3.busname);
-//    }
-//
-//    @Test
-//    @Order(7)
-//    public void testExistsBusSchedule() {
-//        Assertions.assertThat(service.existsBusSchedule(BUS_SCHEDULE1.busname)).isNotNull().isNotEqualTo(-1L);
-//        Assertions.assertThat(service.existsBusSchedule(BUS_SCHEDULE2.busname)).isNotNull().isNotEqualTo(-1L);
-//        Assertions.assertThat(service.existsBusSchedule(BUS_SCHEDULE4.busname)).isEqualTo(-1L);
-//    }
-//
-//
-//    @Test
-//    @Order(8)
-//    @Rollback(value = true)// So That BusRun3 doesn't get saved
-//    public void testSaveBusRun() {
-//        Assertions.assertThatThrownBy(
-//                () -> service.saveBusRun(BUS_RUN1.toEntity(), BUS_SCHEDULE1.busname)
-//        ).isInstanceOf(DataIntegrityViolationException.class);
-//
-//        Assertions.assertThatThrownBy(
-//                () -> service.saveBusRun(BUS_RUN4.toEntity(), BUS_SCHEDULE4.busname)
-//        ).isInstanceOf(EmptyResultDataAccessException.class);
-//
-//        Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN4.publicId)).isFalse();
-//        service.saveBusRun(BUS_RUN4.toEntity(), BUS_SCHEDULE2.busname);
-//        Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN4.publicId)).isTrue();
-//    }
-//
-//    @Test
-//    @Order(9)
-//    public void testExistsBusRun() {
-//        Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN1.publicId)).isTrue();
-//        Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN2.publicId)).isTrue();
-//    }
-//
-//
-//    @Test
-//    @Order(10)
-//    public void testGetBusOverrideForYearAndMonth() {
-//        List<BusOverrideDto> busOverrideDtos = service.getBusOverrideForYearAndMonth(2024, 12);
-//        Assertions.assertThat(busOverrideDtos.size()).isEqualTo(3);
-//
-//        Assertions.assertThat(busOverrideDtos.get(0).getDescription()).isEqualTo(BUS_OVERRIDE1.description);
-//        Assertions.assertThat(busOverrideDtos.get(0).getPublicId()).isEqualTo(BUS_OVERRIDE1.publicId);
-//        Assertions.assertThat(busOverrideDtos.get(0).getBusScheduleBusNumber()).isEqualTo(BUS_SCHEDULE1.busname);
-//
-//    }
-//
-//    @Test
-//    @Order(11)
-//    public void testUpdateBusOverride() {
-//        Assertions.assertThatThrownBy(
-//                () -> service.updateBusOverride(BUS_OVERRIDE3.publicId, BUS_OVERRIDE1.toEntity())
-//        ).isInstanceOf(EmptyResultDataAccessException.class);
-//
-//        Assertions.assertThatThrownBy(
-//                () -> service.updateBusOverride(BUS_OVERRIDE1.publicId, BUS_OVERRIDE4.toEntity())
-//        ).isInstanceOf(DataIntegrityViolationException.class);
-//
-//        Assertions.assertThat(service.existsBusOverrideByPublicId(BUS_OVERRIDE2.publicId)).isTrue();
-//        service.updateBusOverride(BUS_OVERRIDE2.publicId, BUS_OVERRIDE4.toEntity());
-//
-//
-//
-//            Calendar calendar = Calendar.getInstance();
-//            calendar.setTime(BUS_OVERRIDE4.overrideDate);
-//            List<BusOverrideDto> busOverrideDto = service.getBusOverrideForYearAndMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
-//            Assertions.assertThat(busOverrideDto.get(2).getOverrideDate().toInstant()).isEqualTo(BUS_OVERRIDE4.overrideDate.toInstant());
-//            Assertions.assertThat(busOverrideDto.get(2).getDescription()).isEqualTo(BUS_OVERRIDE4.description);
-//            Assertions.assertThat(busOverrideDto.get(2).getPublicId()).isEqualTo(BUS_OVERRIDE2.publicId);
-//            Assertions.assertThat(busOverrideDto.get(2).getBusScheduleBusNumber()).isEqualTo(BUS_SCHEDULE2.busname);
-//
-//    }
-//
-//
-//    @Test
-//    @Order(12)
-//    @Rollback(value = true)
-//    public void testBusOverrideDelete() {
-//
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTime(BUS_OVERRIDE1.overrideDate);
-//
-//        List<BusOverrideDto> busOverrideDtos = service.getBusOverrideForYearAndMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
-//        Assertions.assertThat(busOverrideDtos.size()).isEqualTo(3);
-//
-//        List<String> publicIds = busOverrideDtos.stream().map(BusOverrideDto::getPublicId).toList();
-//
-//        service.deleteBusOverride(publicIds);
-//        busOverrideDtos = service.getBusOverrideForYearAndMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
-//        Assertions.assertThat(busOverrideDtos.size()).isEqualTo(0);
-//    }
-//
-//
-//
-//    @Test
-//    @Order(13)
-//    public void testUpdateBusScheduleRun() {
-//        Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN1.publicId)).isTrue();
-//
-//        Assertions.assertThatThrownBy(() -> service.updateBusScheduleRun(BUS_RUN2.publicId, BUS_RUN3.toEntity())).isInstanceOf(DataIntegrityViolationException.class);
-//
-//        service.updateBusScheduleRun(BUS_RUN1.publicId, BUS_RUN3.toEntity());
-//
-//        Assertions.assertThatCode(() -> {
-//            Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN1.publicId)).isTrue();
-//            BusRun br = entityManager.createQuery("select br from BusRun br where br.publicId = :publicId", BusRun.class).setParameter("publicId", BUS_RUN1.publicId).getSingleResult();
-//            Assertions.assertThat(br.getBusSchedule().getBusNumber()).isEqualTo(BUS_SCHEDULE1.busname);
-//            Assertions.assertThat(br.getScheduleType()).isEqualTo(BUS_RUN3.scheduleType);
-//            Assertions.assertThat(br.getBusSnippet().getTimeOfDeparture()).isEqualTo(BUS_RUN3.busSnippet.timeOfDeparture);
-//            Assertions.assertThat(br.getBusSnippet().getFromLocation().getName()).isEqualTo(BUS_RUN3.busSnippet.fromBusLocation.name);
-//            Assertions.assertThat(br.getBusSnippet().getToLocation().getName()).isEqualTo(BUS_RUN3.busSnippet.toBusLocation.name);
-//        }).doesNotThrowAnyException();
-//    }
-//
-//    @Test
-//    @Order(14)
-//    @Rollback(value = true)
-//    public void testDeleteBusRun() {
-//        Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN1.publicId)).isTrue();
-//        Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN2.publicId)).isTrue();
-//        service.deleteBusRuns(List.of(BUS_RUN1.publicId, BUS_RUN2.publicId));
-//        Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN1.publicId)).isFalse();
-//        Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN2.publicId)).isFalse();
-//
-//    }
-//    @Test
-//    @Order(15)
-//    @Rollback(value = true)
-//    public void testUpdateBusLocation() {
-//
-//        // Checking if the locations assumed to be in database exist in database and not in database
-//        Assertions.assertThat(service.isBusLocationExist(BUS_LOCATION1.name)).isNotNull().isNotEqualTo(-1L);
-//        Assertions.assertThat(service.isBusLocationExist(BUS_LOCATION2.name)).isNotNull().isNotEqualTo(-1L);
-//        Assertions.assertThat(service.isBusLocationExist(BUS_LOCATION4.name)).isEqualTo(-1L);
-//
-//        // If new BusLocation name exist in database
-//        Assertions.assertThatThrownBy(
-//                () -> service.updateBusLocation(BUS_LOCATION1.name, BUS_LOCATION2.name)
-//        ).isInstanceOf(DataIntegrityViolationException.class);
-//
-//        // If OldBusLocationName doesn't exist in database
-//        Assertions.assertThatThrownBy(
-//                () -> service.updateBusLocation(BUS_LOCATION4.name, BUS_LOCATION4.name)
-//        ).isInstanceOf(EmptyResultDataAccessException.class);
-//
-//        service.updateBusLocation(BUS_LOCATION1.name, BUS_LOCATION4.name);
-//
-//        Assertions.assertThat(service.isBusLocationExist(BUS_LOCATION1.name)).isEqualTo(-1L);
-//        Assertions.assertThat(service.isBusLocationExist(BUS_LOCATION4.name)).isNotNull().isNotEqualTo(-1L);
-//    }
-//
-//
-//    @Test
-//    @Order(16)
-//    @Rollback(value = true)
-//    public void testDeleteBusLocation() {
-//
-//        //Checking if location exist in database
-//        Assertions.assertThat(service.isBusLocationExist(BUS_LOCATION2.name)).isNotNull().isNotEqualTo(-1L);
-//
-//        service.deleteBusLocation(BUS_LOCATION2.name);
-//
-//        Assertions.assertThat(service.isBusLocationExist(BUS_LOCATION2.name)).isEqualTo(-1L);
-//
-//        /* Checking if cascading has worked
-//         * Since all the busruns and busoverride exist on bussnippet1 and bussnippet2 which inturn
-//         * depend on buslocation1 the database should be empty for busrun and busoverride
-//         */
-//
-//
-////        Since busrun and busoverride dependent on busrun they should also get deleted. due to cascading
-//
-//        Assertions.assertThatCode(() -> {
-//            Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN1.publicId)).isFalse();
-//            Assertions.assertThat(service.existsBusRunByPublicId(BUS_RUN2.publicId)).isFalse();
-//        }).doesNotThrowAnyException();
-//
-//
-//        Assertions.assertThat(service.existsBusOverrideByPublicId(BUS_OVERRIDE1.publicId)).isFalse();
-//    }
-//    @Test
-//    @Order(17)
-//    @Rollback(value = true)
-//    public void testUpdateBusSchedule() {
-//        Assertions.assertThatThrownBy(
-//                () -> service.updateBusSchedule(BUS_SCHEDULE1.busname, BUS_SCHEDULE2.busname)
-//        ).isInstanceOf(DataIntegrityViolationException.class);
-//
-//        //Before Update
-//        Assertions.assertThat(service.existsBusSchedule(BUS_SCHEDULE2.busname)).isNotNull().isNotEqualTo(-1L);
-//        Assertions.assertThat(service.existsBusSchedule(BUS_SCHEDULE4.busname)).isEqualTo(-1L);
-//
-//        service.updateBusSchedule(BUS_SCHEDULE2.busname, BUS_SCHEDULE4.busname);
-//
-//        //After Update
-//        Assertions.assertThat(service.existsBusSchedule(BUS_SCHEDULE4.busname)).isNotNull().isNotEqualTo(-1L);
-//        Assertions.assertThat(service.existsBusSchedule(BUS_SCHEDULE2.busname)).isEqualTo(-1L);
-//    }
-//
-//    @Test
-//    @Order(18)
-//    @Rollback(value = true)
-//    public void testDeleteBusSchedule() {
-//
-//        //Also testing for cascading deletes
-//        Assertions.assertThat(service.existsBusSchedule(BUS_SCHEDULE1.busname)).isNotNull().isNotEqualTo(-1L);
-//        service.deleteBusSchedule(BUS_SCHEDULE1.busname);
-//        Assertions.assertThat(service.existsBusSchedule(BUS_SCHEDULE1.busname)).isEqualTo(-1L);
-//
-//    }
-//}
+package in.ac.iitj.instiapp.Tests.Service;
+
+
+import in.ac.iitj.instiapp.Repository.BusRepository;
+import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.ScheduleType;
+import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusOverrideDto;
+import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusRunDto;
+import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusScheduleDto;
+import in.ac.iitj.instiapp.services.impl.BusServiceImpl;
+import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import org.springframework.core.annotation.Order;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.sql.Time;
+import java.util.*;
+
+public class BusServiceTest {
+
+    @Mock
+    public BusRepository busRepository;
+
+
+    @InjectMocks
+    private BusServiceImpl busService;
+
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    @Order(1)
+    public void testGetBusLocations() {
+        List<String> busLocations = new ArrayList<>();
+        busLocations.add("IIT Jodhpur");
+        busLocations.add("MBM");
+        busLocations.add("Paota");
+
+        Pageable pageable = PageRequest.of(0,10);
+
+        when(busRepository.getListOfBusLocations(pageable)).thenReturn(busLocations);
+
+        List<String> result = busService.getBusLocations(pageable);
+
+        assertThat(result)
+                .isNotNull()
+                .hasSize(3)
+                .containsExactly("IIT Jodhpur", "MBM", "Paota");
+
+        verify(busRepository, times(1)).getListOfBusLocations(pageable);
+    }
+
+    @Test
+    @Order(2)
+    public void testIsBusLocationExist(){
+        String l1 = "IIT Jodhpur";
+        String l2 = "MBM";
+        String l3 = "Paota";
+
+        when(busRepository.isBusLocationExists(l1)).thenReturn(1L);
+        when(busRepository.isBusLocationExists(l2)).thenReturn(2L);
+        when(busRepository.isBusLocationExists(l3)).thenReturn(-1L);
+
+        Long result1 = busService.isBusLocationExist(l1);
+        Long result2 = busService.isBusLocationExist(l2);
+        Long result3 = busService.isBusLocationExist(l3);
+
+        assertThat(result1)
+                .isNotNull()
+                .isEqualTo(1L);
+
+        assertThat(result2)
+        .isNotNull()
+                .isEqualTo(2L);
+
+        assertThat(result3)
+        .isNotNull()
+                .isEqualTo(-1L);
+
+        verify(busRepository, times(1)).isBusLocationExists(l1);
+        verify(busRepository, times(1)).isBusLocationExists(l2);
+        verify(busRepository, times(1)).isBusLocationExists(l3);
+    }
+
+    @Test
+    @Order(3)
+    void testGetBusSchedule() {
+        // Given
+        String busNumber = "B1";
+
+        BusRunDto busRunDto = new BusRunDto(
+                "run1",
+                new Time(10, 30, 0),
+                "Station A",
+                "Station B",
+                ScheduleType.WEEKDAY
+        );
+
+        BusOverrideDto busOverrideDto = new BusOverrideDto(
+                "override1",
+                busNumber,
+                new Time(11, 00, 0),
+                "Station C",
+                "Station D",
+                new Date(),
+                "Maintenance work"
+        );
+
+        Set<BusRunDto> busRuns = new HashSet<>(Collections.singletonList(busRunDto));
+        Set<BusOverrideDto> busOverrides = new HashSet<>(Collections.singletonList(busOverrideDto));
+
+        BusScheduleDto expectedBusSchedule = new BusScheduleDto(busNumber, busRuns, Optional.of(busOverrides));
+
+        when(busRepository.getBusSchedule(busNumber)).thenReturn(expectedBusSchedule);
+
+        // When
+        BusScheduleDto actualBusSchedule = busService.getBusSchedule(busNumber);
+
+        // Then
+        assertThat(actualBusSchedule).isNotNull();
+        assertThat(actualBusSchedule.getBusNumber()).isEqualTo(busNumber);
+        assertThat(actualBusSchedule.getRuns()).hasSize(1);
+        assertThat(actualBusSchedule.getRuns().iterator().next().getPublicId()).isEqualTo("run1");
+        assertThat(actualBusSchedule.getBusOverrides()).hasSize(1);
+        assertThat(actualBusSchedule.getBusOverrides().iterator().next().getPublicId()).isEqualTo("override1");
+    }
+
+    @Test
+    @Order(4)
+    public void testGetBusNumbers(){
+        List<String> busNumbers = new ArrayList<>();
+        busNumbers.add("B1");
+        busNumbers.add("B2");
+        busNumbers.add("B3");
+
+        Pageable pageable = PageRequest.of(0,10);
+
+        when(busRepository.getBusNumbers(pageable)).thenReturn(busNumbers);
+
+        List<String> result = busService.getBusNumbers(pageable);
+
+        assertThat(result)
+                .isNotNull()
+                .hasSize(3)
+                .containsExactly("B1", "B2", "B3");
+
+        verify(busRepository,times(1)).getBusNumbers(pageable);
+    }
+
+    @Test
+    @Order(5)
+    public void testExistsBusSchedule(){
+        String busNumber1 = "B1";
+        String busNumber2 = "Suiiiiii";
+
+        when(busRepository.existsBusSchedule(busNumber1)).thenReturn(1L);
+        when(busRepository.existsBusSchedule(busNumber2)).thenReturn(-1L);
+
+        Long result1 = busService.existsBusSchedule(busNumber1);
+        Long result2 = busService.existsBusSchedule(busNumber2);
+
+        assertThat(result1)
+                .isNotNull()
+                .isEqualTo(1L);
+        assertThat(result2)
+                .isNotNull()
+                .isEqualTo(-1L);
+
+        verify(busRepository, times(1)).existsBusSchedule(busNumber1);
+        verify(busRepository, times(1)).existsBusSchedule(busNumber2);
+
+
+    }
+
+    @Test
+    @Order(6)
+    public void testExistsBusRunByPublicId() {
+        String publicId1 = "PUB123";
+        String publicId2 = "UNKNOWN";
+
+        when(busRepository.existsBusRunByPublicId(publicId1)).thenReturn(true);
+        when(busRepository.existsBusRunByPublicId(publicId2)).thenReturn(false);
+
+        Boolean result1 = busService.existsBusRunByPublicId(publicId1);
+        Boolean result2 = busService.existsBusRunByPublicId(publicId2);
+
+        assertThat(result1)
+                .isNotNull()
+                .isTrue();
+        assertThat(result2)
+                .isNotNull()
+                .isFalse();
+
+        verify(busRepository, times(1)).existsBusRunByPublicId(publicId1);
+        verify(busRepository, times(1)).existsBusRunByPublicId(publicId2);
+    }
+
+    @Test
+    @Order(7)
+    public void testExistsBusOverrideByPublicId() {
+        String publicId1 = "OVERRIDE_001";
+        String publicId2 = "UNKNOWN_ID";
+
+        when(busRepository.existsBusOverrideByPublicId(publicId1)).thenReturn(true);
+        when(busRepository.existsBusOverrideByPublicId(publicId2)).thenReturn(false);
+
+        boolean result1 = busService.existsBusOverrideByPublicId(publicId1);
+        boolean result2 = busService.existsBusOverrideByPublicId(publicId2);
+
+        assertThat(result1)
+                .isNotNull()
+                .isTrue();
+        assertThat(result2)
+                .isNotNull()
+                .isFalse();
+
+        verify(busRepository, times(1)).existsBusOverrideByPublicId(publicId1);
+        verify(busRepository, times(1)).existsBusOverrideByPublicId(publicId2);
+    }
+
+    @Test
+    @Order(8)
+    public void testGetBusOverrideForYearAndMonth() {
+        int year = 2025;
+        int month = 2;
+
+        // Creating BusOverrideDto objects with values for each column
+        BusOverrideDto busOverride1 = new BusOverrideDto(
+                "PUB001",
+                "B1",
+                Time.valueOf("10:30:00"),
+                "Hostel 1",
+                "Library",
+                new Date(2025 - 1900, 1, 10), // Date(year-1900, month-1, day)
+                "Exam special bus"
+        );
+
+        BusOverrideDto busOverride2 = new BusOverrideDto(
+                "PUB002",
+                "B2",
+                Time.valueOf("14:00:00"),
+                "Main Gate",
+                "Mess",
+                new Date(2025 - 1900, 1, 15),
+                "Lunch time special"
+        );
+
+        List<BusOverrideDto> mockOverrides = Arrays.asList(busOverride1, busOverride2);
+
+        when(busRepository.getBusOverrideForYearAndMonth(year, month)).thenReturn(mockOverrides);
+
+        List<BusOverrideDto> result = busService.getBusOverrideForYearAndMonth(year, month);
+
+        // Assertions using AssertJ
+        assertThat(result)
+                .isNotNull()
+                .hasSize(2)
+                .containsExactlyInAnyOrder(busOverride1, busOverride2);
+
+        assertThat(result.get(0))
+                .extracting(BusOverrideDto::getPublicId, BusOverrideDto::getBusScheduleBusNumber,
+                        BusOverrideDto::getTimeOfDeparture, BusOverrideDto::getFromLocationName,
+                        BusOverrideDto::getToLocationName, BusOverrideDto::getOverrideDate,
+                        BusOverrideDto::getDescription)
+                .containsExactly("PUB001", "B1", Time.valueOf("10:30:00"),
+                        "Hostel 1", "Library", new Date(2025 - 1900, 1, 10),
+                        "Exam special bus");
+
+        assertThat(result.get(1))
+                .extracting(BusOverrideDto::getPublicId, BusOverrideDto::getBusScheduleBusNumber,
+                        BusOverrideDto::getTimeOfDeparture, BusOverrideDto::getFromLocationName,
+                        BusOverrideDto::getToLocationName, BusOverrideDto::getOverrideDate,
+                        BusOverrideDto::getDescription)
+                .containsExactly("PUB002", "B2", Time.valueOf("14:00:00"),
+                        "Main Gate", "Mess", new Date(2025 - 1900, 1, 15),
+                        "Lunch time special");
+
+        verify(busRepository, times(1)).getBusOverrideForYearAndMonth(year, month);
+    }
+
+
+
+
+}
