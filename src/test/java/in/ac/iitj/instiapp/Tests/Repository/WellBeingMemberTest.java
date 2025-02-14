@@ -1,36 +1,34 @@
 package in.ac.iitj.instiapp.Tests.Repository;
 
 
-
 import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.Repository.WellBeingRepository;
 import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.WellBeingRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.UserData;
-import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
-
-import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.*;
-import static in.ac.iitj.instiapp.Tests.EntityTestData.WellBeingMemberData.*;
-
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.User.InitialiseUser;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.User.Wellbeingmoderator.WellBeingMember;
 import in.ac.iitj.instiapp.payload.User.WellBeingModerator.WellBeingMemberDtoFull;
 import in.ac.iitj.instiapp.payload.User.WellBeingModerator.WellBeingMemberDtoLimited;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Rollback;
 
 import java.util.List;
 
+import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.USER1;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.USER2;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.WellBeingMemberData.WELL_BEING_MEMBER_DATA1;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.WellBeingMemberData.WELL_BEING_MEMBER_DATA2;
+
 
 @DataJpaTest
-@Import({UserRepositoryImpl.class, WellBeingRepositoryImpl.class, InitialiseEntities.InitialiseUser.class})
+@Import({UserRepositoryImpl.class, WellBeingRepositoryImpl.class, InitialiseUser.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class WellBeingMemberTest {
@@ -41,7 +39,7 @@ public class WellBeingMemberTest {
     private UserRepositoryImpl userRepository;
 
     @BeforeAll
-    public static void setup(@Autowired InitialiseEntities.InitialiseUser initialise,
+    public static void setup(@Autowired InitialiseUser initialise,
                              @Autowired WellBeingRepository wellBeingRepository,
                              @Autowired UserRepository userRepository) {
         initialise.initialise();

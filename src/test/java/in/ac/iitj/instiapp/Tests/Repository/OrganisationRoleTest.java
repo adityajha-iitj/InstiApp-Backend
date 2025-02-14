@@ -2,27 +2,19 @@ package in.ac.iitj.instiapp.Tests.Repository;
 
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
-import in.ac.iitj.instiapp.Repository.UserRepository;
-import in.ac.iitj.instiapp.Repository.impl.OrganisationRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.OrganisationRoleRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
-import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData;
 import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData;
-import in.ac.iitj.instiapp.Tests.EntityTestData.UserData;
 import in.ac.iitj.instiapp.Tests.InitialiseEntities.User.InitialiseOrganisationRole;
-import in.ac.iitj.instiapp.Tests.InitialiseEntities.User.InitialiseUser;
-import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
 import in.ac.iitj.instiapp.Tests.Utilities.Utils;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
-import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.*;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -30,22 +22,18 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Rollback;
-import org. junit. jupiter.api.*;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationData.ORGANISATION1;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData.ORGANISATION_ROLE1;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData.ORGANISATION_ROLE2;
-import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationTypeData.*;
-import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationTypeData.ORGANISATION_TYPE4;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.*;
 
 @DataJpaTest
-@Import({OrganisationRoleRepositoryImpl.class, InitialiseEntities.InitialiseOrganisationRole.class, UserRepositoryImpl.class})
+@Import({OrganisationRoleRepositoryImpl.class, InitialiseOrganisationRole.class, UserRepositoryImpl.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OrganisationRoleTest {
