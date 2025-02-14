@@ -4,6 +4,7 @@ import in.ac.iitj.instiapp.Repository.OAuth2TokenRepository;
 import in.ac.iitj.instiapp.database.entities.Auth.OAuth2Tokens;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
+import jakarta.transaction.Transactional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +23,7 @@ public class OAuthTokenRepositoryImpl implements OAuth2TokenRepository {
 
 
     @Override
+    @Transactional
     public void save(OAuth2Tokens oAuth2Token) {
 
         if(getByUsernameAndDeviceId(oAuth2Token.getUser().getUserName(), oAuth2Token.getDeviceId()).isPresent()) {
@@ -31,6 +33,7 @@ public class OAuthTokenRepositoryImpl implements OAuth2TokenRepository {
                     oAuth2Token.getUser().getId(),
                     oAuth2Token.getDeviceId()
                     );
+            return;
         }
         entityManager.persist(oAuth2Token);
 

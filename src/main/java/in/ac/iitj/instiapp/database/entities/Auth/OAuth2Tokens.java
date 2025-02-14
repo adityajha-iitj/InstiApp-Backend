@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Timestamp;
-
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -30,7 +28,7 @@ public class OAuth2Tokens {
     @Column(nullable = false)
     String accessToken;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     String refreshToken;
 
 
