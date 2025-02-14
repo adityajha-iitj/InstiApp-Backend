@@ -40,7 +40,7 @@ public class AESUtil {
 
     public static String  encrypt(String payload){
         try {
-            return Base64.getEncoder().encodeToString( cipherEncryptor.doFinal(payload.getBytes()));
+            return Base64.getUrlEncoder().encodeToString( cipherEncryptor.doFinal(payload.getBytes()));
         } catch (IllegalBlockSizeException  | BadPaddingException e) {
             log.error(e.getMessage());
             throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -49,10 +49,10 @@ public class AESUtil {
 
     public static String decrypt(String payload){
         try {
-            return new String(cipherDecryptor.doFinal(Base64.getDecoder().decode(payload)));
+            return new String(cipherDecryptor.doFinal(Base64.getUrlDecoder().decode(payload)));
         }catch (IllegalBlockSizeException | BadPaddingException e){
             log.error(e.getMessage());
-            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new IllegalArgumentException("cannot decrypt value");
         }
     }
 
