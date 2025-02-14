@@ -1,80 +1,84 @@
 package in.ac.iitj.instiapp.config.oauth2;
 
+import com.cloudinary.utils.StringUtils;
 import in.ac.iitj.instiapp.Utils.AESUtil;
-import in.ac.iitj.instiapp.services.JWTTokens.JWTService;
-import in.ac.iitj.instiapp.services.JWTTokens.JWTTempTokenService;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
+import in.ac.iitj.instiapp.Utils.CookieHelper;
+import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
+import in.ac.iitj.instiapp.services.JWTTokens.JWEConstants;
+import in.ac.iitj.instiapp.services.JWTTokens.JWEOAuth2Tokens;
+import in.ac.iitj.instiapp.services.JWTTokens.TokenService;
+import in.ac.iitj.instiapp.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.util.Pair;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.OAuth2RefreshToken;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final OAuth2AuthorizedClientService authorizedClientService;
-    private final JWTTempTokenService jwtTempTokenService;
+    private final JWEOAuth2Tokens jweoAuth2Tokens;
 
-    public CustomOAuth2SuccessHandler(OAuth2AuthorizedClientService authorizedClientService, JWTTempTokenService jwtTempTokenService) {
+    private final UserService userService;
+    private final TokenService tokenService;
+
+    public CustomOAuth2SuccessHandler(OAuth2AuthorizedClientService authorizedClientService, JWEOAuth2Tokens jweoAuth2Tokens, UserService userService, TokenService tokenService) {
         this.authorizedClientService = authorizedClientService;
-        this.jwtTempTokenService = jwtTempTokenService;
+
+        this.jweoAuth2Tokens = jweoAuth2Tokens;
+
+        this.userService = userService;
+        this.tokenService = tokenService;
     }
 
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        if(authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
 
-            OAuth2AuthorizedClient oAuth2AuthorizedClient = authorizedClientService.loadAuthorizedClient(
-                    oAuth2AuthenticationToken.getAuthorizedClientRegistrationId(),
-                    oAuth2AuthenticationToken.getName()
-            );
+        OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
 
-            if(oAuth2AuthorizedClient != null) {
 
-                OAuth2AccessToken accessToken = oAuth2AuthorizedClient.getAccessToken();
-                OAuth2RefreshToken refreshToken = oAuth2AuthorizedClient.getRefreshToken();
+        OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(token.getAuthorizedClientRegistrationId(), token.getName());
 
-                OAuth2User oAuth2User = oAuth2AuthenticationToken.getPrincipal();
-                String email = oAuth2User.getAttribute("email");
-                String name = oAuth2User.getAttribute("name");
-                String avatar = oAuth2User.getAttribute("picture");
 
-                if(StringUtils.hasText(email) && StringUtils.hasText(name) && StringUtils.hasText(avatar)) {
-                    Map<String, Object> additionalInformation = new HashMap<>();
-                    additionalInformation.put("email", email);
-                    additionalInformation.put("name", name);
-                    additionalInformation.put("avatar", avatar);
+        String accessToken = client.getAccessToken().getTokenValue();
+        String refreshToken = client.getRefreshToken() != null ? client.getRefreshToken().getTokenValue() : null;
 
-                    String token =  jwtTempTokenService.GenerateToken(accessToken.getTokenValue(), refreshToken.getTokenValue(), AESUtil.decrypt(request.getParameter("state")), additionalInformation);
+        String email = token.getPrincipal().getAttribute("email");
+        Long id = userService.emailExists(email);
+        if (id != -1L) {
+            UserDetailedDto userDetailedDto = userService.getUserDetailed(email);
 
-                    Cookie cookie = new Cookie("Authorization", String.format("Bearer %s", token));
-                    cookie.setHttpOnly(true);
-                    cookie.setSecure(true);
-                    cookie.setPath("/");
-                    cookie.setMaxAge(Math.toIntExact(JWTTempTokenService.EXPIRATION_TIME));
-                    cookie.setAttribute("SameSite", "Strict");
+            tokenService.generateAndSaveRefreshTokenToken(response, new String[]{userDetailedDto.getUserName(), userDetailedDto.getEmail(), userDetailedDto.getName(), AESUtil.decrypt(request.getParameter("state")), userDetailedDto.getPhoneNumber(), userDetailedDto.getUserTypeName()}, id, Pair.of(accessToken, StringUtils.isBlank(refreshToken) ? "" : refreshToken));
 
-                    response.addCookie(cookie);
+        } else {
 
-                }else {
+            try {
+                Optional<String> jweToken = jweoAuth2Tokens.generateToken(accessToken, refreshToken, AESUtil.decrypt(request.getParameter("state")), token.getPrincipal());
+                if (jweToken.isEmpty()) {
                     throw new BadCredentialsException("Invalid authentication credentials");
                 }
+
+                CookieHelper.setAuthCookie(response, jweToken.get(), JWEConstants.ExpirationDuration.SHORT, CookieHelper.HEADER_SAMESITE_NONE);
+                
+           }
+
+            //DeviceId cannot be decrypted
+            catch (IllegalArgumentException e){
+                response.sendRedirect("/error");
             }
+
         }
+
     }
+
 }
