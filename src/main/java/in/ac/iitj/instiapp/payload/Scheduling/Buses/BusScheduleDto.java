@@ -25,6 +25,11 @@ public class BusScheduleDto implements Serializable {
         this.runs = busRunDtos;
         this.busOverrides = busOverrides.orElseGet(HashSet::new);
     }
+    public BusScheduleDto() {
+        this.runs = new HashSet<>();
+        this.busOverrides = new HashSet<>();
+        this.busNumber = "";
+    }
 
 
 }

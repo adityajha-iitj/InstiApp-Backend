@@ -70,11 +70,11 @@ public class StudentBranchProgramTest {
                         StudentBranchData.STUDENT_BRANCH2.closingYear // Closing year is null
                 ),
                 new StudentBranchDto(
-                StudentBranchData.STUDENT_BRANCH3.name,
-                UserData.USER3.userName,
-                StudentBranchData.STUDENT_BRANCH3.openingYear,
-                StudentBranchData.STUDENT_BRANCH3.closingYear
-        )
+                        StudentBranchData.STUDENT_BRANCH3.name,
+                        UserData.USER3.userName,
+                        StudentBranchData.STUDENT_BRANCH3.openingYear,
+                        StudentBranchData.STUDENT_BRANCH3.closingYear
+                )
         );
 
         // Convert actual results into a set
@@ -158,6 +158,38 @@ public class StudentBranchProgramTest {
         studentProgramRepository.updateStudentProgram(StudentProgramData.STUDENT_PROGRAM1.name , StudentProgramData.STUDENT_PROGRAM4.name, StudentProgramData.STUDENT_PROGRAM4.isActive);
         Long id = studentProgramRepository.existsStudentProgram(StudentProgramData.STUDENT_PROGRAM4.name);
         Assertions.assertNotEquals(-1 , id);
+    }
+
+    @Order(8)
+    @Test
+    public void testGetBranchIdsFromNames() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<String> branchNames = List.of(
+                StudentBranchData.STUDENT_BRANCH1.name,
+                StudentBranchData.STUDENT_BRANCH2.name
+        );
+
+        List<Long> branchIds = studentBranchRepository.getBranchIdsFromNames(branchNames, pageable);
+
+        Assertions.assertEquals(2, branchIds.size());
+        Assertions.assertNotEquals(-1L, branchIds.get(0));
+        Assertions.assertNotEquals(-1L, branchIds.get(1));
+    }
+
+    @Order(9)
+    @Test
+    public void testGetIdsFromProgramName() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<String> programNames = List.of(
+                StudentProgramData.STUDENT_PROGRAM1.name,
+                StudentProgramData.STUDENT_PROGRAM2.name
+        );
+
+        List<Long> programIds = studentProgramRepository.getIdsFromProgramName(programNames, pageable);
+
+        Assertions.assertEquals(2, programIds.size());
+        Assertions.assertNotEquals(-1L, programIds.get(0));
+        Assertions.assertNotEquals(-1L, programIds.get(1));
     }
 
 
