@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.security.Timestamp;
 import java.time.Instant;
 
 @Entity
@@ -25,7 +24,7 @@ public class JWTRefreshToken {
     @ManyToOne(optional = false)
     User user;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = false, nullable = false)
     String deviceId;
 
     @Column(nullable = false)

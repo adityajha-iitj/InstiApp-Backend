@@ -29,9 +29,16 @@ public class JWTRefreshTokenRepositoryImpl implements JWTRefreshTokenRepository 
     public void save(JWTRefreshToken jwtRefreshToken) {
 
 
-        if (!getRefreshTokenAndTokenExpireTimeByDeviceIdAndUserName(jwtRefreshToken.getUser().getUserName(), jwtRefreshToken.getDeviceId()).isEmpty()) {
+        if (!getRefreshTokenAndTokenExpireTimeByDeviceIdAndUserName(jwtRefreshToken.getDeviceId(), jwtRefreshToken.getUser().getUserName()).isEmpty()) {
 
-            jdbcTemplate.update("update jwt_refresh_token  set refresh_token = ?, refresh_token_expires = ? where device_id = ? and user_id = ?", jwtRefreshToken.getRefreshToken(), jwtRefreshToken.getRefreshTokenExpires(), jwtRefreshToken.getDeviceId(), jwtRefreshToken.getUser().getId());
+
+            entityManager.createQuery("update JWTRefreshToken  set refreshToken = :refreshToken, refreshTokenExpires = :refreshTokenExpires where deviceId = :deviceId and user.id = :userId")
+                    .setParameter("refreshToken", jwtRefreshToken.getRefreshToken())
+                    .setParameter("refreshTokenExpires", jwtRefreshToken.getRefreshTokenExpires())
+                    .setParameter("deviceId", jwtRefreshToken.getDeviceId())
+                    .setParameter("userId", jwtRefreshToken.getUser().getId())
+                    .executeUpdate();
+           return;
         }
         User u = entityManager.getReference(User.class, jwtRefreshToken.getUser().getId());
         jwtRefreshToken.setUser(u);

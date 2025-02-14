@@ -1,32 +1,26 @@
 package in.ac.iitj.instiapp.Tests.Repository;
 
-import in.ac.iitj.instiapp.Repository.*;
+import in.ac.iitj.instiapp.Repository.JWTRefreshTokenRepository;
 import in.ac.iitj.instiapp.Repository.impl.JWTRefreshTokenRepositoryImpl;
-import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.AuthAndJwt.JwtRefreshTokenTestData;
-import in.ac.iitj.instiapp.Tests.InitialiseEntities.User.InitialiseUser;
-import in.ac.iitj.instiapp.Tests.Utilities.InitialiseEntities;
-import in.ac.iitj.instiapp.database.entities.Auth.JWTRefreshToken;
-import in.ac.iitj.instiapp.database.entities.User.User;
-import in.ac.iitj.instiapp.database.entities.User.Usertype;
+import in.ac.iitj.instiapp.Tests.InitialiseEntities.Auth.InitialiseJWTRefreshToken;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.Map;
 
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.USER1;
 
 @DataJpaTest
-@Import({InitialiseUser.class,JWTRefreshTokenRepositoryImpl.class })
+@Import({InitialiseJWTRefreshToken.class, JWTRefreshTokenRepositoryImpl.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class JWTRefreshTokenTest {
 
@@ -34,13 +28,11 @@ public class JWTRefreshTokenTest {
     @Autowired
     JWTRefreshTokenRepository jwtRefreshTokenRepository;
 
-    @Autowired
-    TestEntityManager testEntityManager;
 
     @BeforeAll
-    public static void setUp(@Autowired InitialiseEntities.Initialise initialiseUser) {
+    public static void setUp(@Autowired InitialiseJWTRefreshToken initialise) {
 
-        initialiseUser.initialise();
+        initialise.initialise();
 
     }
 
@@ -48,34 +40,50 @@ public class JWTRefreshTokenTest {
     @Order(1)
     @Transactional
     public void testGetRefreshTokenAndTokenExpireTimeByDeviceIdAndUserName() {
-        String deviceId = JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.deviceId;
-        String userName = USER1.userName;
-
-        // Insert the test data into the database
-        JWTRefreshToken jwtRefreshToken = new JWTRefreshToken();
-        jwtRefreshToken.setDeviceId(deviceId);
-        jwtRefreshToken.setRefreshToken(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.refreshToken);
-        jwtRefreshToken.setRefreshTokenExpires(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.refreshTokenExpires);
-        User user = new User();
-        user.setUserName(userName);
-        jwtRefreshToken.setUser(user);
-
-        jwtRefreshTokenRepository.save(jwtRefreshToken);
-
         // Call the method to test
-        Map<String, Object> result = jwtRefreshTokenRepository.getRefreshTokenAndTokenExpireTimeByDeviceIdAndUserName(deviceId, userName);
+        Map<String, Object> result = jwtRefreshTokenRepository.getRefreshTokenAndTokenExpireTimeByDeviceIdAndUserName(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.deviceId, USER1.userName);
 
         // Assert using AssertJ
-        Assertions.assertThat(result)
-                .isNotNull()
-                .containsKey("refreshToken")
-                .containsKey("expirationTime");
+        Assertions.assertThat(result).isNotNull().containsEntry("refreshToken", JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.refreshToken);
 
-        Assertions.assertThat(result.get("refreshToken"))
-                .isEqualTo(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.refreshToken);
+        Assertions.assertThat(((Timestamp) result.get("expirationTime")).toInstant()).isEqualTo(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.refreshTokenExpires);
+    }
 
-        Assertions.assertThat(result.get("expirationTime"))
-                .isEqualTo(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.refreshTokenExpires.toString());
+
+    @Test
+    @Order(2)
+    @Transactional
+    public void testDeleteByUsernameAndDeviceId() {
+
+        Map<String, Object> result = jwtRefreshTokenRepository.getRefreshTokenAndTokenExpireTimeByDeviceIdAndUserName(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.deviceId, USER1.userName);
+
+        // Assert using AssertJ
+        Assertions.assertThat(result).isNotNull().containsEntry("refreshToken", JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.refreshToken);
+
+        Assertions.assertThat(((Timestamp) result.get("expirationTime")).toInstant()).isEqualTo(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.refreshTokenExpires);
+
+        jwtRefreshTokenRepository.deleteByUserNameAndDeviceId(USER1.userName, JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.deviceId);
+        result = jwtRefreshTokenRepository.getRefreshTokenAndTokenExpireTimeByDeviceIdAndUserName(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.deviceId, USER1.userName);
+        Assertions.assertThat(result).isEmpty();
+
+    }
+
+
+    @Test
+    @Order(3)
+    @Transactional
+    public void testDeleteByUserName() {
+
+        Map<String, Object> result = jwtRefreshTokenRepository.getRefreshTokenAndTokenExpireTimeByDeviceIdAndUserName(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.deviceId, USER1.userName);
+
+        // Assert using AssertJ
+        Assertions.assertThat(result).isNotNull().containsEntry("refreshToken", JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.refreshToken);
+
+        Assertions.assertThat(((Timestamp) result.get("expirationTime")).toInstant()).isEqualTo(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.refreshTokenExpires);
+
+        jwtRefreshTokenRepository.deleteByUserName(USER1.userName);
+        result = jwtRefreshTokenRepository.getRefreshTokenAndTokenExpireTimeByDeviceIdAndUserName(JwtRefreshTokenTestData.JWT_REFRESH_TOKEN_1.deviceId, USER1.userName);
+        Assertions.assertThat(result).isEmpty();
     }
 
 
