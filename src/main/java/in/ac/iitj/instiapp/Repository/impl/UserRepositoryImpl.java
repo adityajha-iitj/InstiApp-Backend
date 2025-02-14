@@ -132,7 +132,13 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
-
+    @Override
+    public UserDetailedDto getUserDetailed(String email) {
+        return
+                entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.UserDetailedDto(u.name, u.userName,u.email,u.phoneNumber,u.userType.name, u.calendar.publicId,u.avatarUrl) from User  u where u.email = :email",UserDetailedDto.class)
+                        .setParameter("email",email)
+                        .getSingleResult();
+    }
 
 
     @Override
@@ -180,10 +186,9 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Boolean emailExists(String email) {
-        return entityManager.createQuery("select exists(select id from User  u where  u.email = :email)", Boolean.class)
-                .setParameter("email", email)
-                .getSingleResult();
+    public Long emailExists(String email) {
+        return jdbcTemplate.queryForObject("select coalesce(max(id), -1)  from users  u where  u.email = ?", Long.class, email);
+
     }
 
     @Override

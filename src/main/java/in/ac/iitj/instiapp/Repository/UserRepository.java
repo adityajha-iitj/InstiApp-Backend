@@ -99,6 +99,8 @@ public interface UserRepository {
     UserDetailedDto getUserDetailed(String username, boolean isPrivate);
 
 
+    UserDetailedDto getUserDetailed(String email);
+
     /**
      * Should be used with caution as it may introduce long database calls
      * @param usertype
@@ -135,9 +137,9 @@ public interface UserRepository {
 
     /**
      * @param email
-     * @return false if email doesn't exists in database
+     * @return -1 if email doesn't exists in database
      */
-    Boolean emailExists(String email);
+    Long emailExists(String email);
 
     /**
      * @apiNote The api using this functions if refreshes on userInteraction should have strict rateLimits To prevent exceeding quotas
@@ -161,5 +163,7 @@ public interface UserRepository {
      * @throws org.springframework.dao.EmptyResultDataAccessException if username doesn't exist in database
      */
     void updatePhoneNumber(String username, String newPhoneNumber);
+
+
 
 }

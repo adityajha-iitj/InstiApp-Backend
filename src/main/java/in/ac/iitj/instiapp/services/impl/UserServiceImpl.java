@@ -1,36 +1,33 @@
 package in.ac.iitj.instiapp.services.impl;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import in.ac.iitj.instiapp.Repository.CalendarRepository;
 import in.ac.iitj.instiapp.Repository.OAuth2TokenRepository;
+import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
+import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.controllers.ValidationUtil;
-import in.ac.iitj.instiapp.database.entities.Auth.OAuth2Tokens;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
-import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.User;
+import in.ac.iitj.instiapp.database.entities.User.Usertype;
+import in.ac.iitj.instiapp.mappers.User.UserBaseDtoMapper;
+import in.ac.iitj.instiapp.mappers.User.UserDetailedDtoMapper;
 import in.ac.iitj.instiapp.payload.Auth.SignupDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
-import in.ac.iitj.instiapp.Repository.UserRepository;
-import in.ac.iitj.instiapp.mappers.User.UserBaseDtoMapper;
-import in.ac.iitj.instiapp.mappers.User.UserDetailedDtoMapper;
-import in.ac.iitj.instiapp.database.entities.User.Usertype;
-import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
+import in.ac.iitj.instiapp.services.JWTTokens.JWEConstants;
 import in.ac.iitj.instiapp.services.UserService;
 import in.ac.iitj.instiapp.services.UtilitiesService;
-import io.jsonwebtoken.Claims;
+import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.ValidationUtils;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -71,21 +68,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String save(@Valid  SignupDto signupDto, Claims claim) throws DataIntegrityViolationException, EmptyResultDataAccessException , ConstraintViolationException {
+    @Transactional
+    public Pair<String, Long> save(@Valid  SignupDto signupDto, JWTClaimsSet claim) throws DataIntegrityViolationException, EmptyResultDataAccessException , ConstraintViolationException {
 
 
 
 
-//        =========================   Saving User and oauth2 Tokens and also validating them ========================================
+//        =========================   Saving User==================================
         User u = new User();
 
-        u.setName( validationUtil.validateString( claim.get("name").toString(), 12, 500));
-        u.setEmail(validationUtil.validateEmail(claim.get("email").toString()));
-        u.setAvatarUrl(validationUtil.validateString(claim.get("avatarUrl").toString(), 12, 500));
-        String userName = utilitiesService.generateRandom(claim.get("name").toString());
+        u.setName( validationUtil.validateString( claim.getClaim(JWEConstants.KEYS_NAME).toString(), 1, 500));
+        u.setEmail(validationUtil.validateEmail(claim.getClaim(JWEConstants.KEYS_EMAIL).toString()));
+        u.setAvatarUrl(validationUtil.validateString(claim.getClaim(JWEConstants.KEYS_AVATAR).toString(), 12, 500));
+        String userName = utilitiesService.generateRandom(claim.getClaim(JWEConstants.KEYS_NAME).toString());
         u.setUserName(userName);
 
-        if(userRepository.emailExists(u.getEmail())){
+        if(userRepository.emailExists(u.getEmail()) != -1L){
             throw new DataIntegrityViolationException("Email already exists");
         }
 
@@ -93,32 +91,18 @@ public class UserServiceImpl implements UserService {
         if(id == -1L){
             throw  new EmptyResultDataAccessException("User Type Doesn't exists in database",1);
         }
+        u.setUserType(new Usertype(id));
 
-        String calendarPublicId = utilitiesService.generateRandom(claim.get("name").toString() + "calendar" );
+        String calendarPublicId = utilitiesService.generateRandom(claim.getClaim(JWEConstants.KEYS_NAME).toString() + "calendar" );
         calendarRepository.save(new Calendar(calendarPublicId));
         Long idOfCalendar= calendarRepository.calendarExists(calendarPublicId);
 
         u.setCalendar(new Calendar(idOfCalendar));
 
-
-
-        // Setting OAuth2Token Data
-        OAuth2Tokens oAuth2Tokens = new OAuth2Tokens();
-        oAuth2Tokens.setAccessToken(validationUtil.validateString(claim.get("oauth2AccessToken").toString(),12, 3000));
-        oAuth2Tokens.setRefreshToken(validationUtil.validateString(claim.get("oauth2RefreshToken").toString(),12, 3000));
-        oAuth2Tokens.setDeviceId(validationUtil.validateString(claim.get("deviceId").toString(),12, 3000));
-
-
         // Saving user
         Long idOfUser =  userRepository.save(u);
 
-        // Saving ouath2Token
-        User newUser = new User(idOfUser);
-        newUser.setUserName(userName);
-        oAuth2Tokens.setUser(u);
-        oAuth2TokenRepository.save(oAuth2Tokens);
-
-        return userName;
+        return Pair.of(userName, idOfUser);
     }
 
     public void save(Usertype usertype){
@@ -151,6 +135,13 @@ public class UserServiceImpl implements UserService {
          return userDetailedDto;
     }
 
+    @Override
+    public UserDetailedDto getUserDetailed(String email ) {
+        UserDetailedDto userDetailedDto = userRepository.getUserDetailed(email);
+        userDetailedDto.setOrganisationRoleSet(userRepository.getOrganisationRoleDTOsByUsername(userDetailedDto.getUserName(), PageRequest.of(0,10)));
+        return userDetailedDto;
+    }
+
     public List<UserBaseDto> getListUserLimitedByUsertype(String usertype, Pageable pageable){
         return userRepository.getListUserLimitedByUsertype(usertype, pageable);
     }
@@ -165,6 +156,11 @@ public class UserServiceImpl implements UserService {
 
     public Long usernameExists(String username){
         return userRepository.usernameExists(username);
+    }
+
+    @Override
+    public Long emailExists(String email) {
+        return userRepository.emailExists(email);
     }
 
     public void updateOauth2Info(String newName, String avatarURL, String userName){

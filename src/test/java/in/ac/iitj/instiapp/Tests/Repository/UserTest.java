@@ -196,10 +196,10 @@ public class UserTest {
     @Test
     @Order(12)
     public void testEmailExists(){
-        Assertions.assertThat(userRepository.emailExists(USER1.email)).isTrue();
-        Assertions.assertThat(userRepository.emailExists(USER2.email)).isTrue();
-        Assertions.assertThat(userRepository.emailExists(USER3.email)).isTrue();
-        Assertions.assertThat(userRepository.emailExists(USER4.email)).isFalse();
+        Assertions.assertThat(userRepository.emailExists(USER1.email)).isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.emailExists(USER2.email)).isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.emailExists(USER3.email)).isNotEqualTo(-1L);
+        Assertions.assertThat(userRepository.emailExists(USER4.email)).isEqualTo(-1L);
     }
 
     @Test
