@@ -18,7 +18,7 @@ import java.util.Objects;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/bus")
+@RequestMapping("/api")
 public class BusController {
 
     private final BusService busService;
