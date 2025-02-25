@@ -30,23 +30,19 @@ public class BusController {
         this.validationUtil = validationUtil;
     }
 
-    @PostMapping("/saveBusLocation")
+/*--------------------------------------------------BUS LOCATION------------------------------------------------------*/
+    @PostMapping("/bus-location")
     public ResponseEntity<String> saveBusLocation(@Valid @RequestBody String name) {
         busService.saveBusLocation(name);
         return ResponseEntity.status(HttpStatus.CREATED).body("BusLocation saved successfully");
     }
 
-    @GetMapping("/getAllBusLocations")
+    @GetMapping("/bus-locations")
     public List<String> getBusLocations(Pageable pageable){
         return busService.getBusLocations(pageable);
     }
 
-    @GetMapping("/doesBusLocationExist")
-    public Long isBusLocationExist(@Valid @RequestBody String name) {
-        return busService.isBusLocationExist(name);
-    }
-
-    @PutMapping("/updateBusLocation")
+    @PutMapping("/bus-location")
     public ResponseEntity<String> updateBusLocation(@Valid @RequestParam String oldName, @Valid @RequestParam String newName) {
         Long oldNameExists = busService.isBusLocationExist(oldName);
         Long newNameExists = busService.isBusLocationExist(newName);
@@ -63,7 +59,7 @@ public class BusController {
         return ResponseEntity.ok("Bus location updated successfully.");
     }
 
-    @PostMapping("/deleteBusLocation")
+    @DeleteMapping("/bus-location")
     public ResponseEntity<String> deleteBusLocation(@Valid @RequestParam String name) {
         Long oldNameExists = busService.isBusLocationExist(name);
         if(oldNameExists == -1L) {
@@ -73,13 +69,14 @@ public class BusController {
         return ResponseEntity.ok("Bus location deleted successfully.");
     }
 
-    @PostMapping("/saveBusSchedule")
+/*------------------------------------------------------BUS SCHEDULE--------------------------------------------------*/
+    @PostMapping("/bus-schedule")
     public ResponseEntity<String> saveBusSchedule(@Valid @RequestParam String busNumber) {
         busService.saveBusSchedule(busNumber);
         return ResponseEntity.status(HttpStatus.CREATED).body("BusSchedule saved successfully");
     }
 
-    @GetMapping("/busSchedule") // Returns a Bus Schedule Dto
+    @GetMapping("/bus-schedule") // Returns a Bus Schedule Dto
     public ResponseEntity<?> getBusSchedule(@Valid @RequestParam String busNumber) {
         Long busNumberExists = busService.existsBusSchedule(busNumber);
 
@@ -89,21 +86,14 @@ public class BusController {
 
         return ResponseEntity.ok(busService.getBusSchedule(busNumber));
     }
-    @GetMapping("/busNumbers")
+    @GetMapping("/bus-numbers")
     public List<String> getBusNumbers(Pageable pageable) {
         return busService.getBusNumbers(pageable);
     }
 
-    @PostMapping("existsBusSchedule")
-    public ResponseEntity<?> existsBusSchedule(@Valid @RequestParam String busNumber) {
-        Long busNumberExists = busService.existsBusSchedule(busNumber);
-        if (busNumberExists == -1L) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("The bus number is not found");
-        }
-        return ResponseEntity.ok(busNumberExists);
-    }
 
-    @PutMapping("/updateBusSchedule")
+
+    @PutMapping("/bus-schedule")
     public ResponseEntity<String> updateBusSchedule(@Valid @RequestParam String oldBusNumber, @Valid @RequestParam String newBusNumber) {
         Long oldBusExists = busService.existsBusSchedule(oldBusNumber);
         Long newBusExists = busService.existsBusSchedule(newBusNumber);
@@ -120,7 +110,7 @@ public class BusController {
         return ResponseEntity.ok("Bus schedule updated successfully.");
     }
 
-    @DeleteMapping("/deleteBusSchedule")
+    @DeleteMapping("/bus-schedule")
     public ResponseEntity<String> deleteBusSchedule(@Valid @RequestParam String busNumber) {
         Long busExists = busService.existsBusSchedule(busNumber);
 
@@ -131,19 +121,14 @@ public class BusController {
         busService.deleteBusSchedule(busNumber);
         return ResponseEntity.ok("Bus schedule deleted successfully.");
     }
-
-    @PostMapping("/saveBusRun")
+    /*------------------------------------------------------------BUS RUN-------------------------------------------------*/
+    @PostMapping("/bus-run")
     public ResponseEntity<String> saveBusRun(@Valid @RequestBody BusRun busRun, @Valid @RequestParam String busNumber) {
         busService.saveBusRun(busRun, busNumber);
         return ResponseEntity.status(HttpStatus.CREATED).body("Bus run saved successfully.");
     }
 
-    @GetMapping("/existsBusRunByPublicId")
-    public ResponseEntity<Boolean> existsBusRunByPublicId(@Valid @RequestParam String publicId) {
-        return ResponseEntity.ok(busService.existsBusRunByPublicId(publicId));
-    }
-
-    @PutMapping("/updateBusScheduleRun")
+    @PutMapping("/bus-run")
     public ResponseEntity<String> updateBusScheduleRun(@Valid @RequestParam String publicId, @Valid @RequestBody BusRun newBusRun) {
         if (!busService.existsBusRunByPublicId(publicId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: Bus run does not exist.");
@@ -153,29 +138,25 @@ public class BusController {
         return ResponseEntity.ok("Bus run updated successfully.");
     }
 
-    @DeleteMapping("/deleteBusRuns")
+    @DeleteMapping("/bus-runs")
     public ResponseEntity<String> deleteBusRuns(@Valid @RequestBody List<String> busRunPublicIds) {
         busService.deleteBusRuns(busRunPublicIds);
         return ResponseEntity.ok("Bus runs deleted successfully.");
     }
 
-    @PostMapping("/saveBusOverride")
+/*------------------------------------------------------BUS OVERRIDE--------------------------------------------------*/
+    @PostMapping("/bus-override")
     public ResponseEntity<String> saveBusOverride(@Valid @RequestParam String busNumber, @Valid @RequestBody BusOverride busOverride) {
         busService.saveBusOverride(busNumber, busOverride);
         return ResponseEntity.status(HttpStatus.CREATED).body("Bus override saved successfully.");
     }
 
-    @GetMapping("/existsBusOverrideByPublicId")
-    public ResponseEntity<Boolean> existsBusOverrideByPublicId(@Valid @RequestParam String publicId) {
-        return ResponseEntity.ok(busService.existsBusOverrideByPublicId(publicId));
-    }
-
-    @GetMapping("/getBusOverrideForYearAndMonth")
+    @GetMapping("bus-override")
     public ResponseEntity<List<BusOverrideDto>> getBusOverrideForYearAndMonth(@Valid @RequestParam int year, @Valid @RequestParam int month) {
         return ResponseEntity.ok(busService.getBusOverrideForYearAndMonth(year, month));
     }
 
-    @PutMapping("/updateBusOverride")
+    @PutMapping("/bus-override")
     public ResponseEntity<String> updateBusOverride(@Valid @RequestParam String publicId, @Valid @RequestBody BusOverride newBusOverride) {
         if (!busService.existsBusOverrideByPublicId(publicId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: Bus override does not exist.");
@@ -185,7 +166,7 @@ public class BusController {
         return ResponseEntity.ok("Bus override updated successfully.");
     }
 
-    @DeleteMapping("/deleteBusOverride")
+    @DeleteMapping("/bus-override")
     public ResponseEntity<String> deleteBusOverride(@Valid @RequestBody List<String> busOverrideIds) {
         busService.deleteBusOverride(busOverrideIds);
         return ResponseEntity.ok("Bus overrides deleted successfully.");
