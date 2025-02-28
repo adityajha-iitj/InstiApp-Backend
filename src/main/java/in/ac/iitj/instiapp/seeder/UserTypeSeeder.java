@@ -1,6 +1,7 @@
 package in.ac.iitj.instiapp.seeder;
 
 import in.ac.iitj.instiapp.Repository.UserTypeRepository;
+import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -17,9 +18,14 @@ public class UserTypeSeeder implements CommandLineRunner {
 
 
     @Override
-    public void run(String... args) throws Exception {
-//        userTypeRepository.save(new Usertype(null, "Student"));
-//        userTypeRepository.save(new Usertype(null, "Faculty"));
-//        userTypeRepository.save(new Usertype(null, "Alumni"));
+    public void run(String... args) {
+
+        try {
+            userTypeRepository.save(new Usertype(null, "Student"));
+            userTypeRepository.save(new Usertype(null, "Faculty"));
+            userTypeRepository.save(new Usertype(null, "Alumni"));
+        }catch (Exception e){
+            System.out.println("UserTypeSeeder: Error while seeding data");
+        }
     }
 }
