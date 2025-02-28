@@ -33,6 +33,13 @@ public record CookieOAuth2AuthorizationRequestRepository(
 
     @Override
     public void saveAuthorizationRequest(OAuth2AuthorizationRequest authorizationRequest, HttpServletRequest request, HttpServletResponse response) {
+        if(authorizationRequest == null) {
+            CookieHelper.deleteAuthCookie(response);
+            CookieHelper.deleteJSessionIdCookie(response);
+            CookieHelper.deleteRefreshTokenCookie(response);
+            return;
+        }
+
         Optional<String> token = jweOauth2Redirection.generateToken(authorizationRequest);
         System.out.println(token);
         token.ifPresent(s -> CookieHelper.setAuthCookie(response, s, JWEConstants.ExpirationDuration.VERY_SHORT, CookieHelper.HEADER_SAMESITE_NONE));

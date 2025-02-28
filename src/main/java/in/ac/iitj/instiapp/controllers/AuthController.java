@@ -60,6 +60,7 @@ public class AuthController {
     }
 
 
+    @PreAuthoriseFilters.HasApprovedState
     @GetMapping("/home")
     public ResponseEntity<?> getHome() {
         return new ResponseEntity<>("Hello World", HttpStatus.OK);
@@ -101,7 +102,7 @@ public class AuthController {
         if(authentication instanceof  JWEAuthenticationToken jweAuthenticationToken){
             return  new ResponseEntity<>(jweAuthenticationToken.getState().toString(), HttpStatus.OK);
         }
-        return new ResponseEntity<>("STATE_ONE", HttpStatus.OK);
+        return new ResponseEntity<>("STATE_ANONYMOUS", HttpStatus.OK);
     }
 
 

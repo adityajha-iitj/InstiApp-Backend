@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -25,11 +26,16 @@ public class JWTTokenFilter extends OncePerRequestFilter {
 
     private final JWEService jweService;
 
+
+
     @Autowired
-    public JWTTokenFilter(JWEService jweService) {
+    public JWTTokenFilter(JWEService jweService, AntPathMatcher antPathMatcher) {
         this.jweService = jweService;
 
+
     }
+
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -40,11 +46,12 @@ public class JWTTokenFilter extends OncePerRequestFilter {
         if (cookie.isPresent()) {
             try {
                 JWTClaimsSet claimsSet = jweService.extractClaims(cookie.get());
+                boolean isExpired = jweService.isExpired(claimsSet);
 
-                if (jweService.isExpired(claimsSet) && JWEConstants.STATES.STATE_APPROVED.toString().equals(claimsSet.getClaim(JWEConstants.KEYS_STATE))) {
+                if (isExpired && JWEConstants.STATES.STATE_APPROVED.toString().equals(claimsSet.getClaim(JWEConstants.KEYS_STATE))) {
                     response.sendRedirect("/api/v1/auth/refresh-token");
                     return;
-                } else if (jweService.isExpired(claimsSet)) {
+                } else if (isExpired) {
                     CookieHelper.deleteAuthCookie(response);
                     throw new BadCredentialsException("JWE Expired");
                 }
@@ -59,7 +66,6 @@ public class JWTTokenFilter extends OncePerRequestFilter {
 
 
         }
-
 
         filterChain.doFilter(request, response);
     }

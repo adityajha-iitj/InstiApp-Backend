@@ -14,6 +14,7 @@ public class CookieHelper {
 
     public static final String HEADER_SAMESITE_STRICT = "Strict";
     public static final String HEADER_SAMESITE_NONE = "None";
+    public static final String HEADER_SAMESITE_LAX = "Lax";
 
     public static void  setAuthCookie(HttpServletResponse response, String cookieValue, JWEConstants.ExpirationDuration duration,String sameSiteHeader ) {
         Cookie cookie = new Cookie("Authorization", String.format("Bearer%s",cookieValue));
