@@ -42,6 +42,7 @@ public interface LostnFoundRepository {
 
    /**
     * @param locationName
+    * @implNote first make sure to set the location to null in lostnfound if location is present in thee lostnfound then delete
     */
    void deleteLocationByName(String locationName);
 

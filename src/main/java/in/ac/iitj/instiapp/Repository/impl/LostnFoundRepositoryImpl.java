@@ -73,13 +73,21 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
     }
 
     @Override
+    @Transactional
     public void deleteLocationByName(String locationName) {
         if(existLocation(locationName) == -1){
             throw new DataIntegrityViolationException("location doesnt exist with name " + locationName);
         }
         else {
-            String sql = "delete from locations where name = ?";
-            jdbcTemplate.update(sql, locationName);
+            // step 1 :-first set the locations null in lost and found if present
+            entityManager.createQuery(
+                    "UPDATE LostnFound lf SET lf.Landmark = null WHERE lf.Landmark.name = :name"
+            ).setParameter("name", locationName).executeUpdate();
+
+            // Step 2: Delete the Location
+            entityManager.createQuery(
+                    "DELETE FROM Locations l WHERE l.name = :name"
+            ).setParameter("name", locationName).executeUpdate();
         }
     }
 
@@ -198,16 +206,16 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
     @Override
     public Optional<String> deleteLostnFound(String publicId) {
         String sql = """
-            SELECT m.publicId
+            SELECT m.public_id
             FROM media m
             JOIN lostnfound l ON m.id = l.media_id
-            WHERE l.publicId = ?
+            WHERE l.public_id = ?
         """;
         String mediaPublicId = jdbcTemplate.queryForObject(sql, String.class, publicId);
 
         String deleteSql = """
                 DELETE FROM lostnfound
-                WHERE publicId = ?
+                WHERE public_id = ?
             """;
         jdbcTemplate.update(deleteSql, publicId);
 
