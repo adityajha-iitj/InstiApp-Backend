@@ -3,6 +3,7 @@ package in.ac.iitj.instiapp.Tests.Repository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
 import in.ac.iitj.instiapp.Repository.UserRepository;
+import in.ac.iitj.instiapp.Repository.impl.OrganisationRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.OrganisationRoleRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData;
@@ -33,24 +34,23 @@ import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.*;
 
 @DataJpaTest
-@Import({OrganisationRoleRepositoryImpl.class, InitialiseOrganisationRole.class, UserRepositoryImpl.class})
+@Import({OrganisationRoleRepositoryImpl.class, OrganisationRepositoryImpl.class , InitialiseOrganisationRole.class, UserRepositoryImpl.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OrganisationRoleTest {
 
     private final OrganisationRoleRepository organisationRoleRepository;
-    @Autowired
-    private OrganisationRoleRepositoryImpl organisationRoleRepositoryImpl;
-
-    private OrganisationRepository organisationRepository;
-    private UserRepository userRepository;
+    private final OrganisationRepository organisationRepository;
+    private final UserRepository userRepository;
 
 
 
     @Autowired
-    public OrganisationRoleTest(OrganisationRoleRepository organisationRoleRepository, UserRepository userRepository) {
+    public OrganisationRoleTest(OrganisationRoleRepository organisationRoleRepository, UserRepository userRepository , OrganisationRepository organisationRepository) {
         this.organisationRoleRepository = organisationRoleRepository;
         this.userRepository = userRepository;
+        this.organisationRepository = organisationRepository;
+
     }
 
     @BeforeAll
@@ -149,6 +149,8 @@ public class OrganisationRoleTest {
     @Test
     @Order(5)
     public void testGetAllOrganisationRoles(){
+        Long user5Id = userRepository.usernameExists(USER5.userName);
+        organisationRoleRepository.insertIntoOrganisationRole(USER1.userName, ORGANISATION_ROLE1.roleName, user5Id);
         List<Map<UserBaseDto, OrganisationRoleDto>> organisationRoleList = organisationRoleRepository.getAllOrganisationRoles(USER1.userName, PageRequest.of(0, 10));
 
         Assertions.assertThat(organisationRoleList.size()).isEqualTo(1);
@@ -165,12 +167,16 @@ public class OrganisationRoleTest {
 
         Long organisationId1 = organisationRepository.existOrganisation(USER1.userName);
         Long organisationId4 = organisationRepository.existOrganisation(USER4.userName);
+        Long user5Id = userRepository.usernameExists(USER5.userName);
+        organisationRoleRepository.insertIntoOrganisationRole(USER1.userName, ORGANISATION_ROLE1.roleName, user5Id);
 
-        Assertions.assertThatCode(() -> organisationRoleRepository.removePersonFromOrganisationRole(organisationId1, ORGANISATION_ROLE1.roleName, organisationRoleId1)).doesNotThrowAnyException();
+        Assertions.assertThat(organisationRoleRepository.existOrganisationRole(USER1.userName, ORGANISATION_ROLE1.roleName)).isNotNull().isNotEqualTo(-1L);
+
+        Assertions.assertThatCode(() -> organisationRoleRepository.removePersonFromOrganisationRole(organisationId1, ORGANISATION_ROLE1.roleName, user5Id)).doesNotThrowAnyException();
 
         Assertions.assertThatThrownBy(()-> organisationRoleRepository.removePersonFromOrganisationRole(organisationId4, OrganisationRoleData.ORGANISATION_ROLE4.roleName, organisationRoleId4)).isInstanceOf(EmptyResultDataAccessException.class);
 
-        Assertions.assertThat(organisationRoleRepository.existOrganisationRole(USER1.userName, ORGANISATION_ROLE1.roleName)).isNotNull().isNotEqualTo(-1L);
+
 
     }
 
