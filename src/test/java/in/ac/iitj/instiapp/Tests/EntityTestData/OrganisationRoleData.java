@@ -10,7 +10,7 @@ public enum OrganisationRoleData {
     ORGANISATION_ROLE1("Coordinator",MASTER),
     ORGANISATION_ROLE2("Vice President",INTERMEDIATE),
     ORGANISATION_ROLE3("President",READ),
-    ORGANISATION_ROLE4("Coordinator",INTERMEDIATE);
+    ORGANISATION_ROLE4("Support Team Member",INTERMEDIATE);
 
 
     public final String roleName;

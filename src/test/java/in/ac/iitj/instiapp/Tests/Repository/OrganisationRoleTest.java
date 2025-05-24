@@ -2,6 +2,7 @@ package in.ac.iitj.instiapp.Tests.Repository;
 
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
+import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.Repository.impl.OrganisationRoleRepositoryImpl;
 import in.ac.iitj.instiapp.Repository.impl.UserRepositoryImpl;
 import in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData;
@@ -28,8 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData.ORGANISATION_ROLE1;
-import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData.ORGANISATION_ROLE2;
+import static in.ac.iitj.instiapp.Tests.EntityTestData.OrganisationRoleData.*;
 import static in.ac.iitj.instiapp.Tests.EntityTestData.UserData.*;
 
 @DataJpaTest
@@ -41,12 +41,16 @@ public class OrganisationRoleTest {
     private final OrganisationRoleRepository organisationRoleRepository;
     @Autowired
     private OrganisationRoleRepositoryImpl organisationRoleRepositoryImpl;
-    @Autowired
+
     private OrganisationRepository organisationRepository;
+    private UserRepository userRepository;
+
+
 
     @Autowired
-    public OrganisationRoleTest(OrganisationRoleRepository organisationRoleRepository) {
+    public OrganisationRoleTest(OrganisationRoleRepository organisationRoleRepository, UserRepository userRepository) {
         this.organisationRoleRepository = organisationRoleRepository;
+        this.userRepository = userRepository;
     }
 
     @BeforeAll
@@ -57,8 +61,7 @@ public class OrganisationRoleTest {
     @Test
     @Order(1)
     public void testGetListOrganisationRoles() {
-        // Print the actual username being used
-        System.out.println("Searching for username: " + USER1.userName);
+
 
         List<OrganisationRoleDto> organisationRoleDtoList =
                 organisationRoleRepository.getOrganisationRoles(USER1.userName, PageRequest.of(0, 10));
@@ -85,39 +88,40 @@ public class OrganisationRoleTest {
     @Order(3)
     @Rollback(value = true)
     public void testUpdateOrganisationRole() {
-        OrganisationRole organisationRole1 = new OrganisationRole();
+
+        // Sets RoleName and Permission - Checking for working of correct Errors
+        OrganisationRole organisationRole1 =  ORGANISATION_ROLE1.toEntity();
         Organisation organisation1 = new Organisation();
         organisation1.setUser(new User(USER1.userName));
         organisationRole1.setOrganisation(organisation1);
-        organisationRole1.setRoleName(ORGANISATION_ROLE1.roleName);
-        organisationRole1.setPermission(ORGANISATION_ROLE1.organisationPermission);
 
-        OrganisationRole organisationRole2 = new OrganisationRole();
-        Organisation organisation2 = new Organisation();
-        organisation2.setUser(new User(USER2.userName));
-        organisationRole2.setOrganisation(organisation2);
-        organisationRole2.setRoleName(OrganisationRoleData.ORGANISATION_ROLE2.roleName);
-        organisationRole2.setPermission(OrganisationRoleData.ORGANISATION_ROLE2.organisationPermission);
+        OrganisationRole organisationRole1ToBeUpdated = ORGANISATION_ROLE2.toEntity();
+        organisationRole1ToBeUpdated.setRoleName(ORGANISATION_ROLE1.roleName);
 
-        OrganisationRole organisationRole4 = new OrganisationRole();
+        OrganisationRole organisationRole4 = ORGANISATION_ROLE4.toEntity();
         Organisation organisation4 = new Organisation();
         organisation4.setUser(new User(USER4.userName));
         organisationRole4.setOrganisation(organisation4);
-        organisationRole4.setRoleName(OrganisationRoleData.ORGANISATION_ROLE4.roleName);
-        organisationRole4.setPermission(OrganisationRoleData.ORGANISATION_ROLE4.organisationPermission);
+
+        OrganisationRole organisationRole4ToBeUpdated = ORGANISATION_ROLE1.toEntity();
 
 
-        Assertions.assertThatThrownBy(() -> organisationRoleRepository.updateOrganisationRole(organisationRole4, organisationRole1))
+
+        Assertions.assertThatThrownBy(() -> organisationRoleRepository.updateOrganisationRole(organisationRole4, organisationRole4ToBeUpdated))
                 .isInstanceOf(EmptyResultDataAccessException.class);
-        Assertions.assertThatThrownBy(() -> organisationRoleRepository.updateOrganisationRole(organisationRole1, organisationRole2))
+        Assertions.assertThatThrownBy(() -> organisationRoleRepository.updateOrganisationRole(organisationRole1, organisationRole1ToBeUpdated))
                 .isInstanceOf(DataIntegrityViolationException.class);
+
+
+
+        // Checking if Updation is working correctly
 
         Assertions.assertThat(organisationRoleRepository.existOrganisationRole(organisation1.getUser().getUserName(), organisationRole1.getRoleName())).isNotNull().isNotEqualTo(-1L);
         Assertions.assertThat(organisationRoleRepository.existOrganisationRole(organisation4.getUser().getUserName(), organisationRole4.getRoleName())).isEqualTo(-1L);
 
         organisationRoleRepository.updateOrganisationRole(organisationRole1, organisationRole4);
 
-        Assertions.assertThat(organisationRoleRepository.existOrganisationRole(organisation1.getUser().getUserName(), organisationRole1.getRoleName())).isNotNull().isNotEqualTo(-1L);
+        Assertions.assertThat(organisationRoleRepository.existOrganisationRole(organisation1.getUser().getUserName(), organisationRole4.getRoleName())).isNotNull().isNotEqualTo(-1L);
         Assertions.assertThat(organisationRoleRepository.existOrganisationRole(organisation4.getUser().getUserName(), organisationRole4.getRoleName())).isEqualTo(-1L);
     }
 
@@ -125,16 +129,20 @@ public class OrganisationRoleTest {
     @Order(4)
     @Rollback(value = true)
     public void testInsertIntoOrganisationRole() {
-        Long organisationRoleId1 = organisationRoleRepository.existOrganisationRole(USER1.userName, ORGANISATION_ROLE1.roleName);
-        Long organisationRoleId4 = organisationRoleRepository.existOrganisationRole(USER4.userName, OrganisationRoleData.ORGANISATION_ROLE4.roleName);
+        Long user5Id = userRepository.usernameExists(USER5.userName);
+        Long user6Id = userRepository.usernameExists(USER6.userName);
 
-        Assertions.assertThatCode(() -> organisationRoleRepository.insertIntoOrganisationRole(USER1.userName, ORGANISATION_ROLE1.roleName, organisationRoleId1)).doesNotThrowAnyException();
+        Assertions.assertThatCode(() -> organisationRoleRepository.insertIntoOrganisationRole(USER1.userName, ORGANISATION_ROLE1.roleName, user5Id)).doesNotThrowAnyException();
 
-        Assertions.assertThatThrownBy(()-> organisationRoleRepository.insertIntoOrganisationRole(USER4.userName, OrganisationRoleData.ORGANISATION_ROLE4.roleName, organisationRoleId4)).isInstanceOf(EmptyResultDataAccessException.class).hasMessageContaining("No role " + OrganisationRoleData.ORGANISATION_ROLE4.roleName + " exists for organisation " + USER4.userName);
+        Assertions.assertThatThrownBy(()-> organisationRoleRepository.insertIntoOrganisationRole(USER4.userName, OrganisationRoleData.ORGANISATION_ROLE4.roleName, user6Id)).isInstanceOf(EmptyResultDataAccessException.class).hasMessageContaining("No role " + OrganisationRoleData.ORGANISATION_ROLE4.roleName + " exists for organisation " + USER4.userName);
 
-        Assertions.assertThatThrownBy(() -> organisationRoleRepository.insertIntoOrganisationRole(USER1.userName, ORGANISATION_ROLE1.roleName, organisationRoleId1)).isInstanceOf(DataIntegrityViolationException.class).hasMessageContaining("User already exists in an organisation role");
+        Assertions.assertThatThrownBy(() -> organisationRoleRepository.insertIntoOrganisationRole(USER1.userName, ORGANISATION_ROLE1.roleName, user5Id)).isInstanceOf(DataIntegrityViolationException.class);
 
-        Assertions.assertThat(organisationRoleRepository.existOrganisationRole(USER1.userName, ORGANISATION_ROLE1.roleName)).isNotNull().isNotEqualTo(-1L);
+        List<Map<UserBaseDto, OrganisationRoleDto>> organisationRoleList = organisationRoleRepository.getAllOrganisationRoles(USER1.userName, PageRequest.of(0, 10));
+        Assertions.assertThat(organisationRoleList.get(0).keySet().stream().map(UserBaseDto::getUserName).toList()).contains(USER5.userName);
+
+        Utils.matchOrganisationRoleDto(organisationRoleList.get(0).values().stream().toList().get(0), ORGANISATION_ROLE1, USER1);
+
 
     }
 

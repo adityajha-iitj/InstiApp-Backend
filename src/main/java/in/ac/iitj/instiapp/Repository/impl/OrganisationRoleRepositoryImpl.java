@@ -37,11 +37,10 @@ public class OrganisationRoleRepositoryImpl implements OrganisationRoleRepositor
     public void saveOrganisationRole(OrganisationRole organisationRole) {
         entityManager.persist(organisationRole);
     }
-
     @Override
-    public List<OrganisationRoleDto> getOrganisationRoles(String organisationName, Pageable pageable) {
-            return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto(o.organisation.user.name,o.roleName,o.permission) from OrganisationRole o where o.organisation.user.name= :organisationName",OrganisationRoleDto.class)
-                .setParameter("organisationName",organisationName)
+    public List<OrganisationRoleDto> getOrganisationRoles(String organisationUserName, Pageable pageable) {
+            return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto(o.organisation.user.userName,o.roleName,o.permission) from OrganisationRole o where o.organisation.user.userName= :organisationUserName",OrganisationRoleDto.class)
+                .setParameter("organisationUserName",organisationUserName)
                 .setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();
@@ -65,27 +64,23 @@ public class OrganisationRoleRepositoryImpl implements OrganisationRoleRepositor
 
     @Override
     public void updateOrganisationRole(OrganisationRole oldOrganisationRole,OrganisationRole newOrganisationRole){
-        if(existOrganisationRole(oldOrganisationRole.getOrganisation().getUser().getName(), oldOrganisationRole.getRoleName()) == -1L){
+        if(existOrganisationRole(oldOrganisationRole.getOrganisation().getUser().getUserName(), oldOrganisationRole.getRoleName()) == -1L){
             throw new EmptyResultDataAccessException("No role " + oldOrganisationRole.getRoleName() + "exists", 1);
         }
-        if(existOrganisationRole(newOrganisationRole.getOrganisation().getUser().getName(), newOrganisationRole.getRoleName()) != -1L){
+        if(existOrganisationRole(oldOrganisationRole.getOrganisation().getUser().getUserName(), newOrganisationRole.getRoleName()) != -1L){
             throw new DataIntegrityViolationException("Organisation role with name " + newOrganisationRole.getRoleName() + " already exists");
         }
 
-        entityManager.createNativeQuery(
-                        "update organisation_role set " +
-                                "role_name = case when ? is null then role_name else ? end, " +
-                                "organisation_id = case when ? is null then organisation_id else " +
-                                "(select id from organisation where user_id = (select id from users where name = ?)) end " +
-                                "where organisation_id = (select id from organisation where user_id = (select id from users where name = ?)) " +
-                                "and role_name = ?")
-                .setParameter(1, newOrganisationRole.getRoleName())
-                .setParameter(2, newOrganisationRole.getRoleName())
-                .setParameter(3, newOrganisationRole.getOrganisation().getId())
-                .setParameter(4, newOrganisationRole.getOrganisation().getUser().getName())
-                .setParameter(5, oldOrganisationRole.getOrganisation().getUser().getName())
-                .setParameter(6, oldOrganisationRole.getRoleName())
+        entityManager.createQuery("UPDATE OrganisationRole  set roleName = CASE WHEN :newRoleName IS NULL THEN roleName ELSE :newRoleName END, " +
+                        "permission = CASE WHEN :newPermission IS NULL THEN permission ELSE :newPermission END " +
+                        "WHERE organisation.user.userName = :organisationUserName" +
+                        " AND roleName = :oldRoleName")
+                .setParameter("newRoleName", newOrganisationRole.getRoleName())
+                .setParameter("newPermission", newOrganisationRole.getPermission().name())
+                .setParameter("organisationUserName", oldOrganisationRole.getOrganisation().getUser().getUserName())
+                .setParameter("oldRoleName", oldOrganisationRole.getRoleName())
                 .executeUpdate();
+
     }
 
     @Override
@@ -99,18 +94,21 @@ public class OrganisationRoleRepositoryImpl implements OrganisationRoleRepositor
         if (organisationRoleId == -1L) {
             throw new EmptyResultDataAccessException("No role " + organisationRoleName + " exists for organisation " + organisationUsername, 1);
         }
-        Long existingCount = (Long) entityManager.createNativeQuery(
-                        "select count(*) from organisation_role_set where person_id = ?")
-                .setParameter(1, idOfPerson)
+
+        Long exists =(Long) entityManager.createNativeQuery("SELECT  count(1) from  users_organisation_role_set where organisation_role_set_id = ? and user_id = ?")
+                .setParameter(1, organisationRoleId)
+                .setParameter(2,  idOfPerson)
                 .getSingleResult();
 
-        if (existingCount > 0) {
-            throw new DataIntegrityViolationException("User already exists in an organisation role");
+
+
+        if (exists > 0) {
+            throw new DataIntegrityViolationException("User already exists in an organisation at a role");
         }
 
         // Insert into organisation_role_set
         entityManager.createNativeQuery(
-                        "insert into organisation_role_set (organisation_role_id, person_id) values (?, ?)")
+                        "insert into users_organisation_role_set (organisation_role_set_id, user_id) values (?, ?)")
                 .setParameter(1, organisationRoleId)
                 .setParameter(2, idOfPerson)
                 .executeUpdate();

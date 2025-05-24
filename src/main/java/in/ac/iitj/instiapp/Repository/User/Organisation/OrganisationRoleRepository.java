@@ -17,7 +17,7 @@ public interface OrganisationRoleRepository {
     void saveOrganisationRole(OrganisationRole organisationRole);
 
 
-    List<OrganisationRoleDto> getOrganisationRoles(String organisationName, Pageable pageable);
+    List<OrganisationRoleDto> getOrganisationRoles(String organisationUserName, Pageable pageable);
 
 
     Long existOrganisationRole(String organisationName, String roleName);
@@ -34,9 +34,8 @@ public interface OrganisationRoleRepository {
 
     /**
      * Only changes the roleName and rolePermission
-     * @param oldOrganisationRole OrganisationId cannot be null
-     *                         Organisation name cannot be null
-     *                         roleName cannot be null
+     * @param oldOrganisationRole Organisation userName cannot be null
+     *                            roleName cannot be null
      *                            permission can be null
      * @throws org.springframework.dao.EmptyResultDataAccessException the role doesn't exist
      * @throws org.springframework.dao.DataIntegrityViolationException if the newRole already exist with the same name and permission in the organisation
