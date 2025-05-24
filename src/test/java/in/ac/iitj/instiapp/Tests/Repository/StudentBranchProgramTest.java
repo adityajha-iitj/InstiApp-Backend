@@ -23,6 +23,7 @@ import in.ac.iitj.instiapp.payload.User.Student.StudentBranchDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.Rollback;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,33 +56,25 @@ public class StudentBranchProgramTest {
     @Test
     public void testGetListOfStudentBranch(){
         Pageable pageable = PageRequest.of(0, 10);
-        List<StudentBranchDto> list = studentBranchRepository.getListOfStudentBranch(pageable);
-        Set<StudentBranchDto> expected = Set.of(
-                new StudentBranchDto(
-                        StudentBranchData.STUDENT_BRANCH1.name,
-                        UserData.USER1.userName,
-                        StudentBranchData.STUDENT_BRANCH1.openingYear,
-                        StudentBranchData.STUDENT_BRANCH1.closingYear // Closing year is null
-                ),
-                new StudentBranchDto(
-                        StudentBranchData.STUDENT_BRANCH2.name,
-                        UserData.USER2.userName,
-                        StudentBranchData.STUDENT_BRANCH2.openingYear,
-                        StudentBranchData.STUDENT_BRANCH2.closingYear // Closing year is null
-                ),
-                new StudentBranchDto(
-                        StudentBranchData.STUDENT_BRANCH3.name,
-                        UserData.USER3.userName,
-                        StudentBranchData.STUDENT_BRANCH3.openingYear,
-                        StudentBranchData.STUDENT_BRANCH3.closingYear
-                )
+        List<StudentBranchDto> actual = new ArrayList<>(studentBranchRepository.getListOfStudentBranch(pageable));
+        List<StudentBranchDto> expected = List.of(
+                new StudentBranchDto(StudentBranchData.STUDENT_BRANCH1.name, UserData.USER1.userName, StudentBranchData.STUDENT_BRANCH1.openingYear, StudentBranchData.STUDENT_BRANCH1.closingYear),
+                new StudentBranchDto(StudentBranchData.STUDENT_BRANCH2.name, UserData.USER2.userName, StudentBranchData.STUDENT_BRANCH2.openingYear, StudentBranchData.STUDENT_BRANCH2.closingYear),
+                new StudentBranchDto(StudentBranchData.STUDENT_BRANCH3.name, UserData.USER3.userName, StudentBranchData.STUDENT_BRANCH3.openingYear, StudentBranchData.STUDENT_BRANCH3.closingYear)
         );
 
-        // Convert actual results into a set
-        Set<StudentBranchDto> actual = new HashSet<>(list);
-
         // Verify
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertEquals(expected.size(), actual.size(), "List sizes do not match");
+
+        for (int i = 0; i < expected.size(); i++) {
+            StudentBranchDto exp = expected.get(i);
+            StudentBranchDto act = actual.get(i);
+
+            Assertions.assertEquals(exp.getName(), act.getName(), "Name mismatch at index " + i);
+            Assertions.assertEquals(exp.getOrganisation().getUser().getUserName(), act.getOrganisation().getUser().getUserName(), "organisationUsername mismatch at index " + i);
+            Assertions.assertEquals(exp.getOpeningYear(), act.getOpeningYear(), "Opening year mismatch at index " + i);
+            Assertions.assertEquals(exp.getClosingYear(), act.getClosingYear(), "Closing year mismatch at index " + i);
+        }
     }
 
     @Order(2)

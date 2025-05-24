@@ -60,7 +60,7 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
     @Override
     public void updateLocation(String oldLocationName, Locations locations) {
         if(existLocation(oldLocationName) == -1L){
-            throw new EmptyResultDataAccessException("location already exists with name " + oldLocationName,1);
+            throw new EmptyResultDataAccessException("old location does not exist with name " + oldLocationName,1);
         }
         else if(existLocation(locations.getName()) != -1L){
             throw new DataIntegrityViolationException("location already exists with name " + locations.getName());

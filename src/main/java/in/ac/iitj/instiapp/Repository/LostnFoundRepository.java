@@ -28,7 +28,7 @@ public interface LostnFoundRepository {
 
    /**
     * @param pageable
-    * @return
+    * @return list of locations name
     */
    List<String> getListOfLocationsName(Pageable pageable);
 
