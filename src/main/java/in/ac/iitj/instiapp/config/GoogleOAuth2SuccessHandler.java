@@ -159,7 +159,8 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(
-                String.format("{\"username\":\"%s\", \"message\":\"%s\"}", username, message)
+                String.format("{\"username\":\"%s\", \"message\":\"%s\", \"accessToken\":\"%s\", \"refreshToken\":\"%s\"}",
+                        username, message, accessToken, refreshToken)
         );
         System.out.println("[OAuth2] Cookie tokens written to response.");
     }
