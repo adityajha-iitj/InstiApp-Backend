@@ -10,6 +10,9 @@ import in.ac.iitj.instiapp.payload.Auth.AuthResponse;
 import in.ac.iitj.instiapp.payload.Auth.SignupDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.services.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -25,8 +28,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.User;
 
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -55,37 +59,36 @@ public class AuthController {
         this.jwtProvider = jwtProvider;
     }
 
-    private String getOauthAccessTokenGoogle(String code) {
-        RestTemplate rest = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        var params = new org.springframework.util.LinkedMultiValueMap<String,String>();
-        params.add("code", code);
-        params.add("client_id", googleClientId);
-        params.add("client_secret", googleClientSecret);
-        params.add("redirect_uri", googleRedirectUri);
-        params.add("grant_type", "authorization_code");
-        var req = new HttpEntity<>(params, headers);
-        ResponseEntity<String> resp = rest.postForEntity(
-                "https://oauth2.googleapis.com/token", req, String.class);
-        if (!resp.getStatusCode().is2xxSuccessful()) {
-            throw new OAuthTokenExchangeException("Failed to exchange Google code");
+    // 1) Allow GET (so a browser logout link works) and POST
+    @RequestMapping(value = "/logout", method = {RequestMethod.GET, RequestMethod.POST})
+    public void logout(HttpServletRequest request,
+                       HttpServletResponse response) throws IOException {
+
+        // --- clear local session & Spring Security context ---
+        if (request.getSession(false) != null) {
+            request.getSession().invalidate();
         }
-        JsonObject obj = new Gson().fromJson(resp.getBody(), JsonObject.class);
-        return obj.get("access_token").getAsString();
-    }
-    private JsonObject getProfileDetailsGoogle(String token) {
-        RestTemplate rest = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        var req = new HttpEntity<>(headers);
-        ResponseEntity<String> resp = rest.exchange(
-                "https://www.googleapis.com/oauth2/v2/userinfo",
-                HttpMethod.GET, req, String.class);
-        return new Gson().fromJson(resp.getBody(), JsonObject.class);
+        SecurityContextHolder.clearContext();
+
+        // --- clear your JWT cookies (always mark them Secure=true so they actually overwrite) ---
+        clearCookie(response, "accessToken", "/");
+        clearCookie(response, "refreshToken", "/");
+        clearCookie(response, "JSESSIONID", "/");
+
+        // 2) Redirect to your OAuth2 entry‑point WITH prompt=select_account
+        response.sendRedirect("/oauth2/authorization/google?prompt=select_account");
     }
 
-
-
-
+    // simplified clearCookie helper
+    private void clearCookie(HttpServletResponse response,
+                             String name,
+                             String path) {
+        Cookie c = new Cookie(name, "");
+        c.setPath(path);
+        c.setHttpOnly(true);
+        c.setSecure(true);
+        c.setMaxAge(0);
+        response.addCookie(c);
+        System.out.println("[Logout] Cleared cookie: " + name);
+    }
 }

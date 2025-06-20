@@ -5,6 +5,7 @@ import in.ac.iitj.instiapp.payload.Auth.SignupDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.services.UserService;
 import io.jsonwebtoken.io.IOException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, java.io.IOException {
-        System.out.println("[OAuth2] Authentication successful. Extracting OAuth2 user...");
+
 
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         String email = oauthUser.getAttribute("email");
@@ -110,21 +111,56 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         SecurityContextHolder.getContext().setAuthentication(newAuth);
         System.out.println("[OAuth2] Spring Security context updated with new authentication.");
 
-        String accessToken = jwtProvider.generateAccessToken(newAuth);
-        String refreshToken = jwtProvider.generateRefreshToken(newAuth);
-        System.out.println("[OAuth2] Tokens generated successfully.");
+        String accessToken = null;
+        String refreshToken = null;
+
+        // FIXED: Proper token extraction with type-specific validation
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("accessToken".equals(cookie.getName()) && jwtProvider.validateAccessToken(cookie.getValue())) {
+                    accessToken = cookie.getValue();
+                }
+                if ("refreshToken".equals(cookie.getName()) && jwtProvider.validateRefreshToken(cookie.getValue())) {
+                    refreshToken = cookie.getValue();
+                }
+            }
+        }
+
+        // FIXED: Only generate new access token if refresh token is valid
+        if (accessToken == null && refreshToken != null) {
+            accessToken = jwtProvider.generateAccessToken(newAuth);
+        }
+
+        // FIXED: Only generate new tokens when necessary
+        if (accessToken == null) {
+            accessToken = jwtProvider.generateAccessToken(newAuth);
+        }
+        if (refreshToken == null) {
+            refreshToken = jwtProvider.generateRefreshToken(newAuth);
+        }
+
+        // Set cookies
+        Cookie accessCookie = new Cookie("accessToken", accessToken);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setSecure(true);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(3 * 24 * 60 * 60); // 3 days
+        response.addCookie(accessCookie);
+
+        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/");
+        // FIXED: Align cookie expiration with token expiration (15 days)
+        refreshCookie.setMaxAge(15 * 24 * 60 * 60); // 15 days
+        response.addCookie(refreshCookie);
 
         String message = isNew ? "Auto-signup via Google successful" : "Google login successful";
-        String jsonResponse = String.format(
-                "{\"accessToken\":\"%s\", \"refreshToken\":\"%s\", \"username\":\"%s\", \"message\":\"%s\"}",
-                accessToken, refreshToken, username, message
-        );
-
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(jsonResponse);
-        System.out.println("[OAuth2] JSON response written to output stream.");
+        response.getWriter().write(
+                String.format("{\"username\":\"%s\", \"message\":\"%s\"}", username, message)
+        );
+        System.out.println("[OAuth2] Cookie tokens written to response.");
     }
-
 }
-
