@@ -22,10 +22,13 @@ public class IndependentBeans {
 
     @Bean
     public Dotenv getDotEnv(){
-        return  Dotenv.load();
+        return Dotenv.configure()
+                .ignoreIfMissing()
+                .load();
     }
 
-    @Bean
+
+        @Bean
     public SecureRandom getSecureRandom(){
         return new SecureRandom();
     }

@@ -164,6 +164,8 @@ public interface UserRepository {
      */
     void updatePhoneNumber(String username, String newPhoneNumber);
 
+    public String getUserNameFromEmail(String email);
+
 
 
 }

@@ -1,7 +1,9 @@
 package in.ac.iitj.instiapp.payload.Auth;
 
+import in.ac.iitj.instiapp.database.entities.User.Usertype;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Value;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -9,11 +11,26 @@ import java.io.Serializable;
  * DTO for {@link in.ac.iitj.instiapp.database.entities.User.User}
  */
 @Value
-public class SignupDto implements Serializable {
-
-
-    String phoneNumber;
+@Getter
+@Setter
+@AllArgsConstructor
+public class SignupDto {
 
     @NotBlank
-    String userTypeName;
+    private String name;
+
+    @Email
+    private String email;
+
+    @NotBlank
+    private String username;
+
+    @NotBlank
+    private String password;
+
+    @NotBlank
+    private String avatarUrl;
+
+    @NotBlank
+    private Usertype userType;
 }

@@ -110,6 +110,6 @@ public AlumniRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManag
     public Long deleteAlumni(String username) {
 
     // TODO
-        return  0L;
+        return  -1L;
     }
 }

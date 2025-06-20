@@ -22,6 +22,15 @@ public class UserDetailedDto implements Serializable {
     String name;
     String userName;
     String email;
+    @JsonView(Views.Private.class)
+    String phoneNumber;
+    String userTypeName;
+
+    @JsonView(Views.Private.class)
+    String calendarPublicId;
+
+    String avatarUrl;
+    Set<OrganisationRoleDto> organisationRoleSet;
 
 
     // Public Constructor
@@ -58,16 +67,6 @@ public class UserDetailedDto implements Serializable {
         this.phoneNumber = null;
         this.calendarPublicId = null;
     }
-
-    @JsonView(Views.Private.class)
-    String phoneNumber;
-    String userTypeName;
-
-    @JsonView(Views.Private.class)
-    String calendarPublicId;
-
-    String avatarUrl;
-    Set<OrganisationRoleDto> organisationRoleSet;
 
 
 
