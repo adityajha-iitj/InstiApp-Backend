@@ -1,12 +1,11 @@
 package in.ac.iitj.instiapp.services.impl;
 
-import com.nimbusds.jwt.JWTClaimsSet;
 import in.ac.iitj.instiapp.Repository.CalendarRepository;
+import jakarta.persistence.EntityManager;
 import in.ac.iitj.instiapp.Repository.OAuth2TokenRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
 import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.controllers.ValidationUtil;
-import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.mappers.User.UserBaseDtoMapper;
@@ -15,23 +14,27 @@ import in.ac.iitj.instiapp.payload.Auth.SignupDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
-import in.ac.iitj.instiapp.services.JWTTokens.JWEConstants;
 import in.ac.iitj.instiapp.services.UserService;
 import in.ac.iitj.instiapp.services.UtilitiesService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.util.Pair;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -43,10 +46,11 @@ public class UserServiceImpl implements UserService {
     private final CalendarRepository calendarRepository;
     private final  ValidationUtil  validationUtil ;
     private final OAuth2TokenRepository oAuth2TokenRepository;
+    private final EntityManager entityManager;
 
     public UserServiceImpl(UserRepository userRepository, UserBaseDtoMapper userBaseDtoMapper, UserDetailedDtoMapper userDetailedDtoMapper,
                            OrganisationRoleRepository organisationRoleRepository,UtilitiesService utilitiesService, ValidationUtil validationUtil, CalendarRepository calendarRepository,
-                           OAuth2TokenRepository oAuth2TokenRepository) {
+                           OAuth2TokenRepository oAuth2TokenRepository, EntityManager entityManager) {
         this.userRepository = userRepository;
         this.userBaseDtoMapper = userBaseDtoMapper;
         this.userDetailedDtoMapper = userDetailedDtoMapper;
@@ -55,6 +59,7 @@ public class UserServiceImpl implements UserService {
         this.validationUtil = validationUtil;
         this.calendarRepository = calendarRepository;
         this.oAuth2TokenRepository = oAuth2TokenRepository;
+        this.entityManager = entityManager;
     }
 
     public Long save(UserBaseDto userBaseDto) {
@@ -69,41 +74,60 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Pair<String, Long> save(@Valid  SignupDto signupDto, JWTClaimsSet claim) throws DataIntegrityViolationException, EmptyResultDataAccessException , ConstraintViolationException {
-
-
-
-
-//        =========================   Saving User==================================
+    public Long save(@Valid SignupDto signupDto) throws DataIntegrityViolationException, EmptyResultDataAccessException {
         User u = new User();
 
-        u.setName( validationUtil.validateString( claim.getClaim(JWEConstants.KEYS_NAME).toString(), 1, 500));
-        u.setEmail(validationUtil.validateEmail(claim.getClaim(JWEConstants.KEYS_EMAIL).toString()));
-        u.setAvatarUrl(validationUtil.validateString(claim.getClaim(JWEConstants.KEYS_AVATAR).toString(), 12, 500));
-        String userName = utilitiesService.generateRandom(claim.getClaim(JWEConstants.KEYS_NAME).toString());
-        u.setUserName(userName);
+        // Get directly from signupDto
+        u.setName(signupDto.getName());
+        u.setEmail(validationUtil.validateEmail(signupDto.getEmail()));
+        u.setPassword(signupDto.getPassword());
+        u.setAvatarUrl(signupDto.getAvatarUrl());
+        u.setUserName(signupDto.getUsername());
+        u.setUserType(signupDto.getUserType());
 
-        if(userRepository.emailExists(u.getEmail()) != -1L){
+        // Check for duplicate email
+        if (userRepository.emailExists(u.getEmail()) != -1L) {
             throw new DataIntegrityViolationException("Email already exists");
         }
 
-        Long id = userRepository.userTypeExists(signupDto.getUserTypeName());
-        if(id == -1L){
-            throw  new EmptyResultDataAccessException("User Type Doesn't exists in database",1);
+        // Validate user type
+        Long userTypeId = userRepository.userTypeExists(signupDto.getUserType().getName());
+        if (userTypeId == -1L) {
+            throw new EmptyResultDataAccessException("User Type doesn't exist in database", 1);
         }
-        u.setUserType(new Usertype(id));
 
-        String calendarPublicId = utilitiesService.generateRandom(claim.getClaim(JWEConstants.KEYS_NAME).toString() + "calendar" );
-        calendarRepository.save(new Calendar(calendarPublicId));
-        Long idOfCalendar= calendarRepository.calendarExists(calendarPublicId);
+        // ✅ Load the user type entity correctly (not a dummy with null ID)
+        Usertype userTypeEntity = entityManager.getReference(Usertype.class, userTypeId); // or a proper findById
+        u.setUserType(userTypeEntity);
 
-        u.setCalendar(new Calendar(idOfCalendar));
 
-        // Saving user
-        Long idOfUser =  userRepository.save(u);
+        try {
+            return userRepository.save(u);
+        } catch (Exception e) {
+            log.error("Error saving user", e);
+            throw e;
+        }
 
-        return Pair.of(userName, idOfUser);
     }
+
+    public String createUsername(String firstName, String lastName, String email) {
+        String base = String.format("%s.%s.%s",
+                firstName,
+                lastName,
+                email.substring(0, email.indexOf('@'))
+        ).toLowerCase().replaceAll("[^a-z0-9.]", "");
+
+        String username;
+        do {
+            int suffix = ThreadLocalRandom.current().nextInt(1000, 10000);
+            username = base + suffix;
+        }  while (userRepository.usernameExists(username) > -1L);
+            // Check for uniqueness in DB
+
+        return username;
+    }
+
+
 
     public void save(Usertype usertype){
         userRepository.save(usertype);
@@ -178,5 +202,22 @@ public class UserServiceImpl implements UserService {
     public void delete(String userTypeName){
         userRepository.delete(userTypeName);
     }
+
+
+    public String generateJwtToken(Long userId, String email) {
+        // Build JWT with your secret (HS256)
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("userId", userId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
+                .signWith(SignatureAlgorithm.HS256, "your_jwt_secret") // Use env/config
+                .compact();
+    }
+
+    public String getUsernameFromEmail(String email){
+        return userRepository.getUserNameFromEmail(email);
+    }
+
 
 }

@@ -4,6 +4,8 @@ package in.ac.iitj.instiapp.database.entities.User;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,6 +35,10 @@ public class User{
     @Column(nullable = false)
     String email;
 
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters")
+    String password;
+
     @Column(nullable = true)
     String phoneNumber;
 
@@ -40,10 +46,10 @@ public class User{
     Usertype userType;
 
     @OneToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = true)
     Calendar calendar;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     String avatarUrl;
 
     @OneToMany

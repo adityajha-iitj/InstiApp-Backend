@@ -15,6 +15,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -91,10 +92,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    @Transactional
     public Long save(User user) {
-        user.setUserType(entityManager.getReference(Usertype.class,user.getUserType().getId()));
-        user.setCalendar(entityManager.getReference(Calendar.class,user.getCalendar().getId()));
+        user.setCalendar(null);
         entityManager.persist(user);
+        entityManager.flush();
         return user.getId();
     }
 
@@ -103,7 +105,7 @@ public class UserRepositoryImpl implements UserRepository {
         try {
 
 
-            return entityManager.createQuery("select  new in.ac.iitj.instiapp.payload.User.UserBaseDto(u.name, u.userName, u.email, u.userType.name, u.avatarUrl) from User  u where u.userName = :username", UserBaseDto.class)
+            return entityManager.createQuery("select  new in.ac.iitj.instiapp.payload.User.UserBaseDto(u.name, u.userName,u.password, u.email, u.userType.name, u.avatarUrl) from User  u where u.userName = :username", UserBaseDto.class)
                     .setParameter("username", username)
                     .getSingleResult();
         }
@@ -227,6 +229,13 @@ public class UserRepositoryImpl implements UserRepository {
                 .setParameter("newPhoneNumber",newPhoneNumber)
                 .setParameter("userId",userId)
                 .executeUpdate();
+    }
+
+    public String getUserNameFromEmail(String email){
+        return entityManager.createQuery(
+                        "select u.userName from User u where u.email = :email", String.class)
+                .setParameter("email", email)
+                .getSingleResult();
     }
 
 

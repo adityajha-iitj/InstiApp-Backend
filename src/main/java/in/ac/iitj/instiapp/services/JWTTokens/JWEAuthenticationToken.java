@@ -3,8 +3,10 @@ package in.ac.iitj.instiapp.services.JWTTokens;
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collections;
+import java.util.List;
 
 public class JWEAuthenticationToken extends AbstractAuthenticationToken {
 
@@ -16,14 +18,11 @@ public class JWEAuthenticationToken extends AbstractAuthenticationToken {
 
 
 
-    public JWEAuthenticationToken(JWEConstants.STATES state, String subject,JWTClaimsSet claimsSet) {
-        super(Collections.emptyList());
-
+    public JWEAuthenticationToken(JWEConstants.STATES state, String subject, JWTClaimsSet claimsSet) {
+        super(List.of(new SimpleGrantedAuthority("ROLE_USER")));
         this.state = state;
         this.subject = subject;
         this.claimsSet = claimsSet;
-        
-
         this.setAuthenticated(true);
     }
 
@@ -34,6 +33,11 @@ public class JWEAuthenticationToken extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
+        return subject;
+    }
+
+    @Override
+    public String getName() {
         return subject;
     }
 

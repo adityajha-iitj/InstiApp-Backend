@@ -22,6 +22,8 @@ public class UserBaseDto implements Serializable {
 
     String userName;
 
+    String password;
+
     String email;
 
     String userTypeName;
@@ -31,6 +33,7 @@ public class UserBaseDto implements Serializable {
     public UserBaseDto(String userName) {
         this.userName = userName;
         this.name = null;
+        this.password = null;
         this.email = null;
         this.avatarUrl = null;
         this.userTypeName = null;

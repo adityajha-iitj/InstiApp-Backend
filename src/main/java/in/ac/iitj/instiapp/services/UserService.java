@@ -1,13 +1,12 @@
 package in.ac.iitj.instiapp.services;
 
-import com.nimbusds.jwt.JWTClaimsSet;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.payload.Auth.SignupDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.util.Pair;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +17,9 @@ import java.util.Set;
 public interface UserService {
 
 
-    public Pair<String, Long> save(SignupDto signupDto, JWTClaimsSet claim);
+    public Long save(@Valid SignupDto signupDto);
+
+    public String createUsername(String firstName, String lastName, String email);
 
     public void save(Usertype usertype);
 
@@ -54,4 +55,6 @@ public interface UserService {
     public void updatePhoneNumber(String username, String newPhoneNumber);
 
     public void delete(String userTypeName);
+
+    public String getUsernameFromEmail(String email);
 }
