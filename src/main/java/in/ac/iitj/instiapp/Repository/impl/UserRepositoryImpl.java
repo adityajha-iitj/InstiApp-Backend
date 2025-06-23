@@ -95,9 +95,9 @@ public class UserRepositoryImpl implements UserRepository {
     @Transactional
     public Long save(User user) {
         user.setCalendar(null);
-        entityManager.persist(user);
+        User newUser = entityManager.merge(user);
         entityManager.flush();
-        return user.getId();
+        return newUser.getId();
     }
 
     @Override
@@ -255,6 +255,21 @@ public class UserRepositoryImpl implements UserRepository {
                 .setParameter("email", email)
                 .getSingleResult();
     }
+
+    @Override
+    public Long getUserIdFromUsername(String username) {
+        return entityManager.createQuery(
+                        "SELECT u.id FROM User u WHERE u.userName = :username", Long.class)
+                .setParameter("username", username)
+                .getSingleResult();
+    }
+
+    public User getUserFromUsername(String username){
+        return entityManager.createQuery("SELECT u FROM User u WHERE u.userName = :username", User.class)
+                .setParameter("username",username)
+                .getSingleResult();
+    }
+
 
 
 

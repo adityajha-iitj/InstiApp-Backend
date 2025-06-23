@@ -18,6 +18,7 @@ public interface UserService {
 
 
     public Long save(@Valid SignupDto signupDto);
+    public Long updateUserDetails(UserDetailedDto userDetailedDto);
 
     public String createUsername(String firstName, String lastName, String email);
 
