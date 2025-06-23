@@ -62,10 +62,10 @@ surefire-reports/
 *.swp
 
 
-# Docker files
-**/.dockerignore
-**/Dockerfile
-**/Dockerfile-*
+## Docker files
+#**/.dockerignore
+#**/Dockerfile
+#**/Dockerfile-*
 
 
 # NetBeans specific files
