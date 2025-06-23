@@ -36,7 +36,7 @@ public interface UserService {
     public UserDetailedDto getUserDetailed(String username, boolean isPrivate, Pageable pageable);
 
 
-    public UserDetailedDto getUserDetailed(String email );
+    public UserDetailedDto getUserDetailed(String username);
 
     public List<UserBaseDto> getListUserLimitedByUsertype(String usertype, Pageable pageable);
 

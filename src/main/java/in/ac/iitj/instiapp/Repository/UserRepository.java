@@ -99,7 +99,7 @@ public interface UserRepository {
     UserDetailedDto getUserDetailed(String username, boolean isPrivate);
 
 
-    UserDetailedDto getUserDetailed(String email);
+    UserDetailedDto getUserDetailed(String username);
 
     /**
      * Should be used with caution as it may introduce long database calls

@@ -160,9 +160,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDetailedDto getUserDetailed(String email ) {
-        UserDetailedDto userDetailedDto = userRepository.getUserDetailed(email);
-        userDetailedDto.setOrganisationRoleSet(userRepository.getOrganisationRoleDTOsByUsername(userDetailedDto.getUserName(), PageRequest.of(0,10)));
+    public UserDetailedDto getUserDetailed(String username) {
+        UserDetailedDto userDetailedDto = userRepository.getUserDetailed(username);
+        userDetailedDto.setOrganisationRoleSet(userRepository.getOrganisationRoleDTOsByUsername(username, PageRequest.of(0,10)));
         return userDetailedDto;
     }
 
