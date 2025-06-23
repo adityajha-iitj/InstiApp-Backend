@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
     private final EntityManager entityManager;
 
     public UserServiceImpl(UserRepository userRepository, UserBaseDtoMapper userBaseDtoMapper, UserDetailedDtoMapper userDetailedDtoMapper,
-                           OrganisationRoleRepository organisationRoleRepository,UtilitiesService utilitiesService, ValidationUtil validationUtil, CalendarRepository calendarRepository,
+                           OrganisationRoleRepository organisationRoleRepository, UtilitiesService utilitiesService, ValidationUtil validationUtil, CalendarRepository calendarRepository,
                            OAuth2TokenRepository oAuth2TokenRepository, EntityManager entityManager) {
         this.userRepository = userRepository;
         this.userBaseDtoMapper = userBaseDtoMapper;
@@ -218,6 +218,17 @@ public class UserServiceImpl implements UserService {
     public String getUsernameFromEmail(String email){
         return userRepository.getUserNameFromEmail(email);
     }
+
+    public Long updateUserDetails(UserDetailedDto userDetailedDto){
+        User updatedUser = userDetailedDtoMapper.toUser(userDetailedDto);
+        updatedUser.setId(userRepository.getUserIdFromUsername(userDetailedDto.getUserName()));
+        User user = userRepository.getUserFromUsername(userDetailedDto.getUserName());
+
+        updatedUser.setUserType(user.getUserType());
+
+        return userRepository.save(updatedUser);
+    }
+
 
 
 }

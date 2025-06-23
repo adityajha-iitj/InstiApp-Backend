@@ -57,6 +57,7 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         Usertype userType = new Usertype();
         userType.setName("Student");
+        userType.setId(1L);
 
         boolean isNew = false;
 
