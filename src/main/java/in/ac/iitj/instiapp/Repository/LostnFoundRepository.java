@@ -57,7 +57,7 @@ public interface LostnFoundRepository {
    /**
     * @param lostnFound
     */
-   void saveLostnFoundDetails(LostnFound lostnFound );
+   void saveLostnFoundDetails(LostnFound lostnFound);
 
    /**
     * @param status cannot be null must be Optional.empty()

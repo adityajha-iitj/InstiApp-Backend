@@ -1,5 +1,6 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
+import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
@@ -8,6 +9,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
@@ -25,12 +27,14 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager entityManager;
+    private final UserRepository userRepository;
 
 
     @Autowired
-    public LostnFoundRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManager) {
+    public LostnFoundRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManager, UserRepository userRepository) {
         this.jdbcTemplate = jdbcTemplate;
         this.entityManager = entityManager;
+        this.userRepository = userRepository;
     }
 
 
@@ -97,38 +101,7 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
     }
 
     @Override
-    public void saveLostnFoundDetails(LostnFound lostnFound) {
-
-        User finder = null;
-        if (lostnFound.getFinder() != null && lostnFound.getFinder().getId() != -1) {
-            finder = entityManager.getReference(User.class, lostnFound.getFinder().getId());
-        }
-        User owner = null;
-        if (lostnFound.getOwner() != null && lostnFound.getOwner().getId() != -1) {
-            owner = entityManager.getReference(User.class, lostnFound.getOwner().getId());
-        }
-        Locations landmark = null;
-        if (lostnFound.getLandmark() != null && lostnFound.getLandmark().getId() != -1) {
-            landmark = entityManager.getReference(Locations.class, lostnFound.getLandmark().getId());
-        }
-        Media media = null;
-        if (lostnFound.getMedia() != null && lostnFound.getMedia().getId() != -1) {
-            media = entityManager.getReference(Media.class, lostnFound.getMedia().getId());
-        }
-
-        if (finder != null) {
-            lostnFound.setFinder(finder);
-        }
-        if (owner != null) {
-            lostnFound.setOwner(owner);
-        }
-        if (landmark != null) {
-            lostnFound.setLandmark(landmark);
-        }
-        if (media != null) {
-            lostnFound.setMedia(media);
-        }
-
+    public void saveLostnFoundDetails(LostnFound lostnFound){
         entityManager.persist(lostnFound);
     }
 
@@ -211,13 +184,18 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
             JOIN lostnfound l ON m.id = l.media_id
             WHERE l.public_id = ?
         """;
-        String mediaPublicId = jdbcTemplate.queryForObject(sql, String.class, publicId);
+        List<String> mediaPublicIds = jdbcTemplate.queryForList(sql, String.class, publicId);
+        String mediaPublicId = mediaPublicIds.isEmpty() ? null : mediaPublicIds.get(0);
 
         String deleteSql = """
                 DELETE FROM lostnfound
                 WHERE public_id = ?
             """;
-        jdbcTemplate.update(deleteSql, publicId);
+        int rowsAffected = jdbcTemplate.update(deleteSql, publicId);
+
+        if (rowsAffected == 0) {
+            throw new EmptyResultDataAccessException("No lost and found item with public id " + publicId, 1);
+        }
 
         return Optional.ofNullable(mediaPublicId);
 
