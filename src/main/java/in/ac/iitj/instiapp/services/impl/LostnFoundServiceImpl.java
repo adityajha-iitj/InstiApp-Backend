@@ -6,6 +6,7 @@ import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.Repository.impl.BusRepositoryImpl;
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
 import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFound;
+import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFoundType;
 import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.mappers.LostnFoundDtoMapper;
@@ -58,7 +59,9 @@ public class LostnFoundServiceImpl implements LostnFoundService {
 
     @Override
     @Transactional
-    public void updateLocation(String oldLocationName, Locations location) {
+    public void updateLocation(String oldLocationName, String newLocationName) {
+        Locations location = new Locations();
+        location.setName(newLocationName);
         lostnFoundRepository.updateLocation(oldLocationName, location);
     }
 
@@ -70,6 +73,8 @@ public class LostnFoundServiceImpl implements LostnFoundService {
         lostnFound.setPublicId(lostnFoundDto.getPublicId());
         lostnFound.setExtraInfo(lostnFoundDto.getExtraInfo());
         lostnFound.setStatus(lostnFoundDto.getStatus());
+        lostnFound.setType(lostnFoundDto.getType());
+
 
         // Set managed User (finder)
         if (lostnFoundDto.getFinder() != null && lostnFoundDto.getFinder().getUserName() != null) {
@@ -124,7 +129,59 @@ public class LostnFoundServiceImpl implements LostnFoundService {
     @Override
     @Transactional
     public void updateLostAndFound(LostnFoundDto lostnFoundDto) {
-        LostnFound lostnFound = LostnFoundDtoMapper.INSTANCE.toEntity(lostnFoundDto);
+
+        LostnFound lostnFound = new LostnFound();
+
+        lostnFound.setPublicId(lostnFoundDto.getPublicId());
+        lostnFound.setExtraInfo(lostnFoundDto.getExtraInfo());
+        lostnFound.setStatus(lostnFoundDto.getStatus());
+
+
+        // Set managed User (finder)
+        if (lostnFoundDto.getFinder() != null && lostnFoundDto.getFinder().getUserName() != null) {
+            Long finderId = userRepository.getUserIdFromUsername(lostnFoundDto.getFinder().getUserName());
+            User finder = entityManager.getReference(User.class, finderId);
+            lostnFound.setFinder(finder);
+        } else {
+            lostnFound.setFinder(null);
+        }
+
+        // Set managed User (owner)
+        if (lostnFoundDto.getOwner() != null && lostnFoundDto.getOwner().getUserName() != null) {
+            Long ownerId = userRepository.getUserIdFromUsername(lostnFoundDto.getOwner().getUserName());
+            User owner = entityManager.getReference(User.class, ownerId);
+            lostnFound.setOwner(owner);
+        } else {
+            lostnFound.setOwner(null);
+        }
+
+        // Set managed Locations (landmark)
+        if (lostnFoundDto.getLandmarkName() != null) {
+            Long landmarkId = lostnFoundRepository.existLocation(lostnFoundDto.getLandmarkName());
+            if (landmarkId != -1) {
+                Locations landmark = entityManager.getReference(Locations.class, landmarkId);
+                lostnFound.setLandmark(landmark);
+            } else {
+                throw new DataIntegrityViolationException("Location with name '" + lostnFoundDto.getLandmarkName() + "' does not exist.");
+            }
+        } else {
+            lostnFound.setLandmark(null);
+        }
+
+        // Set managed Media (if present)
+        if (lostnFoundDto.getMedia() != null && lostnFoundDto.getMedia().getPublicId() != null) {
+            Long mediaId = mediaRepository.getIdByPublicId(lostnFoundDto.getMedia().getPublicId());
+            if (mediaId != null) {
+                Media media = entityManager.getReference(Media.class, mediaId);
+                lostnFound.setMedia(media);
+            } else {
+                throw new DataIntegrityViolationException("Media with publicId '" + lostnFoundDto.getMedia().getPublicId() + "' does not exist.");
+            }
+        } else {
+            lostnFound.setMedia(null);
+        }
+
+        //LostnFound lostnFound = LostnFoundDtoMapper.INSTANCE.toEntity(lostnFoundDto);
         lostnFoundRepository.updateLostnFound(lostnFound , lostnFound.getPublicId());
     }
 
@@ -135,7 +192,18 @@ public class LostnFoundServiceImpl implements LostnFoundService {
     }
 
     @Override
-    public List<LostnFoundDto> getLostAndFoundByFilter(Optional<Boolean> status, Optional<String> owner, Optional<String> finder, Optional<String> landmark, Pageable pageable) {
-        return lostnFoundRepository.getLostnFoundByFilter(status, owner, finder, landmark, pageable);
+    public List<LostnFoundDto> getLostAndFoundByFilter(LostnFoundType type, Optional<Boolean> status, Optional<String> owner, Optional<String> finder, Optional<String> landmark, Pageable pageable) {
+        return lostnFoundRepository.getLostnFoundByFilter(type, status, owner, finder, landmark, pageable);
+    }
+
+    public boolean isOwner(String userName, String publicId){
+        return lostnFoundRepository.isOwner(userName,publicId);
+    }
+    public boolean isFinder(String userName, String publicId){
+        return lostnFoundRepository.isFinder(userName,publicId);
+    }
+
+    public LostnFoundType findTypeByPublicId(String publicId){
+        return lostnFoundRepository.findTypeByPublicId(publicId);
     }
 }

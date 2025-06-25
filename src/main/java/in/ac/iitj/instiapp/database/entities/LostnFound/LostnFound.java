@@ -32,6 +32,10 @@ public class LostnFound {
     @ManyToOne
     Locations Landmark;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    LostnFoundType type;
+
     @Column( nullable = true)
     String extraInfo;
 

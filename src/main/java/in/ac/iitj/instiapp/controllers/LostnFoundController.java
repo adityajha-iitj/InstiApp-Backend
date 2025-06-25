@@ -1,7 +1,10 @@
 package in.ac.iitj.instiapp.controllers;
 
+import in.ac.iitj.instiapp.config.JwtProvider;
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
+import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFoundType;
 import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
+import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.common.ApiResponse;
 import in.ac.iitj.instiapp.services.LostnFoundService;
 import jakarta.validation.Valid;
@@ -24,11 +27,13 @@ public class LostnFoundController {
 
     private final LostnFoundService lostnFoundService;
     private final ValidationUtil validationUtil;
+    private final JwtProvider jwtProvider;
 
     @Autowired
-    public LostnFoundController(LostnFoundService lostnFoundService, ValidationUtil validationUtil) {
+    public LostnFoundController(LostnFoundService lostnFoundService, ValidationUtil validationUtil, JwtProvider jwtProvider) {
         this.lostnFoundService = lostnFoundService;
         this.validationUtil = validationUtil;
+        this.jwtProvider = jwtProvider;
     }
 
     /*--------------------------------------------------------LOCATIONS---------------------------------------------------*/
@@ -59,8 +64,10 @@ public class LostnFoundController {
     }
 
     @PostMapping("/locations")
-    public ResponseEntity<ApiResponse<Void>> saveLocation(@RequestBody Locations location) {
+    public ResponseEntity<ApiResponse<Void>> saveLocation(@RequestBody String locationName) {
         try {
+            Locations location = new Locations();
+            location.setName(locationName);
             lostnFoundService.saveLocation(location);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(
@@ -92,9 +99,11 @@ public class LostnFoundController {
     }
 
     @DeleteMapping("/locations")
-    public ResponseEntity<ApiResponse<Void>> deleteLocationByName(@RequestBody Locations locationName) {
+    public ResponseEntity<ApiResponse<Void>> deleteLocationByName(@RequestBody String locationName) {
         try {
-            lostnFoundService.deleteLocationByName(locationName.getName());
+            Locations location = new Locations();
+            location.setName(locationName);
+            lostnFoundService.deleteLocationByName(location.getName());
             return ResponseEntity.ok(
                     new ApiResponse<>(
                             HttpStatus.OK.value(),
@@ -126,9 +135,9 @@ public class LostnFoundController {
     }
 
     @PutMapping("/locations")
-    public ResponseEntity<ApiResponse<Void>> updateLocation(@RequestParam String oldLocationName, @RequestBody Locations location) {
+    public ResponseEntity<ApiResponse<Void>> updateLocation(@RequestParam String oldLocationName, @RequestParam String newLocationName) {
         try {
-            lostnFoundService.updateLocation(oldLocationName, location);
+            lostnFoundService.updateLocation(oldLocationName, newLocationName);
             return ResponseEntity.ok(
                     new ApiResponse<>(
                             HttpStatus.OK.value(),
@@ -171,8 +180,15 @@ public class LostnFoundController {
     /*-----------------------------------------------------LOST AND FOUND-------------------------------------------------*/
 
     @PostMapping("/")
-    public ResponseEntity<ApiResponse<Void>> saveLostAndFound(@Valid @RequestBody LostnFoundDto lostnFoundDto) {
+    public ResponseEntity<ApiResponse<Void>> saveLostAndFound(@RequestHeader("Authorization") String jwt,@Valid @RequestBody LostnFoundDto lostnFoundDto) {
         try {
+            String userName = jwtProvider.getUsernameFromToken(jwt);
+            UserBaseDto userBaseDto = new UserBaseDto();
+            userBaseDto.setUserName(userName);
+            if(lostnFoundDto.getType() == LostnFoundType.LOST)
+                lostnFoundDto.setOwner(userBaseDto);
+            if(lostnFoundDto.getType() == LostnFoundType.FOUND)
+                lostnFoundDto.setFinder(userBaseDto);
             lostnFoundService.saveLostAndFound(lostnFoundDto);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(
@@ -204,7 +220,48 @@ public class LostnFoundController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<ApiResponse<Void>> updateLostAndFound(@Valid @RequestBody LostnFoundDto lostnFoundDto) {
+    public ResponseEntity<ApiResponse<Void>> updateLostAndFound(@RequestHeader("Authorization") String jwt,@Valid @RequestBody LostnFoundDto lostnFoundDto) {
+
+        LostnFoundType lostnFoundType = lostnFoundService.findTypeByPublicId(lostnFoundDto.getPublicId());
+        boolean isOwner=false,isFinder=false;
+        try {
+            String userName = jwtProvider.getUsernameFromToken(jwt);
+            System.out.println("User trying to access : "+userName);
+            UserBaseDto userBaseDto = new UserBaseDto();
+            userBaseDto.setUserName(userName);
+
+            if(lostnFoundType == LostnFoundType.FOUND){
+                isFinder = lostnFoundService.isFinder(userName, lostnFoundDto.getPublicId());
+                lostnFoundDto.setFinder(userBaseDto);
+                lostnFoundDto.setOwner(lostnFoundDto.getOwner());
+            }
+            if(lostnFoundType == LostnFoundType.LOST){
+                isOwner = lostnFoundService.isOwner(userName, lostnFoundDto.getPublicId());
+                lostnFoundDto.setOwner(userBaseDto);
+                lostnFoundDto.setFinder(lostnFoundDto.getFinder());
+            }
+
+        } catch (Exception ex) {
+            // If service throws something unexpected during check (e.g., DB error), treat as bad request or internal error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "OWNER_CHECK_ERROR",
+                            "Error checking ownership: " + ex.getMessage(),
+                            null,
+                            null
+                    ));
+        }
+        if (!isOwner && !isFinder) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse<>(
+                            HttpStatus.FORBIDDEN.value(),
+                            "FORBIDDEN",
+                            "You are not authorized to delete this item",
+                            null,
+                            null
+                    ));
+        }
         try {
             lostnFoundService.updateLostAndFound(lostnFoundDto);
             return ResponseEntity.ok(
@@ -247,7 +304,33 @@ public class LostnFoundController {
     }
 
     @DeleteMapping("/{publicId}")
-    public ResponseEntity<ApiResponse<Void>> deleteLostAndFound(@PathVariable String publicId) {
+    public ResponseEntity<ApiResponse<Void>> deleteLostAndFound(@RequestHeader("Authorization") String jwt, @PathVariable String publicId) {
+            String userName = jwtProvider.getUsernameFromToken(jwt);
+        boolean isOwner;
+        try {
+            isOwner = lostnFoundService.isOwner(userName, publicId);
+        } catch (Exception ex) {
+            // If service throws something unexpected during check (e.g., DB error), treat as bad request or internal error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "OWNER_CHECK_ERROR",
+                            "Error checking ownership: " + ex.getMessage(),
+                            null,
+                            null
+                    ));
+        }
+        if (!isOwner) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse<>(
+                            HttpStatus.FORBIDDEN.value(),
+                            "FORBIDDEN",
+                            "You are not authorized to delete this item",
+                            null,
+                            null
+                    ));
+        }
+
         try {
             lostnFoundService.deleteLostAndFound(publicId);
             return ResponseEntity.ok(
@@ -283,12 +366,13 @@ public class LostnFoundController {
     @GetMapping("/")
     public ResponseEntity<ApiResponse<List<LostnFoundDto>>> getLostAndFoundByFilter(
             @RequestParam Optional<Boolean> status,
+            @RequestParam(required = true) LostnFoundType type,
             @RequestParam Optional<String> owner,
             @RequestParam Optional<String> finder,
             @RequestParam Optional<String> landmark,
             Pageable pageable) {
         try {
-            List<LostnFoundDto> items = lostnFoundService.getLostAndFoundByFilter(status, owner, finder, landmark, pageable);
+            List<LostnFoundDto> items = lostnFoundService.getLostAndFoundByFilter(type, status, owner, finder, landmark, pageable);
             return ResponseEntity.ok(
                     new ApiResponse<>(
                             HttpStatus.OK.value(),
