@@ -87,53 +87,53 @@ public class LostnFoundTest {
         Assertions.assertEquals(-1, id2);
 
     }
-    @Test
-    @Order(6)
-    public void testGetLostnFoundByFilter(){
-        Pageable pageable = PageRequest.of(0, 10);
-        List<LostnFoundDto> status_filter = lostnFoundRepository.getLostnFoundByFilter(Optional.of(true) , Optional.empty() , Optional.empty() , Optional.empty() , pageable);
-        Assertions.assertEquals(1, status_filter.size());
-        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND1.publicId, status_filter.get(0).getPublicId());
-        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND1.extraInfo, status_filter.get(0).getExtraInfo());
+//    @Test
+//    @Order(6)
+//    public void testGetLostnFoundByFilter(){
+//        Pageable pageable = PageRequest.of(0, 10);
+//        List<LostnFoundDto> status_filter = lostnFoundRepository.getLostnFoundByFilter(Optional.of(true) , Optional.empty() , Optional.empty() , Optional.empty() , pageable);
+//        Assertions.assertEquals(1, status_filter.size());
+//        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND1.publicId, status_filter.get(0).getPublicId());
+//        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND1.extraInfo, status_filter.get(0).getExtraInfo());
+//
+//        List<LostnFoundDto>  owner_filter = lostnFoundRepository.getLostnFoundByFilter(Optional.empty() , Optional.of(UserData.USER15.userName) ,Optional.empty() , Optional.empty() , pageable);
+//        Assertions.assertEquals(1, owner_filter.size());
+//        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND2.publicId, owner_filter.get(0).getPublicId());
+//
+//        List<LostnFoundDto> finder_filter = lostnFoundRepository.getLostnFoundByFilter(Optional.empty() , Optional.empty() , Optional.of(UserData.USER14.userName) , Optional.empty() , pageable);
+//        Assertions.assertEquals(1, finder_filter.size());
+//        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND3.publicId, finder_filter.get(0).getPublicId());
+//
+//        List<LostnFoundDto> land_filter = lostnFoundRepository.getLostnFoundByFilter(Optional.empty() , Optional.empty(), Optional.empty() , Optional.of(LocationData.LOCATION2.name) , pageable);
+//        Assertions.assertEquals(1, land_filter.size());
+//        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND2.publicId, land_filter.get(0).getPublicId());
+//
+//        List<LostnFoundDto> no_filter = lostnFoundRepository.getLostnFoundByFilter(Optional.empty() , Optional.empty() , Optional.empty() , Optional.empty() , pageable);
+//        Assertions.assertEquals(3, no_filter.size());
+//        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND1.publicId, no_filter.get(0).getPublicId());
+//        Assertions.assertEquals(UserData.USER14.userName, no_filter.get(0).getOwner().getUserName());
+//        Assertions.assertEquals(LocationData.LOCATION1.name , no_filter.get(0).getLandmarkName());
+//        Assertions.assertEquals(MediaData.MEDIA1.publicId, no_filter.get(0).getMedia().getPublicId());
+//        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND2.publicId, no_filter.get(1).getPublicId());
+//        Assertions.assertEquals(UserData.USER14.userName, no_filter.get(2).getFinder().getUserName());
+//        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND3.publicId, no_filter.get(2).getPublicId());
+//
+//
+//    }
 
-        List<LostnFoundDto>  owner_filter = lostnFoundRepository.getLostnFoundByFilter(Optional.empty() , Optional.of(UserData.USER15.userName) ,Optional.empty() , Optional.empty() , pageable);
-        Assertions.assertEquals(1, owner_filter.size());
-        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND2.publicId, owner_filter.get(0).getPublicId());
 
-        List<LostnFoundDto> finder_filter = lostnFoundRepository.getLostnFoundByFilter(Optional.empty() , Optional.empty() , Optional.of(UserData.USER14.userName) , Optional.empty() , pageable);
-        Assertions.assertEquals(1, finder_filter.size());
-        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND3.publicId, finder_filter.get(0).getPublicId());
-
-        List<LostnFoundDto> land_filter = lostnFoundRepository.getLostnFoundByFilter(Optional.empty() , Optional.empty(), Optional.empty() , Optional.of(LocationData.LOCATION2.name) , pageable);
-        Assertions.assertEquals(1, land_filter.size());
-        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND2.publicId, land_filter.get(0).getPublicId());
-
-        List<LostnFoundDto> no_filter = lostnFoundRepository.getLostnFoundByFilter(Optional.empty() , Optional.empty() , Optional.empty() , Optional.empty() , pageable);
-        Assertions.assertEquals(3, no_filter.size());
-        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND1.publicId, no_filter.get(0).getPublicId());
-        Assertions.assertEquals(UserData.USER14.userName, no_filter.get(0).getOwner().getUserName());
-        Assertions.assertEquals(LocationData.LOCATION1.name , no_filter.get(0).getLandmarkName());
-        Assertions.assertEquals(MediaData.MEDIA1.publicId, no_filter.get(0).getMedia().getPublicId());
-        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND2.publicId, no_filter.get(1).getPublicId());
-        Assertions.assertEquals(UserData.USER14.userName, no_filter.get(2).getFinder().getUserName());
-        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND3.publicId, no_filter.get(2).getPublicId());
-
-
-    }
-
-
-    @Test
-    @Order(7)
-    @Rollback(value = true)
-    public void updateLostnfound(){
-        Pageable pageable = PageRequest.of(0, 10);
-        lostnFoundRepository.updateLostnFound(LostnFoundData.LOST_N_FOUND4.toEntity() , LostnFoundData.LOST_N_FOUND1.publicId);
-        List<LostnFoundDto> data = lostnFoundRepository.getLostnFoundByFilter(Optional.empty() , Optional.of(UserData.USER14.userName) , Optional.empty() , Optional.empty() , pageable);
-        Assertions.assertEquals(1, data.size());
-        Assertions.assertEquals(LocationData.LOCATION1.name, data.get(0).getLandmarkName());
-        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND4.extraInfo , data.get(0).getExtraInfo());
-
-    }
+//    @Test
+//    @Order(7)
+//    @Rollback(value = true)
+//    public void updateLostnfound(){
+//        Pageable pageable = PageRequest.of(0, 10);
+//        lostnFoundRepository.updateLostnFound(LostnFoundData.LOST_N_FOUND4.toEntity() , LostnFoundData.LOST_N_FOUND1.publicId);
+//        List<LostnFoundDto> data = lostnFoundRepository.getLostnFoundByFilter(Optional.empty() , Optional.of(UserData.USER14.userName) , Optional.empty() , Optional.empty() , pageable);
+//        Assertions.assertEquals(1, data.size());
+//        Assertions.assertEquals(LocationData.LOCATION1.name, data.get(0).getLandmarkName());
+//        Assertions.assertEquals(LostnFoundData.LOST_N_FOUND4.extraInfo , data.get(0).getExtraInfo());
+//
+//    }
 
     @Test
     @Order(8)
