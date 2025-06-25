@@ -95,9 +95,9 @@ public class UserRepositoryImpl implements UserRepository {
     @Transactional
     public Long save(User user) {
         user.setCalendar(null);
-        entityManager.persist(user);
+        User newUser = entityManager.merge(user);
         entityManager.flush();
-        return user.getId();
+        return newUser.getId();
     }
 
     @Override
@@ -105,7 +105,7 @@ public class UserRepositoryImpl implements UserRepository {
         try {
 
 
-            return entityManager.createQuery("select  new in.ac.iitj.instiapp.payload.User.UserBaseDto(u.name, u.userName,u.password, u.email, u.userType.name, u.avatarUrl) from User  u where u.userName = :username", UserBaseDto.class)
+            return entityManager.createQuery("select  new in.ac.iitj.instiapp.payload.User.UserBaseDto(u.name, u.userName,u.email, u.userType.name, u.avatarUrl) from User  u where u.userName = :username", UserBaseDto.class)
                     .setParameter("username", username)
                     .getSingleResult();
         }
@@ -135,11 +135,29 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public UserDetailedDto getUserDetailed(String email) {
-        return
-                entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.UserDetailedDto(u.name, u.userName,u.email,u.phoneNumber,u.userType.name, u.calendar.publicId,u.avatarUrl) from User  u where u.email = :email",UserDetailedDto.class)
-                        .setParameter("email",email)
-                        .getSingleResult();
+    public UserDetailedDto getUserDetailed(String username) {
+
+        String ql = """
+                      select new in.ac.iitj.instiapp.payload.User.UserDetailedDto(
+                          u.name,
+                          u.userName,
+                          u.email,
+                          u.password,
+                          u.phoneNumber,
+                          ut.name,
+                          c.publicId,
+                          u.avatarUrl
+                      )
+                      from User u
+                        join u.userType ut
+                        left join u.calendar c
+                      where u.userName = :username
+                    """;
+
+        return entityManager
+                .createQuery(ql, UserDetailedDto.class)
+                .setParameter("username", username)
+                .getSingleResult();
     }
 
 
@@ -237,6 +255,21 @@ public class UserRepositoryImpl implements UserRepository {
                 .setParameter("email", email)
                 .getSingleResult();
     }
+
+    @Override
+    public Long getUserIdFromUsername(String username) {
+        return entityManager.createQuery(
+                        "SELECT u.id FROM User u WHERE u.userName = :username", Long.class)
+                .setParameter("username", username)
+                .getSingleResult();
+    }
+
+    public User getUserFromUsername(String username){
+        return entityManager.createQuery("SELECT u FROM User u WHERE u.userName = :username", User.class)
+                .setParameter("username",username)
+                .getSingleResult();
+    }
+
 
 
 

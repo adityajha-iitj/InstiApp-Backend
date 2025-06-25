@@ -1,13 +1,17 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
+import in.ac.iitj.instiapp.Repository.UserRepository;
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
+import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFoundType;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
 import in.ac.iitj.instiapp.payload.User.Student.StudentBaseDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
@@ -25,12 +29,14 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager entityManager;
+    private final UserRepository userRepository;
 
 
     @Autowired
-    public LostnFoundRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManager) {
+    public LostnFoundRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManager, UserRepository userRepository) {
         this.jdbcTemplate = jdbcTemplate;
         this.entityManager = entityManager;
+        this.userRepository = userRepository;
     }
 
 
@@ -97,61 +103,55 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
     }
 
     @Override
-    public void saveLostnFoundDetails(LostnFound lostnFound) {
-
-        User finder = null;
-        if (lostnFound.getFinder() != null && lostnFound.getFinder().getId() != -1) {
-            finder = entityManager.getReference(User.class, lostnFound.getFinder().getId());
-        }
-        User owner = null;
-        if (lostnFound.getOwner() != null && lostnFound.getOwner().getId() != -1) {
-            owner = entityManager.getReference(User.class, lostnFound.getOwner().getId());
-        }
-        Locations landmark = null;
-        if (lostnFound.getLandmark() != null && lostnFound.getLandmark().getId() != -1) {
-            landmark = entityManager.getReference(Locations.class, lostnFound.getLandmark().getId());
-        }
-        Media media = null;
-        if (lostnFound.getMedia() != null && lostnFound.getMedia().getId() != -1) {
-            media = entityManager.getReference(Media.class, lostnFound.getMedia().getId());
-        }
-
-        if (finder != null) {
-            lostnFound.setFinder(finder);
-        }
-        if (owner != null) {
-            lostnFound.setOwner(owner);
-        }
-        if (landmark != null) {
-            lostnFound.setLandmark(landmark);
-        }
-        if (media != null) {
-            lostnFound.setMedia(media);
-        }
-
+    public void saveLostnFoundDetails(LostnFound lostnFound){
         entityManager.persist(lostnFound);
     }
 
     @Override
-    public List<LostnFoundDto> getLostnFoundByFilter(Optional<Boolean> status, Optional<String> owner, Optional<String> finder, Optional<String> landmark, Pageable pageable) {
-        return entityManager.createQuery(
-                        "select new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto(" +
-                                "l.publicId,l.finder.userName, l.owner.userName, l.Landmark.name, " +
-                                "l.extraInfo, l.status, l.media.publicId) " +
-                                "from LostnFound l left join l.finder " +
-                                "where (:status is null or l.status = :status) " +
-                                "AND (:owner is null or l.owner.userName = :owner) " +
-                                "AND (:finder is null or l.finder.userName = :finder) " + // Ensure correct attribute paths
-                                "AND (:landmark is null or l.Landmark.name = :landmark) ", LostnFoundDto.class)
-                .setParameter("status", status.orElse(null))
-                .setParameter("owner", owner.orElse(null))
-                .setParameter("finder", finder.orElse(null))
-                .setParameter("landmark", landmark.orElse(null)) // Parameter names match query
-                .setFirstResult((int) pageable.getOffset())
-                .setMaxResults(pageable.getPageSize())
-                .getResultList();
+    public List<LostnFoundDto> getLostnFoundByFilter(
+            LostnFoundType type,
+            Optional<Boolean> status,
+            Optional<String> owner,
+            Optional<String> finder,
+            Optional<String> landmark,
+            Pageable pageable) {
 
+        String ql =
+                "select new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto(" +
+                        "l.publicId, " +
+                        "f.userName, " +            // alias for finder
+                        "o.userName, " +            // alias for owner
+                        "lm.name, " +               // alias for landmark
+                        "l.type, " +
+                        "l.extraInfo, " +
+                        "l.status, " +
+                        "m.publicId" +              // alias for media
+                        ") " +
+                        "from LostnFound l " +
+                        "left join l.finder f " +
+                        "left join l.owner o " +
+                        "left join l.Landmark lm " +   // or l.landmark if your field is lowercase
+                        "left join l.media m " +
+                        "where l.type = :type " +
+                        "AND (:status is null or l.status = :status) " +
+                        "AND (:owner is null or o.userName = :owner) " +
+                        "AND (:finder is null or f.userName = :finder) " +
+                        "AND (:landmark is null or lm.name = :landmark)";
+
+        TypedQuery<LostnFoundDto> query = entityManager.createQuery(ql, LostnFoundDto.class);
+        query.setParameter("type", type);
+        query.setParameter("status", status.orElse(null));
+        query.setParameter("owner", owner.orElse(null));
+        query.setParameter("finder", finder.orElse(null));
+        query.setParameter("landmark", landmark.orElse(null));
+
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        return query.getResultList();
     }
+
+
 
     @Override
     public void updateLostnFound(LostnFound lostnFound, String publicId) {
@@ -161,21 +161,15 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
         else {
             jdbcTemplate.update(
                     "UPDATE lostnfound SET " +
-                            "finder_id = CASE WHEN cast(? as integer) IS NULL THEN finder_id ELSE ? END, " +
-                            "owner_id = CASE WHEN cast(? as integer) IS NULL THEN owner_id ELSE ? END, " +
-                            "landmark_id = CASE WHEN cast(? as integer) IS NULL THEN Landmark_id ELSE ? END, " +
+                            "finder_id = ?, " +
+                            "owner_id = ?, " +
+                            "landmark_id = CASE WHEN cast(? as integer) IS NULL THEN landmark_id ELSE ? END, " +
                             "extra_info = CASE WHEN ? IS NULL THEN extra_info ELSE ? END, " +
                             "status = CASE WHEN ? IS NULL THEN status ELSE ? END, " +
                             "media_id = CASE WHEN cast(? as integer) IS NULL THEN media_id ELSE ? END " +
                             "WHERE public_id = ?",
-
-                    // Parameters for query
+                    // Parameters for query in order:
                     Optional.ofNullable(lostnFound.getFinder())
-                            .map(User::getId).orElse(null),
-                    Optional.ofNullable(lostnFound.getFinder())
-                            .map(User::getId).orElse(null),
-
-                    Optional.ofNullable(lostnFound.getOwner())
                             .map(User::getId).orElse(null),
                     Optional.ofNullable(lostnFound.getOwner())
                             .map(User::getId).orElse(null),
@@ -198,8 +192,6 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
                     publicId
             );
-
-
         }
     }
 
@@ -211,16 +203,38 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
             JOIN lostnfound l ON m.id = l.media_id
             WHERE l.public_id = ?
         """;
-        String mediaPublicId = jdbcTemplate.queryForObject(sql, String.class, publicId);
+        List<String> mediaPublicIds = jdbcTemplate.queryForList(sql, String.class, publicId);
+        String mediaPublicId = mediaPublicIds.isEmpty() ? null : mediaPublicIds.get(0);
 
         String deleteSql = """
                 DELETE FROM lostnfound
                 WHERE public_id = ?
             """;
-        jdbcTemplate.update(deleteSql, publicId);
+        int rowsAffected = jdbcTemplate.update(deleteSql, publicId);
+
+        if (rowsAffected == 0) {
+            throw new EmptyResultDataAccessException("No lost and found item with public id " + publicId, 1);
+        }
 
         return Optional.ofNullable(mediaPublicId);
 
+    }
+
+    public boolean isOwner(String userName, String publicId){
+        TypedQuery<String> query = entityManager.createQuery("SELECT l.owner.userName FROM LostnFound l WHERE l.publicId = :publicId", String.class)
+                                                .setParameter("publicId", publicId);
+        return query.getSingleResult().equals(userName);
+    }
+    public boolean isFinder(String userName, String publicId){
+        TypedQuery<String> query = entityManager.createQuery("SELECT l.finder.userName FROM LostnFound l WHERE l.publicId = :publicId", String.class)
+                .setParameter("publicId", publicId);
+        return query.getSingleResult().equals(userName);
+    }
+
+    public LostnFoundType findTypeByPublicId(String publicId){
+        TypedQuery<LostnFoundType> Query = entityManager.createQuery("SELECT l.type FROM LostnFound l WHERE l.publicId = :publicId", LostnFoundType.class)
+                .setParameter("publicId", publicId);
+        return Query.getSingleResult();
     }
 
 

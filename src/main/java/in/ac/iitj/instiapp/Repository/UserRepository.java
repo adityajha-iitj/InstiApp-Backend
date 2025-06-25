@@ -5,7 +5,10 @@ import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -99,7 +102,7 @@ public interface UserRepository {
     UserDetailedDto getUserDetailed(String username, boolean isPrivate);
 
 
-    UserDetailedDto getUserDetailed(String email);
+    UserDetailedDto getUserDetailed(String username);
 
     /**
      * Should be used with caution as it may introduce long database calls
@@ -165,6 +168,10 @@ public interface UserRepository {
     void updatePhoneNumber(String username, String newPhoneNumber);
 
     public String getUserNameFromEmail(String email);
+
+
+    public Long getUserIdFromUsername(String username);
+    public User getUserFromUsername(String username);
 
 
 

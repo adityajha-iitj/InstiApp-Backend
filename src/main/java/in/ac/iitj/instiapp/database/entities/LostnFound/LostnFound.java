@@ -26,11 +26,15 @@ public class LostnFound {
     User finder;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(name = "owner_id", nullable = true)
     User owner;
 
     @ManyToOne
     Locations Landmark;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    LostnFoundType type;
 
     @Column( nullable = true)
     String extraInfo;

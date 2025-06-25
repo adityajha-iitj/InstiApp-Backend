@@ -18,6 +18,7 @@ public interface UserService {
 
 
     public Long save(@Valid SignupDto signupDto);
+    public Long updateUserDetails(UserDetailedDto userDetailedDto);
 
     public String createUsername(String firstName, String lastName, String email);
 
@@ -36,7 +37,7 @@ public interface UserService {
     public UserDetailedDto getUserDetailed(String username, boolean isPrivate, Pageable pageable);
 
 
-    public UserDetailedDto getUserDetailed(String email );
+    public UserDetailedDto getUserDetailed(String username);
 
     public List<UserBaseDto> getListUserLimitedByUsertype(String usertype, Pageable pageable);
 

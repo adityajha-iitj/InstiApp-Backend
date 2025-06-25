@@ -7,6 +7,10 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +34,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + ACCESS_TOKEN_EXPIRATION))
-                .claim("email", auth.getName())
+                .claim("username", auth.getName())
                 .claim("authorities", authorities)
                 .claim("token_type", "access") // Added token type claim
                 .signWith(key)
@@ -41,26 +45,24 @@ public class JwtProvider {
         return Jwts.builder()
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + REFRESH_TOKEN_EXPIRATION))
-                .claim("email", auth.getName())
+                .claim("username", auth.getName())
                 .claim("token_type", "refresh") // Added token type claim
                 .signWith(key)
                 .compact();
     }
 
-    // FIXED: Removed substring operation
-    public String getEmailFromToken(String jwt) {
-        Claims claims = parseToken(jwt);
-        return String.valueOf(claims.get("email"));
+    public String getUsernameFromToken(String jwt) {
+        jwt = jwt.substring(7);
+        Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(jwt).getPayload();
+        return String.valueOf(claims.get("username"));
     }
-
-    public String getEmailFromRefreshToken(String jwt) {
-        Claims claims = parseToken(jwt);
-        return String.valueOf(claims.get("email"));
-    }
-
     public boolean validateAccessToken(String jwt) {
         try {
-            Claims claims = parseToken(jwt);
+            Claims claims = Jwts.parser()                     // returns JwtParserBuilder (new in 0.12.x)
+                    .verifyWith(key)                          // verifyWith() exists in 0.12.6
+                    .build()
+                    .parseSignedClaims(jwt)
+                    .getPayload();
             System.out.println("Token expiry: " + claims.getExpiration());
             System.out.println("Current time: " + new Date());
             return claims.getExpiration().after(new Date());
@@ -73,20 +75,15 @@ public class JwtProvider {
     // FIXED: Added token type validation
     public boolean validateRefreshToken(String jwt) {
         try {
-            Claims claims = parseToken(jwt);
+            Claims claims = Jwts.parser()                     // returns JwtParserBuilder (new in 0.12.x)
+                    .verifyWith(key)                          // verifyWith() exists in 0.12.6
+                    .build()
+                    .parseSignedClaims(jwt)
+                    .getPayload();
             return "refresh".equals(claims.get("token_type"));
         } catch (Exception e) {
             System.out.println("Refresh token validation failed: " + e.getMessage());
             return false;
         }
-    }
-
-    // FIXED: Unified token parsing
-    private Claims parseToken(String jwt) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(jwt)
-                .getBody();
     }
 }

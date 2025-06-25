@@ -1,6 +1,7 @@
 package in.ac.iitj.instiapp.services;
 
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
+import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFoundType;
 import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
 import org.springframework.data.domain.Pageable;
 
@@ -31,7 +32,7 @@ public interface LostnFoundService {
      * @param oldLocationName
      * @param location
      */
-    void updateLocation(String oldLocationName , Locations location);
+    void updateLocation(String oldLocationName ,String newLocationName);
 
 
 /*-----------------------------------------------------LOST AND FOUND-------------------------------------------------*/
@@ -59,6 +60,10 @@ public interface LostnFoundService {
      * @param pageable
      * @return
      */
-    List<LostnFoundDto> getLostAndFoundByFilter(Optional<Boolean> status , Optional<String> owner , Optional<String> finder, Optional<String> landmark , Pageable pageable);
+    List<LostnFoundDto> getLostAndFoundByFilter(LostnFoundType type,Optional<Boolean> status , Optional<String> owner , Optional<String> finder, Optional<String> landmark , Pageable pageable);
+
+    boolean isOwner(String userName, String publicId);
+    boolean isFinder(String userName, String publicId);
+    public LostnFoundType findTypeByPublicId(String publicId);
 
 }

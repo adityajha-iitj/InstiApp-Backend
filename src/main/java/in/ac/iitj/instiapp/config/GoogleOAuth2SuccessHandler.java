@@ -3,6 +3,7 @@ package in.ac.iitj.instiapp.config;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.payload.Auth.SignupDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
+import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
 import in.ac.iitj.instiapp.services.UserService;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.Cookie;
@@ -56,6 +57,7 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         Usertype userType = new Usertype();
         userType.setName("Student");
+        userType.setId(1L);
 
         boolean isNew = false;
 
@@ -92,16 +94,16 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         String username = userService.getUsernameFromEmail(email);
         System.out.println("[OAuth2] Resolved username from email: " + username);
 
-        UserBaseDto userBaseDto = userService.getUserLimited(username);
-        System.out.println("[OAuth2] Retrieved UserBaseDto for login.");
+        UserDetailedDto userDetailedDto = userService.getUserDetailed(username);
+        System.out.println("[OAuth2] Retrieved UserDetailedDto for login.");
 
         List<GrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority(userBaseDto.getUserTypeName())
+                new SimpleGrantedAuthority(userDetailedDto.getUserTypeName())
         );
 
         var userDetails = User.builder()
                 .username(username)
-                .password(userBaseDto.getPassword())
+                .password(userDetailedDto.getPassword())
                 .authorities(authorities)
                 .build();
 

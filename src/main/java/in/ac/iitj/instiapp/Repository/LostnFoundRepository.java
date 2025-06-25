@@ -2,6 +2,7 @@ package in.ac.iitj.instiapp.Repository;
 
 import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
 import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFound;
+import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFoundType;
 import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
 import in.ac.iitj.instiapp.payload.User.Student.StudentBaseDto;
 import org.springframework.data.domain.Pageable;
@@ -57,7 +58,7 @@ public interface LostnFoundRepository {
    /**
     * @param lostnFound
     */
-   void saveLostnFoundDetails(LostnFound lostnFound );
+   void saveLostnFoundDetails(LostnFound lostnFound);
 
    /**
     * @param status cannot be null must be Optional.empty()
@@ -67,7 +68,9 @@ public interface LostnFoundRepository {
     * @param pageable
     * @return List of all the lost and found dto based on the given filter
     */
-   List<LostnFoundDto> getLostnFoundByFilter(Optional<Boolean> status ,Optional<String> owner , Optional<String> finder, Optional<String> landmark ,  Pageable pageable);
+   List<LostnFoundDto> getLostnFoundByFilter(
+           LostnFoundType type, Optional<Boolean> status ,Optional<String> owner , Optional<String> finder, Optional<String> landmark ,  Pageable pageable
+   );
 
    /**
     * @param lostnFound
@@ -82,6 +85,10 @@ public interface LostnFoundRepository {
     */
    Optional<String> deleteLostnFound(String publicId);
 
+   boolean isOwner(String userName, String publicId);
+   boolean isFinder(String userName, String publicId);
+
+   LostnFoundType findTypeByPublicId(String publicId);
 
 
 }
