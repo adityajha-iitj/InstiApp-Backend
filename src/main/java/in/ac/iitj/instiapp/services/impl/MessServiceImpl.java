@@ -11,6 +11,7 @@ import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MessMenuDto;
 import in.ac.iitj.instiapp.services.MessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -26,6 +27,7 @@ public class MessServiceImpl implements MessService {
     }
 
     @Override
+    @Transactional
     public void saveMessMenu(MessMenuDto menu) {
         MessMenu menuEntity = MessDtoMapper.INSTANCE.dtoToMessMenu(menu);
         messRepository.saveMessMenu( menuEntity );

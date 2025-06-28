@@ -14,7 +14,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-@RestController("/api")
+@RestController
+@RequestMapping("/api")
 public class MessController {
 
     private final MessService messService;
