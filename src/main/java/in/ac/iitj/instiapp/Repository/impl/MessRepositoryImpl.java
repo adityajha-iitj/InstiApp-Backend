@@ -4,11 +4,11 @@ import in.ac.iitj.instiapp.database.entities.Scheduling.MessMenu.*;
 import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MenuOverrideDto;
 import in.ac.iitj.instiapp.payload.Scheduling.MessMenu.MessMenuDto;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -30,9 +30,9 @@ public class MessRepositoryImpl implements in.ac.iitj.instiapp.Repository.MessRe
     @Override
     public void saveMessMenu(MessMenu messMenu) {
 
-        if (messMenuExists(messMenu.getYear(), messMenu.getMonth(), messMenu.getDay())) {
-            throw new DataIntegrityViolationException(" Mess Menu for " + messMenu.getYear() + "-" + messMenu.getMonth() + "-" + messMenu.getDay() + " already exists");
-        }
+//        if (messMenuExists(messMenu.getYear(), messMenu.getMonth(), messMenu.getDay())) {
+//            throw new DataIntegrityViolationException(" Mess Menu for " + messMenu.getYear() + "-" + messMenu.getMonth() + "-" + messMenu.getDay() + " already exists");
+//        }
         entityManager.persist(messMenu);
 
 

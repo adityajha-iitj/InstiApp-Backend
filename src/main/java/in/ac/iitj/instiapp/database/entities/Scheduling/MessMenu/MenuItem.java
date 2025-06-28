@@ -13,9 +13,16 @@ import java.awt.*;
 public class MenuItem {
 
 
+    @Column(name = "breakfast", columnDefinition = "text", nullable = false)
     private String breakfast;
+
+    @Column(name = "lunch", columnDefinition = "text", nullable = false)
     private String lunch;
+
+    @Column(name = "snacks", columnDefinition = "text", nullable = false)
     private String snacks;
+
+    @Column(name = "dinner", columnDefinition = "text", nullable = false)
     private String dinner;
 
 
