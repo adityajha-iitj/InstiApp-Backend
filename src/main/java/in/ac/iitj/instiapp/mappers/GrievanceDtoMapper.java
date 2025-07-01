@@ -25,5 +25,6 @@ public interface GrievanceDtoMapper {
     @Mapping(source="description",target="description")
     @Mapping(source="userFrom",target="userFrom")
     @Mapping(source="resolved",target="resolved")
+    @Mapping(source="media",target="media")
     Grievance toGrievance(GrievanceDto grievanceDto);
 }

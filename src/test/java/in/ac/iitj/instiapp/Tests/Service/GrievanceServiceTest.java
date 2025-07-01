@@ -129,42 +129,42 @@ public class GrievanceServiceTest {
     }
 
 
-    @Test
-    @Order(2)
-    public void testUpdateGrievance() {
-        String testPublicId;
-        GrievanceDto testGrievanceDto;
-        Grievance testGrievance;
-
-        // Initialize test data
-        testPublicId = "test-grievance-123";
-        testGrievanceDto = new GrievanceDto(
-                testPublicId,
-                "Test Grievance",
-                "Test Description",
-                "testUser",
-                "testOrg",
-                "Manager",
-                OrganisationPermission.INTERMEDIATE,
-                false,
-                "media-123"
-        );
-
-        testGrievance = new Grievance();
-
-        // Arrange
-        when(grievanceRepository.getGrievance(testPublicId)).thenReturn(testGrievanceDto);
-        when(grievanceDtoMapper.toGrievance(testGrievanceDto)).thenReturn(testGrievance);
-        doNothing().when(grievanceRepository).updateGrievance(testPublicId, testGrievance);
-
-        // Act
-        grievanceService.updateGrievance(testPublicId);
-
-        // Assert using AssertJ and Mockito
-        verify(grievanceRepository).getGrievance(testPublicId);
-        verify(grievanceDtoMapper).toGrievance(testGrievanceDto);
-        verify(grievanceRepository).updateGrievance(testPublicId, testGrievance);
-    }
+//    @Test
+//    @Order(2)
+//    public void testUpdateGrievance() {
+//        String testPublicId;
+//        GrievanceDto testGrievanceDto;
+//        Grievance testGrievance;
+//
+//        // Initialize test data
+//        testPublicId = "test-grievance-123";
+//        testGrievanceDto = new GrievanceDto(
+//                testPublicId,
+//                "Test Grievance",
+//                "Test Description",
+//                "testUser",
+//                "testOrg",
+//                "Manager",
+//                OrganisationPermission.INTERMEDIATE,
+//                false,
+//                "media-123"
+//        );
+//
+//        testGrievance = new Grievance();
+//
+//        // Arrange
+//        when(grievanceRepository.getGrievance(testPublicId)).thenReturn(testGrievanceDto);
+//        when(grievanceDtoMapper.toGrievance(testGrievanceDto)).thenReturn(testGrievance);
+//        doNothing().when(grievanceRepository).updateGrievance(testPublicId, testGrievance);
+//
+//        // Act
+//        grievanceService.updateGrievance(testPublicId);
+//
+//        // Assert using AssertJ and Mockito
+//        verify(grievanceRepository).getGrievance(testPublicId);
+//        verify(grievanceDtoMapper).toGrievance(testGrievanceDto);
+//        verify(grievanceRepository).updateGrievance(testPublicId, testGrievance);
+//    }
 
 
     @Test

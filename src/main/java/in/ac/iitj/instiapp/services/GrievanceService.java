@@ -9,10 +9,12 @@ import java.util.Optional;
 public interface GrievanceService {
 
     public Long existGrievance(String publicId);
-    public void save(GrievanceDto grievanceDto);
+    public String save(GrievanceDto grievanceDto);
     public GrievanceDto getGrievance(String publicId);
-    public void updateGrievance(String publicId);
+    public void updateGrievance(String publicId, GrievanceDto grievanceDto);
     public List<GrievanceDto> getGrievancesByFilter(Optional<String> title, Optional<String> description, Optional<String> organisationName, Optional<Boolean> resolved, Pageable pageable);
     public void deleteGrievance(String publicId);
+
+    public boolean doesOwn(String publicId, String username);
 
 }
