@@ -5,6 +5,9 @@ import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
+
+import java.util.UUID;
 
 
 @Entity
@@ -19,8 +22,8 @@ public class Grievance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
-    @Column(unique = true, nullable = false)
-    String publicId;
+    @Column(name = "public_id", unique = true, nullable = false, updatable = false, length = 36)
+    private String publicId;
 
     @Column( nullable = false)
     String Title;
@@ -41,4 +44,11 @@ public class Grievance {
     @ManyToOne
     @JoinColumn(name = "media_id", nullable = true)
     Media media;
+
+    @PrePersist
+    private void ensurePublicId() {
+        if (publicId == null) {
+            publicId = UUID.randomUUID().toString();
+        }
+    }
 }
