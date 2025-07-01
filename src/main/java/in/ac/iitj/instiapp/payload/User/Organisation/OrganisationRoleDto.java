@@ -3,9 +3,7 @@ package in.ac.iitj.instiapp.payload.User.Organisation;
 import com.fasterxml.jackson.annotation.JsonView;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationPermission;
 import in.ac.iitj.instiapp.payload.Views;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.Value;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -14,16 +12,12 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrganisationRoleDto implements Serializable {
 
     String organisationUsername;
     String roleName;
     OrganisationPermission permission;
-
-    public OrganisationRoleDto(String organisationUsername, String roleName, OrganisationPermission permission) {
-        this.organisationUsername = organisationUsername;
-        this.roleName = roleName;
-        this.permission = permission;
-    }
 }
 

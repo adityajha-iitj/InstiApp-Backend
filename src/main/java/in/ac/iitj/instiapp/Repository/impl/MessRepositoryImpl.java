@@ -30,9 +30,9 @@ public class MessRepositoryImpl implements in.ac.iitj.instiapp.Repository.MessRe
     @Override
     public void saveMessMenu(MessMenu messMenu) {
 
-//        if (messMenuExists(messMenu.getYear(), messMenu.getMonth(), messMenu.getDay())) {
-//            throw new DataIntegrityViolationException(" Mess Menu for " + messMenu.getYear() + "-" + messMenu.getMonth() + "-" + messMenu.getDay() + " already exists");
-//        }
+        if (messMenuExists(messMenu.getYear(), messMenu.getMonth(), messMenu.getDay())) {
+            throw new DataIntegrityViolationException(" Mess Menu for " + messMenu.getYear() + "-" + messMenu.getMonth() + "-" + messMenu.getDay() + " already exists");
+        }
         entityManager.persist(messMenu);
 
 

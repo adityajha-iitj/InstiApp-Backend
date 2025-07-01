@@ -4,7 +4,7 @@
 import in.ac.iitj.instiapp.database.entities.Grievance;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -70,12 +70,14 @@ public class GrievanceRepositoryImpl implements in.ac.iitj.instiapp.Repository.G
 
 package in.ac.iitj.instiapp.Repository.impl;
 import in.ac.iitj.instiapp.Repository.GrievanceRepository;
+import in.ac.iitj.instiapp.Repository.MediaRepository;
 import in.ac.iitj.instiapp.database.entities.Grievance;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import in.ac.iitj.instiapp.payload.GrievanceDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Repository;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -86,31 +88,42 @@ import in.ac.iitj.instiapp.Repository.UserRepository;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.UUID;
 
 
 @Repository
+@Slf4j
 public class GrievanceRepositoryImpl implements GrievanceRepository {
 
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager entityManager;
+    private final MediaRepository mediaRepository;
 
-    GrievanceRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManager) {
+    GrievanceRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManager, MediaRepository mediaRepository) {
         this.jdbcTemplate = jdbcTemplate;
         this.entityManager = entityManager;
+        this.mediaRepository = mediaRepository;
     }
 
     @Transactional
-    public void save(Grievance grievance) {
-        grievance.setUserFrom(entityManager.getReference(User.class,grievance.getUserFrom().getId()));
-        grievance.setOrganisationRole(entityManager.getReference(OrganisationRole.class,grievance.getOrganisationRole().getId()));
-        grievance.setMedia(entityManager.getReference(Media.class,grievance.getMedia().getId()));
+    public String save(Grievance grievance) {
+        //grievance.setUserFrom(entityManager.getReference(User.class,grievance.getUserFrom().getId()));
+        //grievance.setOrganisationRole(entityManager.getReference(OrganisationRole.class,grievance.getOrganisationRole().getId()));
+        //grievance.setMedia(entityManager.getReference(Media.class,grievance.getMedia().getId()));
+        Media media = new Media();
+        media.setType(grievance.getMedia().getType());
+        media.setPublicUrl(grievance.getMedia().getPublicUrl());
+        media.setAssetId(UUID.randomUUID().toString());
+        mediaRepository.save(media);
+
+        grievance.setMedia(media);
 
         grievance.setTitle(grievance.getTitle());
         grievance.setDescription(grievance.getDescription());
         grievance.setResolved(false);
 
         entityManager.persist(grievance);
+        return grievance.getPublicId();
     }
 
     public List<GrievanceDto> getGrievancesByFilter(Optional<String> title, Optional<String> description,Optional<String> organisationName, Optional<Boolean> resolved,Pageable pageable){
@@ -131,31 +144,41 @@ public class GrievanceRepositoryImpl implements GrievanceRepository {
     }
 
     @Override
-    public void updateGrievance(String publicId, Grievance grievance) {
+    @Transactional
+    public void updateGrievance(String publicId, Grievance updated) {
+        Grievance existing = entityManager.createQuery(
+                        "SELECT g FROM Grievance g WHERE g.publicId = :pubId",
+                        Grievance.class)
+                .setParameter("pubId", publicId)
+                .getSingleResult();
 
-        Long organisationRoleId = grievance.getOrganisationRole().getId();
+        // 2) Update simple fields if non-null
+        if (updated.getTitle() != null) {
+            existing.setTitle(updated.getTitle());
+        }
+        if (updated.getDescription() != null) {
+            existing.setDescription(updated.getDescription());
+        }
+        if (updated.getResolved() != null) {
+            existing.setResolved(updated.getResolved());
+        }
 
-// Update query with extracted ID
-        String updateQuery = "UPDATE grievance SET " +
-                "title = CASE WHEN ? IS NULL THEN title ELSE ? END, " +
-                "description = CASE WHEN ? IS NULL THEN description ELSE ? END, " +
-                "organisation_role_id = CASE WHEN cast(? as bigint) IS NULL THEN organisation_role_id ELSE ? END, " +
-                "resolved = CASE WHEN ? IS NULL THEN resolved else ? end " +
-                "WHERE public_id = ?";
 
+        // 4) Update Media if provided
 
-        jdbcTemplate.update(updateQuery,
-                grievance.getTitle(),
-                grievance.getTitle(),
-                grievance.getDescription(),
-                grievance.getDescription(),
-                organisationRoleId,
-                organisationRoleId,
-                grievance.getResolved(),
-                grievance.getResolved(),
-                publicId
-        );
+//        // Create & save a fresh Media entity
+//        Media incoming = existing.getMedia();
+//        Media m = new Media();
+//        m.setType(incoming.getType());
+//        m.setPublicUrl(incoming.getPublicUrl());
+//        m.setAssetId(UUID.randomUUID().toString());
+//        entityManager.merge(m);
+//
+//
+//        existing.setMedia(m);
 
+        // 5) Merge the changes
+        entityManager.merge(existing);
     }
 
 
@@ -183,9 +206,31 @@ public class GrievanceRepositoryImpl implements GrievanceRepository {
 
 
     @Override
+    @Transactional
     public void deleteGrievance(String publicId) {
-        // TODO
+        int deleted = entityManager.createQuery(
+                        "DELETE FROM Grievance g WHERE g.publicId = :publicId")
+                .setParameter("publicId", publicId)
+                .executeUpdate();
+
+        if (deleted == 0) {
+            throw new EntityNotFoundException(
+                    "No grievance found with publicId=" + publicId);
+        }
     }
+
+    public boolean doesOwn(String publicId, String username){
+        String usernameOfGrievance = entityManager.createQuery(
+                        "SELECT g.userFrom.userName FROM Grievance g WHERE g.publicId = :publicId",
+                        String.class
+                ).setParameter("publicId", publicId)
+                .getSingleResult();
+
+        log.debug("doesOwn: checking publicId='{}' for user='{}'", publicId, username);
+
+        return usernameOfGrievance.equals(username);
+    }
+
 
 
 

@@ -17,9 +17,11 @@ import java.util.Optional;
 public interface GrievanceRepository {
 
     public Long existGrievance(String publicId);
-    public void save(Grievance grievance);
+    public String save(Grievance grievance);
     public List<GrievanceDto> getGrievancesByFilter(Optional<String> title, Optional<String> description,Optional<String> organisationName, Optional<Boolean> resolved,Pageable pageable);
     public void deleteGrievance(String publicId);
     public void updateGrievance(String publicId, Grievance grievance);
     public GrievanceDto getGrievance(String publicId);
+
+    public boolean doesOwn(String publicId, String username);
 }
