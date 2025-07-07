@@ -1,6 +1,7 @@
 package in.ac.iitj.instiapp.controllers;
 
 import in.ac.iitj.instiapp.config.JwtProvider;
+import in.ac.iitj.instiapp.payload.User.Organisation.AddUserToRoleRequest;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.common.ApiResponse;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -237,15 +239,12 @@ public class OrganisationRoleController {    private final OrganisationRoleServi
 
     /*--------------------------------------------------------USER ROLE MANAGEMENT---------------------------------------------------*/
 
-    @PostMapping("/{organisationUsername}/{roleName}/users")
-    public ResponseEntity<ApiResponse<Void>> addUserToOrganisationRole(@RequestHeader("Authorization") String jwt,
-                                                                      @PathVariable String organisationUsername,
-                                                                      @PathVariable String roleName,
-                                                                      @RequestBody String userUsername) {
+    @PostMapping("/users")
+    public ResponseEntity<ApiResponse<Void>> addUserToOrganisationRole(@RequestHeader("Authorization") String jwt, @Valid @RequestBody AddUserToRoleRequest request) {
         String currentUser = jwtProvider.getUsernameFromToken(jwt);
-        
+
         // Check if current user is authorized to manage users for this organisation
-        if (!currentUser.equals(organisationUsername)) {
+        if (!currentUser.equals(request.getOrganisationUsername())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ApiResponse<>(
                             HttpStatus.FORBIDDEN.value(),
@@ -257,7 +256,7 @@ public class OrganisationRoleController {    private final OrganisationRoleServi
         }
 
         try {
-            organisationRoleService.addUserToOrganisationRole(organisationUsername, roleName, userUsername);
+            organisationRoleService.addUserToOrganisationRole(request.getOrganisationUsername(), request.getRoleName(), request.getUserUsername());
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(
                             HttpStatus.CREATED.value(),
@@ -296,8 +295,8 @@ public class OrganisationRoleController {    private final OrganisationRoleServi
         }
     }
 
-    @GetMapping("/{organisationUsername}/users")
-    public ResponseEntity<ApiResponse<List<Map<UserBaseDto, OrganisationRoleDto>>>> getAllOrganisationRoles(@PathVariable String organisationUsername,
+    @GetMapping("/users")
+    public ResponseEntity<ApiResponse<List<Map<UserBaseDto, OrganisationRoleDto>>>> getAllOrganisationRoles(@RequestParam String organisationUsername,
                                                                                                             Pageable pageable) {
         try {
             List<Map<UserBaseDto, OrganisationRoleDto>> userRoles = organisationRoleService.getAllOrganisationRoles(organisationUsername, pageable);
@@ -331,13 +330,14 @@ public class OrganisationRoleController {    private final OrganisationRoleServi
         }
     }
 
-    @DeleteMapping("/{organisationUsername}/{roleName}/users/{userUsername}")
-    public ResponseEntity<ApiResponse<Void>> removeUserFromOrganisationRole(@RequestHeader("Authorization") String jwt,
-                                                                           @PathVariable String organisationUsername,
-                                                                           @PathVariable String roleName,
-                                                                           @PathVariable String userUsername) {
+    @DeleteMapping("/users")
+    public ResponseEntity<ApiResponse<Void>> removeUserFromOrganisationRole(@RequestHeader("Authorization") String jwt, @Valid @RequestBody AddUserToRoleRequest request) {
         String currentUser = jwtProvider.getUsernameFromToken(jwt);
-        
+
+        String organisationUsername = request.getOrganisationUsername();
+        String roleName = request.getRoleName();
+        String userUsername = request.getUserUsername();
+
         // Check if current user is authorized to remove users from this organisation
         if (!currentUser.equals(organisationUsername)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
