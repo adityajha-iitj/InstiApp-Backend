@@ -25,24 +25,24 @@ public class OrganisationBaseDto implements Serializable {    @JsonProperty(acce
     
     @NotNull(message = "Description is required")
     @Size(min = 1, max = 1000, message = "Description must be between 1 and 1000 characters")
-    String Description;
+    String description;
     
-    String Website;
+    String website;
 
     public OrganisationBaseDto(String userName, String parentOrganisationUserUserName, String typeName, String Description, String Website){
         this.user = new UserBaseDto(userName);
         this.parentOrganisationUserUserName = parentOrganisationUserUserName;
         this.typeName = typeName;
-        this.Description = Description;
-        this.Website = Website;
+        this.description = Description;
+        this.website = Website;
     }
 
 
     public OrganisationBaseDto(String username){
         this.user = new UserBaseDto(username);
         this.typeName = null;
-        this.Description = null;
-        this.Website = null;
+        this.description = null;
+        this.website = null;
         this.parentOrganisationUserUserName = null;
     }
 

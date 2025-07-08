@@ -59,6 +59,7 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
     }
 
     @Override
+    @Transactional
     public void updateOrganisationType(String oldName, String newName) {
         if(existsOrganisationType(oldName) == -1L){
             throw new EmptyResultDataAccessException("No organisation type " + oldName + "exists",1);
@@ -74,15 +75,19 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
     }
 
     @Override
+    @Transactional
     public void deleteOrganisationType(String name) {
         if (existsOrganisationType(name) == -1){
             throw new EmptyResultDataAccessException("No usertype " + name + "exists",1);
         }
 
-        //TODO
+        entityManager.createQuery("DELETE FROM OrganisationType ot WHERE ot.name = :name")
+                .setParameter("name", name)
+                .executeUpdate();
     }
 
     @Override
+    @Transactional
     public void save(Organisation organisation) {
         organisation.setUser(entityManager.getReference(User.class,organisation.getUser().getId()));
         organisation.setType(entityManager.getReference(OrganisationType.class,organisation.getType().getId()));
@@ -135,6 +140,7 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
     @Override
     public OrganisationDetailedDto organisationDetailed(String username) {
 
+        System.out.println("▶ Checking if organisation exists for username: '" + username + "'");
         Long organisationId = existOrganisation(username);
         if(organisationId == -1L){
             throw new EmptyResultDataAccessException("No organisation with name " + username + " exists",1);
@@ -170,14 +176,24 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
         if(organisationDetailedDto.getParentOrganisation().getUser().getUserName() != null){
             System.out.println("Hello world" + organisationDetailedDto.getParentOrganisation().getUser().getUserName());
             organisationDetailedDto.setParentOrganisation(getOrganisation(organisationDetailedDto.getParentOrganisation().getUser().getUserName()));
-        }
-            return organisationDetailedDto;
+        } else
+            organisationDetailedDto.setParentOrganisation(null);
+
+        return organisationDetailedDto;
     }
 
     @Override
     public Long existOrganisation(String username) {
-        return jdbcTemplate.queryForObject("select coalesce(max(o.id), -1::bigint) from organisation o join users u on u.id = o.user_id where u.user_name = ?", Long.class, username);
+        return jdbcTemplate.queryForObject(
+                "select coalesce(max(o.id), -1::bigint) " +
+                        "from organisation o join users u on u.id = o.user_id " +
+                        "where u.user_name = ?",
+                Long.class,
+                username
+        );
     }
+
+
 
     @Override
     public Optional<List<String>> updateOrganisation(Organisation organisation) {

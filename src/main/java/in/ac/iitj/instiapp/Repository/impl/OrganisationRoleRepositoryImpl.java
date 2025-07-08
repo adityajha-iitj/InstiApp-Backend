@@ -15,6 +15,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,9 +52,23 @@ public class OrganisationRoleRepositoryImpl implements OrganisationRoleRepositor
     }
 
     @Override
-    public Long existOrganisationRole(String organisationName, String roleName) {
-        return jdbcTemplate.queryForObject("select COALESCE(r.id, -1) from organisation_role r " + "join organisation o on o.id = r.organisation_id join users u on o.user_id = u.id " + "where r.role_name = ? and u.user_name = ?", Long.class, roleName, organisationName);
+    public Long existOrganisationRole(String organisationUsername, String roleName) {
+        // returns how many roles with that name exist for that organisation owner
+        return jdbcTemplate.queryForObject(
+                """
+                SELECT COALESCE(COUNT(r.id), 0)
+                  FROM organisation_role r
+                  JOIN organisation o ON o.id = r.organisation_id
+                  JOIN users u        ON u.id = o.user_id
+                 WHERE r.role_name = ?
+                   AND u.user_name = ?
+                """,
+                Long.class,
+                roleName,
+                organisationUsername
+        );
     }
+
 
     @Override
     public List<Long> getOrganisationRoleIds(List<String> organisationName, List<String> organisationRoleName, Pageable pageable) {
@@ -68,11 +83,25 @@ public class OrganisationRoleRepositoryImpl implements OrganisationRoleRepositor
 
     @Override
     public void updateOrganisationRole(OrganisationRole oldOrganisationRole,OrganisationRole newOrganisationRole){
-        if(existOrganisationRole(oldOrganisationRole.getOrganisation().getUser().getUserName(), oldOrganisationRole.getRoleName()) == -1L){
-            throw new EmptyResultDataAccessException("No role " + oldOrganisationRole.getRoleName() + "exists", 1);
+        long oldCount = existOrganisationRole(
+                oldOrganisationRole.getOrganisation().getUser().getUserName(),
+                oldOrganisationRole.getRoleName()
+        );
+        if (oldCount == 0) {
+            throw new EmptyResultDataAccessException(
+                    "No role " + oldOrganisationRole.getRoleName() + " exists",
+                    1
+            );
         }
-        if(existOrganisationRole(oldOrganisationRole.getOrganisation().getUser().getUserName(), newOrganisationRole.getRoleName()) != -1L){
-            throw new DataIntegrityViolationException("Organisation role with name " + newOrganisationRole.getRoleName() + " already exists");
+
+        long newCount = existOrganisationRole(
+                oldOrganisationRole.getOrganisation().getUser().getUserName(),
+                newOrganisationRole.getRoleName()
+        );
+        if (newCount > 0) {
+            throw new DataIntegrityViolationException(
+                    "Organisation role with name " + newOrganisationRole.getRoleName() + " already exists"
+            );
         }
 
         entityManager.createQuery("UPDATE OrganisationRole  set roleName = CASE WHEN :newRoleName IS NULL THEN roleName ELSE :newRoleName END, " +
@@ -93,30 +122,39 @@ public class OrganisationRoleRepositoryImpl implements OrganisationRoleRepositor
     }
 
     @Override
-    public void insertIntoOrganisationRole(String organisationUsername, String organisationRoleName, Long idOfPerson){
-        Long organisationRoleId = existOrganisationRole(organisationUsername, organisationRoleName);
-        if (organisationRoleId == -1L) {
-            throw new EmptyResultDataAccessException("No role " + organisationRoleName + " exists for organisation " + organisationUsername, 1);
-        }
+    @Transactional
+    public void insertIntoOrganisationRole(String organisationUsername,
+                                           String organisationRoleName,
+                                           Long idOfPerson) {
+        // get the real PK
+        Long organisationRoleId = getOrganisationRoleId(organisationUsername, organisationRoleName);
 
-        Long exists =(Long) entityManager.createNativeQuery("SELECT  count(1) from  users_organisation_role_set where organisation_role_set_id = ? and user_id = ?")
+        // check for duplicate
+        Long exists = ((Number) entityManager.createNativeQuery(
+                        "SELECT count(1) " +
+                                "  FROM users_organisation_role_set " +
+                                " WHERE organisation_role_set_id = ? " +
+                                "   AND user_id = ?"
+                )
                 .setParameter(1, organisationRoleId)
-                .setParameter(2,  idOfPerson)
-                .getSingleResult();
-
-
+                .setParameter(2, idOfPerson)
+                .getSingleResult()).longValue();
 
         if (exists > 0) {
-            throw new DataIntegrityViolationException("User already exists in an organisation at a role");
+            throw new DataIntegrityViolationException(
+                    "User already exists in an organisation at a role"
+            );
         }
 
-        // Insert into organisation_role_set
+        // and now the foreign‑key is valid
         entityManager.createNativeQuery(
-                        "insert into users_organisation_role_set (organisation_role_set_id, user_id) values (?, ?)")
+                        "INSERT INTO users_organisation_role_set (organisation_role_set_id, user_id) VALUES (?, ?)"
+                )
                 .setParameter(1, organisationRoleId)
                 .setParameter(2, idOfPerson)
                 .executeUpdate();
     }
+
 
     @Override
     public List<Map<UserBaseDto, OrganisationRoleDto>> getAllOrganisationRoles(String usernameOfOrganisation, Pageable pageable){
@@ -170,6 +208,30 @@ public class OrganisationRoleRepositoryImpl implements OrganisationRoleRepositor
                 .setParameter(3, organisationRoleName)
                 .executeUpdate();
     }
+
+    public Long getOrganisationRoleId(String organisationUsername, String roleName) {
+        try {
+            return jdbcTemplate.queryForObject(
+                    """
+                    SELECT r.id
+                      FROM organisation_role r
+                      JOIN organisation o ON o.id = r.organisation_id
+                      JOIN users u        ON u.id = o.user_id
+                     WHERE u.user_name = ?
+                       AND r.role_name = ?
+                    """,
+                    Long.class,
+                    organisationUsername,
+                    roleName
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new EmptyResultDataAccessException(
+                    "No role " + roleName + " exists for organisation " + organisationUsername,
+                    1
+            );
+        }
+    }
+
 
 
 
