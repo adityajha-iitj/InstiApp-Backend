@@ -26,19 +26,26 @@ public class BusRun {
     private String publicId;
 
     @ManyToOne
+    @JoinColumn(name = "bus_schedule_id")
     private BusSchedule busSchedule;
 
-    BusSnippet busSnippet;
+    @ManyToOne
+    @JoinColumn(name = "route_id")
+    private BusRoute route;
 
+    @Column(nullable = false)
+    private Time startTime;
 
     @Enumerated(EnumType.STRING)
     private ScheduleType scheduleType;
 
 
-   public BusRun(String publicId, BusSnippet busSnippet,ScheduleType scheduleType) {
-       this.publicId = publicId;
-       this.busSnippet = busSnippet;
-       this.scheduleType = scheduleType;
-   }
-
+    public BusRun(String publicId, BusSchedule busSchedule, BusRoute route, Time startTime, ScheduleType scheduleType) {
+        this.publicId = publicId;
+        this.busSchedule = busSchedule;
+        this.route = route;
+        this.startTime = startTime;
+        this.scheduleType = scheduleType;
+    }
+    
 }

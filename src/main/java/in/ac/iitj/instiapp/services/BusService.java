@@ -1,11 +1,9 @@
 package in.ac.iitj.instiapp.services;
 
 import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.*;
-import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusOverrideDto;
-import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusScheduleDto;
+import in.ac.iitj.instiapp.payload.Scheduling.Buses.*;
 import org.springframework.data.domain.Pageable;
 
-import java.sql.Time;
 import java.util.List;
 
 public interface BusService {
@@ -80,30 +78,19 @@ public interface BusService {
     void deleteBusSchedule(String busNumber);
 /*---------------------------------------------------BUS RUN----------------------------------------------------------*/
 
+
     /**
      * @param busRun
-     * @param busNumber
      * @Assumtions Assuming the Bus Run object contains the correct name of location and bus run to get refrence from
      */
-    void saveBusRun(BusRun busRun,String busNumber);
+    void saveBusRunWithRoute(BusRun busRun);
 
     /**
-     * @param publicId
-     * @return True if bus run with that public id exist else False
+     * @param busNumber
+     * @param routeId
+     * @return
      */
-    Boolean existsBusRunByPublicId(String publicId);
-
-    /**
-     * @param publicId
-     * @param newBusRun
-     *
-     */
-    void updateBusScheduleRun(String publicId, BusRun newBusRun);
-
-    /**
-     * @param busRunPublicIds List af all the bus runs public id to be deleted
-     */
-    void deleteBusRuns(List<String> busRunPublicIds);
+    List<BusRun> getBusRunsForRoute(String busNumber, String routeId);
 
 /*--------------------------------------------BUS OVERRIDE------------------------------------------------------------*/
     /**
@@ -135,4 +122,21 @@ public interface BusService {
      * @param busOverrideIds
      */
     void deleteBusOverride(List<String> busOverrideIds);
+
+    // ------------------- BusRoute and RouteStop Operations -------------------
+    BusRouteDto saveBusRoute(BusRouteDto busRouteDto);
+
+    BusRouteDto getBusRouteByRouteId(String routeId);
+
+    List<BusRouteDto> getAllBusRoutes();
+
+    void saveRouteStop(RouteStop stop);
+
+    List<RouteStop> getRouteStopsByRouteId(String routeId);
+
+    BusRouteDto updateBusRoute(String routeId, BusRouteDto busRouteDto);
+
+    RouteStopDto addRouteStop(String routeId, RouteStopDto routeStopDto);
+
+    BusRunDto createBusRunWithRoute(BusRunDto busRunDto);
 }
