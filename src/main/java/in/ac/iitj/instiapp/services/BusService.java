@@ -90,7 +90,7 @@ public interface BusService {
      * @param routeId
      * @return
      */
-    List<BusRun> getBusRunsForRoute(String busNumber, String routeId);
+    List<BusRun> getBusRunsForRoute(String busNumber, Long routeId);
 
 /*--------------------------------------------BUS OVERRIDE------------------------------------------------------------*/
     /**
@@ -124,19 +124,19 @@ public interface BusService {
     void deleteBusOverride(List<String> busOverrideIds);
 
     // ------------------- BusRoute and RouteStop Operations -------------------
-    BusRouteDto saveBusRoute(BusRouteDto busRouteDto);
+    void saveBusRoute(BusRouteDto busRouteDto);
 
-    BusRouteDto getBusRouteByRouteId(String routeId);
+    BusRouteDto getBusRouteByRouteId(Long routeId);
 
     List<BusRouteDto> getAllBusRoutes();
 
     void saveRouteStop(RouteStop stop);
 
-    List<RouteStop> getRouteStopsByRouteId(String routeId);
+    List<RouteStop> getRouteStopsByRouteId(Long routeId);
 
-    BusRouteDto updateBusRoute(String routeId, BusRouteDto busRouteDto);
+    BusRouteDto updateBusRoute(Long routeId, BusRouteDto busRouteDto);
 
-    RouteStopDto addRouteStop(String routeId, RouteStopDto routeStopDto);
+    RouteStopDto addRouteStop(String routeName, RouteStopDto routeStopDto);
 
     BusRunDto createBusRunWithRoute(BusRunDto busRunDto);
 }

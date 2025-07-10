@@ -2,7 +2,9 @@ package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.Repository.BusRepository;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.*;
+import in.ac.iitj.instiapp.mappers.Scheduling.Buses.BusRunDtoMapper;
 import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusOverrideDto;
+import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusRunDto;
 import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusScheduleDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class BusRepositoryImpl implements BusRepository {
@@ -24,13 +28,16 @@ public class BusRepositoryImpl implements BusRepository {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BusRepositoryImpl.class);
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager entityManager;
+    private final BusRunDtoMapper busRunDtoMapper;
 
-    public BusRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManager) {
+    public BusRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManager, BusRunDtoMapper busRunDtoMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.entityManager = entityManager;
+        this.busRunDtoMapper = busRunDtoMapper;
     }
 
     // ------------------- Bus Location Operations -------------------
+
     @Override
     @Transactional
     public void saveBusLocation(String name) {
@@ -77,6 +84,16 @@ public class BusRepositoryImpl implements BusRepository {
         jdbcTemplate.update("delete from bus_location where name=?", name);
     }
 
+    @Override
+    public BusLocation getLocationById(Long Id){
+
+        return entityManager.createQuery(
+                "select new in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusLocation" +
+                "(bu.id, bu.name) from BusLocation bu where bu.id = :id", BusLocation.class)
+                .setParameter("id", Id)
+                .getSingleResult();
+    }
+
     // ------------------- BusSchedule Operations -------------------
     @Override
     @Transactional
@@ -90,10 +107,26 @@ public class BusRepositoryImpl implements BusRepository {
     @Override
     public BusScheduleDto getBusSchedule(String busNumber) {
         if (existsBusSchedule(busNumber) != -1L) {
+            List<BusRun> busRuns = getBusRunsByBusNumber(busNumber);
+            Set<BusRunDto> busRunDtos = busRuns.stream()
+                    .map(busRunDtoMapper::toDto)
+                    .collect(Collectors.toSet());
             // Return an empty schedule or fetch runs by route if needed
-            return new BusScheduleDto(busNumber, null, Optional.empty());
+            return new BusScheduleDto(busNumber, busRunDtos);
         }
         throw new EmptyResultDataAccessException("Bus Number" + busNumber + "Does not exists", 1);
+    }
+
+    @Override
+    public BusSchedule getBusScheduleByBusNumber(String busNumber) {
+        try {
+            return entityManager.createQuery(
+                            "SELECT b FROM BusSchedule b WHERE b.busNumber = :busNumber", BusSchedule.class)
+                    .setParameter("busNumber", busNumber)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     @Override
@@ -145,10 +178,27 @@ public class BusRepositoryImpl implements BusRepository {
     }
 
     @Override
-    public List<BusRun> getBusRunsForRoute(String busNumber, String routeId) {
+    public Long isBusRouteExists(String name) {
+        try {
+            return jdbcTemplate.queryForObject("SELECT id FROM bus_route WHERE route_name = ?", Long.class, name);
+        } catch (DataAccessException ignored) {
+            return -1L;
+        }
+    }
+
+    @Override
+    public List<BusRun> getBusRunsForRoute(String busNumber, Long routeId) {
         return entityManager.createQuery("SELECT br FROM BusRun br WHERE br.busSchedule.busNumber = :busNumber AND br.route.routeId = :routeId", BusRun.class)
                 .setParameter("busNumber", busNumber)
                 .setParameter("routeId", routeId)
+                .getResultList();
+    }
+
+    @Override
+    public List<BusRun> getBusRunsByBusNumber(String busNumber) {
+        return entityManager.createQuery(
+                        "SELECT br FROM BusRun br WHERE br.busSchedule.busNumber = :busNumber", BusRun.class)
+                .setParameter("busNumber", busNumber)
                 .getResultList();
     }
 
@@ -157,11 +207,13 @@ public class BusRepositoryImpl implements BusRepository {
     @Transactional
     public void saveBusRoute(BusRoute route) {
         entityManager.persist(route);
+        entityManager.flush();
+        entityManager.refresh(route);
     }
 
     @Override
-    public BusRoute getBusRouteByRouteId(String routeId) {
-        return entityManager.createQuery("SELECT r FROM BusRoute r WHERE r.routeId = :routeId", BusRoute.class)
+    public BusRoute getBusRouteByRouteId(Long routeId) {
+        return entityManager.createQuery("SELECT r FROM BusRoute r WHERE r.id = :routeId", BusRoute.class)
                 .setParameter("routeId", routeId)
                 .getSingleResult();
     }
@@ -174,14 +226,31 @@ public class BusRepositoryImpl implements BusRepository {
     @Override
     @Transactional
     public void saveRouteStop(RouteStop stop) {
+        BusLocation busLocation = getLocationById(stop.getLocation().getId());
+        stop.setLocation(busLocation);
+
+        BusRoute busRoute = getBusRouteByRouteId(stop.getRoute().getId());
+        stop.setRoute(busRoute);
         entityManager.persist(stop);
     }
 
     @Override
-    public List<RouteStop> getRouteStopsByRouteId(String routeId) {
+    public List<RouteStop> getRouteStopsByRouteId(Long routeId) {
         return entityManager.createQuery("SELECT s FROM RouteStop s WHERE s.route.routeId = :routeId ORDER BY s.stopOrder ASC", RouteStop.class)
                 .setParameter("routeId", routeId)
                 .getResultList();
+    }
+
+    @Override
+    public BusRoute findBusRouteByRouteName(String routeName) {
+        try {
+            return entityManager.createQuery(
+                            "SELECT r FROM BusRoute r WHERE r.routeName = :routeName", BusRoute.class)
+                    .setParameter("routeName", routeName)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     // ------------------- BusOverride Operations (if still needed) -------------------

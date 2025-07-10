@@ -9,7 +9,6 @@ import java.util.List;
 @Builder
 @With
 public class BusRouteDto implements Serializable {
-    String routeId;
     String routeName;
     List<RouteStopDto> stops;
 }

@@ -8,6 +8,7 @@ import in.ac.iitj.instiapp.mappers.Scheduling.Buses.BusRunDtoMapper;
 import in.ac.iitj.instiapp.mappers.Scheduling.Buses.RouteStopDtoMapper;
 import in.ac.iitj.instiapp.payload.Scheduling.Buses.*;
 import in.ac.iitj.instiapp.services.BusService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -83,20 +84,29 @@ public class BusServiceImpl implements BusService {
     public void saveBusRunWithRoute(BusRun busRun) { busRepository.saveBusRunWithRoute(busRun); }
 
     @Override
-    public List<BusRun> getBusRunsForRoute(String busNumber, String routeId) { return busRepository.getBusRunsForRoute(busNumber, routeId); }
+    public List<BusRun> getBusRunsForRoute(String busNumber, Long routeId) { return busRepository.getBusRunsForRoute(busNumber, routeId); }
 
     // BusRoute and RouteStop
     @Override
     @Transactional
-    public BusRouteDto saveBusRoute(BusRouteDto busRouteDto) {
-        BusRoute busRoute = busRouteDtoMapper.toEntity(busRouteDto);
+    public void saveBusRoute(BusRouteDto busRouteDto) {
+        BusRoute busRoute = new BusRoute(busRouteDto.getRouteName());
         busRepository.saveBusRoute(busRoute);
-        return busRouteDtoMapper.toDto(busRoute);
+
+        Long routeId = busRepository.isBusRouteExists(busRouteDto.getRouteName());
+
+        for(int i=0; i<busRouteDto.getStops().size(); i++){
+            Long Id = busRepository.isBusLocationExists(busRouteDto.getStops().get(i).getLocationName());
+            RouteStop routeStop = routeStopDtoMapper.toEntity(busRouteDto.getStops().get(i));
+            routeStop.setLocation(new BusLocation(Id));
+            routeStop.setRoute(new BusRoute(routeId));
+            busRepository.saveRouteStop(routeStop);
+        }
     }
 
     @Override
     @Transactional
-    public BusRouteDto updateBusRoute(String routeId, BusRouteDto busRouteDto) {
+    public BusRouteDto updateBusRoute(Long routeId, BusRouteDto busRouteDto) {
         try {
             BusRoute existingRoute = busRepository.getBusRouteByRouteId(routeId);
             BusRoute updatedRoute = busRouteDtoMapper.toEntity(busRouteDto);
@@ -110,7 +120,7 @@ public class BusServiceImpl implements BusService {
 
 
     @Override
-    public BusRouteDto getBusRouteByRouteId(String routeId) {
+    public BusRouteDto getBusRouteByRouteId(Long routeId) {
         try {
             BusRoute route = busRepository.getBusRouteByRouteId(routeId);
             return busRouteDtoMapper.toDto(route);
@@ -132,7 +142,7 @@ public class BusServiceImpl implements BusService {
     public void saveRouteStop(RouteStop stop) { busRepository.saveRouteStop(stop); }
 
     @Override
-    public List<RouteStop> getRouteStopsByRouteId(String routeId) { return busRepository.getRouteStopsByRouteId(routeId); }
+    public List<RouteStop> getRouteStopsByRouteId(Long routeId) { return busRepository.getRouteStopsByRouteId(routeId); }
 
     // BusOverride (if still needed)
 
@@ -153,7 +163,7 @@ public class BusServiceImpl implements BusService {
 
     @Override
     @Transactional
-    public RouteStopDto addRouteStop(String routeId, RouteStopDto stopDto) {
+    public RouteStopDto addRouteStop(String routeName, RouteStopDto stopDto) {
         RouteStop stop = routeStopDtoMapper.toEntity(stopDto);
         busRepository.saveRouteStop(stop);
         return routeStopDtoMapper.toDto(stop);
@@ -162,7 +172,52 @@ public class BusServiceImpl implements BusService {
     @Override
     @Transactional
     public BusRunDto createBusRunWithRoute(BusRunDto busRunDto) {
-        BusRun busRun = busRunDtoMapper.toEntity(busRunDto);
+        BusSchedule bus = busRepository.getBusScheduleByBusNumber(busRunDto.getBusNumber());
+        if (bus == null) {
+            throw new EntityNotFoundException("BusSchedule not found for busNumber: " + busRunDto.getBusNumber());
+            // Or return a custom error response if you prefer
+        }
+
+        BusRoute route = busRepository.findBusRouteByRouteName(busRunDto.getRoute().getRouteName());
+        if (route == null) {
+            // Create and save new BusRoute
+            route = busRouteDtoMapper.toEntity(busRunDto.getRoute());
+            busRepository.saveBusRoute(route); // This assigns an ID
+
+            // Save RouteStops, referencing the now-persisted route
+            if (busRunDto.getRoute().getStops() != null) {
+                for (RouteStopDto stopDto : busRunDto.getRoute().getStops()) {
+                    RouteStop stop = routeStopDtoMapper.toEntity(stopDto);
+                    stop.setRoute(route);
+
+                    // Ensure BusLocation exists
+                    Long locationId = busRepository.isBusLocationExists(stopDto.getLocationName());
+                    BusLocation location;
+                    if (locationId == -1L) {
+                        // Create new location
+                        busRepository.saveBusLocation(stopDto.getLocationName());
+                        locationId = busRepository.isBusLocationExists(stopDto.getLocationName());
+                    }
+                    location = busRepository.getLocationById(locationId);
+
+                    stop.setLocation(location);
+
+                    System.out.println("Saving stop: " + stop + ", location: " + stop.getLocation());
+                    if (stop.getLocation() == null) {
+                        throw new IllegalStateException("Location is null for stop: " + stopDto.getLocationName());
+                    }
+
+                    busRepository.saveRouteStop(stop);
+                }
+            }
+        }
+
+        BusRun busRun = new BusRun();
+        busRun.setBusSchedule(bus);
+        busRun.setRoute(route);
+        busRun.setStartTime(busRunDto.getStartTime());
+        busRun.setScheduleType(busRunDto.getScheduleType());
+
         busRepository.saveBusRunWithRoute(busRun);
         return busRunDtoMapper.toDto(busRun);
     }

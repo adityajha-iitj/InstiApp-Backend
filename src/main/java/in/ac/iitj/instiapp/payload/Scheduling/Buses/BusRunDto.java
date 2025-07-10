@@ -16,7 +16,7 @@ import java.sql.Time;
 @Builder
 @With
 public class BusRunDto implements Serializable {
-    String publicId;
+    String busNumber;
     BusRouteDto route;
     Time startTime;
     ScheduleType scheduleType;

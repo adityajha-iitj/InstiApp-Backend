@@ -3,6 +3,7 @@ package in.ac.iitj.instiapp.controllers;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusOverride;
 import in.ac.iitj.instiapp.payload.Scheduling.Buses.*;
 import in.ac.iitj.instiapp.services.BusService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -81,7 +82,6 @@ public class BusController {
 
     @GetMapping("/bus-numbers")
     public List<String> getBusNumbers(Pageable pageable) {
-
         return busService.getBusNumbers(pageable);
     }
 
@@ -112,36 +112,36 @@ public class BusController {
     // ------------------- Bus Override Endpoints -------------------
 
 
-    @PostMapping("/bus-override")
-    public ResponseEntity<String> saveBusOverride(@Valid @RequestParam String busNumber, @Valid @RequestBody BusOverride busOverride) {
-        busService.saveBusOverride(busNumber, busOverride);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Bus override saved successfully.");
-    }
-
-    @GetMapping("bus-override")
-    public ResponseEntity<List<BusOverrideDto>> getBusOverrideForYearAndMonth(@Valid @RequestParam int year, @Valid @RequestParam int month) {
-        return ResponseEntity.ok(busService.getBusOverrideForYearAndMonth(year, month));
-    }
-    @PutMapping("/bus-override")
-    public ResponseEntity<String> updateBusOverride(@Valid @RequestParam String publicId, @Valid @RequestBody BusOverride newBusOverride) {
-        if (!busService.existsBusOverrideByPublicId(publicId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: Bus override does not exist.");
-        }
-        busService.updateBusOverride(publicId, newBusOverride);
-        return ResponseEntity.ok("Bus override updated successfully.");
-    }
-    @DeleteMapping("/bus-override")
-    public ResponseEntity<String> deleteBusOverride(@Valid @RequestBody List<String> busOverrideIds) {
-        busService.deleteBusOverride(busOverrideIds);
-        return ResponseEntity.ok("Bus overrides deleted successfully.");
-    }
+//    @PostMapping("/bus-override")
+//    public ResponseEntity<String> saveBusOverride(@Valid @RequestParam String busNumber, @Valid @RequestBody BusOverride busOverride) {
+//        busService.saveBusOverride(busNumber, busOverride);
+//        return ResponseEntity.status(HttpStatus.CREATED).body("Bus override saved successfully.");
+//    }
+//
+//    @GetMapping("bus-override")
+//    public ResponseEntity<List<BusOverrideDto>> getBusOverrideForYearAndMonth(@Valid @RequestParam int year, @Valid @RequestParam int month) {
+//        return ResponseEntity.ok(busService.getBusOverrideForYearAndMonth(year, month));
+//    }
+//    @PutMapping("/bus-override")
+//    public ResponseEntity<String> updateBusOverride(@Valid @RequestParam String publicId, @Valid @RequestBody BusOverride newBusOverride) {
+//        if (!busService.existsBusOverrideByPublicId(publicId)) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: Bus override does not exist.");
+//        }
+//        busService.updateBusOverride(publicId, newBusOverride);
+//        return ResponseEntity.ok("Bus override updated successfully.");
+//    }
+//    @DeleteMapping("/bus-override")
+//    public ResponseEntity<String> deleteBusOverride(@Valid @RequestBody List<String> busOverrideIds) {
+//        busService.deleteBusOverride(busOverrideIds);
+//        return ResponseEntity.ok("Bus overrides deleted successfully.");
+//    }
 
     // ------------------- BusRoute and RouteStop Endpoints-------------------
 
     @PostMapping("/bus-routes")
-    public ResponseEntity<BusRouteDto> createBusRoute(@Valid @RequestBody BusRouteDto busRouteDto) {
-        BusRouteDto created = busService.saveBusRoute(busRouteDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public void createBusRoute(@Valid @RequestBody BusRouteDto busRouteDto) {
+        busService.saveBusRoute(busRouteDto);
+        ResponseEntity.status(HttpStatus.CREATED);
     }
 
     @GetMapping("/bus-routes")
@@ -150,14 +150,14 @@ public class BusController {
         return ResponseEntity.ok(routes);
     }
     @GetMapping("/bus-routes/{routeId}")
-    public ResponseEntity<BusRouteDto> getBusRoute(@PathVariable String routeId) {
+    public ResponseEntity<BusRouteDto> getBusRoute(@PathVariable Long routeId) {
         BusRouteDto route = busService.getBusRouteByRouteId(routeId);
         if (route == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(route);
     }
 
     @PutMapping("/bus-routes/{routeId}")
-    public ResponseEntity<BusRouteDto> updateBusRoute(@PathVariable String routeId, @Valid @RequestBody BusRouteDto busRouteDto) {
+    public ResponseEntity<BusRouteDto> updateBusRoute(@PathVariable Long routeId, @Valid @RequestBody BusRouteDto busRouteDto) {
         BusRouteDto updated = busService.updateBusRoute(routeId, busRouteDto);
         if (updated == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(updated);
@@ -170,9 +170,9 @@ public class BusController {
 //    }
 
     // RouteStop endpoints
-    @PostMapping("/bus-routes/{routeId}/stops")
-    public ResponseEntity<RouteStopDto> addRouteStop(@PathVariable String routeId, @Valid @RequestBody RouteStopDto stopDto) {
-        RouteStopDto created = busService.addRouteStop(routeId, stopDto);
+    @PostMapping("/bus-routes/{routeName}/stops")
+    public ResponseEntity<RouteStopDto> addRouteStop(@PathVariable String routeName, @Valid @RequestBody RouteStopDto stopDto) {
+        RouteStopDto created = busService.addRouteStop(routeName, stopDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 //    @PutMapping("/bus-routes/{routeId}/stops/{stopId}")
@@ -189,11 +189,18 @@ public class BusController {
 //    }
 
     // BusRun with Route Endpoint
+
     @PostMapping("/bus-runs")
     public ResponseEntity<BusRunDto> createBusRun(@Valid @RequestBody BusRunDto busRunDto) {
-        BusRunDto created = busService.createBusRunWithRoute(busRunDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        try {
+            BusRunDto created = busService.createBusRunWithRoute(busRunDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Or a custom error message
+        }
     }
+
+
 }
 
 

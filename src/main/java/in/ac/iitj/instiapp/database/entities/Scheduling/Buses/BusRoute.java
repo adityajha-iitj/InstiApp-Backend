@@ -16,19 +16,19 @@ public class BusRoute {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(nullable = false, unique = true)
-    private String routeId; // e.g., "ROUTE_COLLEGE_TO_CITY"
-    
+
     @Column(nullable = false)
-    private String routeName; // e.g., "College to Main City"
+    private String routeName;
     
     @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderBy("stopOrder ASC")
     private List<RouteStop> stops;
-    
-    public BusRoute(String routeId, String routeName) {
-        this.routeId = routeId;
+
+    public BusRoute(String routeName) {
         this.routeName = routeName;
+    }
+
+    public BusRoute(Long id){
+        this.id = id;
     }
 }

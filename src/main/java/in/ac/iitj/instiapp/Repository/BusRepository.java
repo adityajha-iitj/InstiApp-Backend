@@ -13,6 +13,7 @@ public interface BusRepository {
     Long isBusLocationExists(String name);
     void updateBusLocation(String oldName, String newName);
     void deleteBusLocation(String name);
+    BusLocation getLocationById(Long id);
 
     // Bus Schedule
     void saveBusSchedule(String busNumber);
@@ -21,17 +22,21 @@ public interface BusRepository {
     Long existsBusSchedule(String busNumber);
     void updateBusSchedule(String oldBusNumber, String newBusNumber);
     void deleteBusSchedule(String busNumber);
+    BusSchedule getBusScheduleByBusNumber(String busNumber);
 
     // BusRun with Route
     void saveBusRunWithRoute(BusRun busRun);
-    List<BusRun> getBusRunsForRoute(String busNumber, String routeId);
+    List<BusRun> getBusRunsForRoute(String busNumber, Long routeId);
+    Long isBusRouteExists(String name);
+    List<BusRun> getBusRunsByBusNumber(String busNumber);
 
     // BusRoute and RouteStop
     void saveBusRoute(BusRoute route);
-    BusRoute getBusRouteByRouteId(String routeId);
+    BusRoute getBusRouteByRouteId(Long routeId);
     List<BusRoute> getAllBusRoutes();
     void saveRouteStop(RouteStop stop);
-    List<RouteStop> getRouteStopsByRouteId(String routeId);
+    List<RouteStop> getRouteStopsByRouteId(Long routeId);
+    BusRoute findBusRouteByRouteName(String routeName);
 
     // BusOverride (if still needed)
     void saveBusOverride(String busNumber, BusOverride busOverride);

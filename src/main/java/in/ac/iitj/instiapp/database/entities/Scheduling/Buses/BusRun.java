@@ -22,9 +22,6 @@ public class BusRun {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
 
-    @Column(nullable = false,unique = true)
-    private String publicId;
-
     @ManyToOne
     @JoinColumn(name = "bus_schedule_id")
     private BusSchedule busSchedule;
@@ -39,9 +36,7 @@ public class BusRun {
     @Enumerated(EnumType.STRING)
     private ScheduleType scheduleType;
 
-
-    public BusRun(String publicId, BusSchedule busSchedule, BusRoute route, Time startTime, ScheduleType scheduleType) {
-        this.publicId = publicId;
+    public BusRun(BusSchedule busSchedule, BusRoute route, Time startTime, ScheduleType scheduleType) {
         this.busSchedule = busSchedule;
         this.route = route;
         this.startTime = startTime;

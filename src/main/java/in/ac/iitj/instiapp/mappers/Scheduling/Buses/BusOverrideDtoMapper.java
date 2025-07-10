@@ -17,9 +17,9 @@ public interface BusOverrideDtoMapper {
 
 
     @Mapping(source = "busSchedule.busNumber",target = "busScheduleBusNumber")
-    @Mapping(source = "busSnippet.timeOfDeparture", target = "timeOfDeparture")
-    @Mapping(source = "busSnippet.fromLocation", target = "fromLocationName")
-    @Mapping(source = "busSnippet.toLocation", target = "toLocationName")
+//    @Mapping(source = "busSnippet.timeOfDeparture", target = "timeOfDeparture")
+//    @Mapping(source = "busSnippet.fromLocation", target = "fromLocationName")
+//    @Mapping(source = "busSnippet.toLocation", target = "toLocationName")
     BusOverrideDto toDto(BusOverride busOverride);
 
     @InheritInverseConfiguration
