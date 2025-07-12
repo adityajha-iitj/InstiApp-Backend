@@ -213,7 +213,7 @@ public class BusRepositoryImpl implements BusRepository {
 
     @Override
     public BusRoute getBusRouteByRouteId(Long routeId) {
-        return entityManager.createQuery("SELECT r FROM BusRoute r WHERE r.id = :routeId", BusRoute.class)
+        return entityManager.createQuery("SELECT r FROM BusRoute r LEFT JOIN FETCH r.stops WHERE r.id = :routeId", BusRoute.class)
                 .setParameter("routeId", routeId)
                 .getSingleResult();
     }
@@ -245,13 +245,68 @@ public class BusRepositoryImpl implements BusRepository {
     public BusRoute findBusRouteByRouteName(String routeName) {
         try {
             return entityManager.createQuery(
-                            "SELECT r FROM BusRoute r WHERE r.routeName = :routeName", BusRoute.class)
+                            "SELECT r FROM BusRoute r LEFT JOIN FETCH r.stops WHERE r.routeName = :routeName", BusRoute.class)
                     .setParameter("routeName", routeName)
                     .getSingleResult();
         } catch (NoResultException e) {
             return null;
         }
     }
+
+    @Override
+    public String findBusFromBusRoute(String routeName){
+        try{
+            return entityManager.createQuery(
+                            "SELECT b.busNumber " +
+                                    "FROM BusSchedule b " +
+                                    "JOIN BusRoute r ON b.id = r.id " +
+                                    "WHERE r.routeName = :routeName",
+                            String.class
+                    )
+                    .setParameter("routeName", routeName)
+                    .getSingleResult();
+        }
+        catch (NoResultException e){
+            return null;
+        }
+
+    }
+
+    @Override
+    public BusRun getBusRunByBusAndRoute( BusRunDto busRunDto){
+        String jpql = """
+        SELECT br
+        FROM BusRun br
+        JOIN br.busSchedule bs
+        JOIN br.route r
+        WHERE bs.busNumber = :busNumber AND r.routeName = :routeName
+    """;
+        try {
+            return entityManager.createQuery(jpql, BusRun.class)
+                    .setParameter("busNumber", busRunDto.getBusNumber())
+                    .setParameter("routeName", busRunDto.getRoute().getRouteName())
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+
+    }
+    @Override
+    public RouteStop getRouteStopByRouteIdAndLocationId(Long routeId, Long locationId) {
+        String jpql = """
+        SELECT rs FROM RouteStop rs 
+        WHERE rs.route.id = :routeId AND rs.location.id = :locationId
+    """;
+        try {
+            return entityManager.createQuery(jpql, RouteStop.class)
+                    .setParameter("routeId", routeId)
+                    .setParameter("locationId", locationId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
 
     // ------------------- BusOverride Operations (if still needed) -------------------
     @Override
@@ -281,6 +336,8 @@ public class BusRepositoryImpl implements BusRepository {
     public void deleteBusOverride(List<String> busOverrideIds) {
         // Implement as needed for new structure
     }
+
+
 
     // Remove all legacy BusSnippet, fromLocation, toLocation, and point-to-point logic.
 }

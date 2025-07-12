@@ -6,6 +6,7 @@ import in.ac.iitj.instiapp.services.BusService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -197,10 +198,32 @@ public class BusController {
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Or a custom error message
+        } catch(DataIntegrityViolationException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
     }
 
+    @GetMapping("/bus-runs/{busNumber}")
+    public ResponseEntity<List<BusRunDto>> getBusRun(@PathVariable String busNumber) {
+        try{
+            List<BusRunDto> busRunDtos = busService.getBusRunByBusNumber(busNumber);
+            return ResponseEntity.ok(busRunDtos);
+        } catch(EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
 
+    @PutMapping("/bus-runs")
+    public ResponseEntity<BusRunDto> updateBusRun(@Valid @RequestBody BusRunDto busRunDto) {
+        try {
+            BusRunDto created = busService.updateBusRunWithRouteName(busRunDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Or a custom error message
+        } catch(DataIntegrityViolationException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        }
+    }
 }
 
 

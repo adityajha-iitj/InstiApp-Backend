@@ -139,4 +139,8 @@ public interface BusService {
     RouteStopDto addRouteStop(String routeName, RouteStopDto routeStopDto);
 
     BusRunDto createBusRunWithRoute(BusRunDto busRunDto);
+
+    List<BusRunDto> getBusRunByBusNumber(String busNumber);
+
+    BusRunDto updateBusRunWithRouteName(BusRunDto busRunDto);
 }

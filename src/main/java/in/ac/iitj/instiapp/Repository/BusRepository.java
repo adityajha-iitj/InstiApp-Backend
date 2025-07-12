@@ -2,6 +2,7 @@ package in.ac.iitj.instiapp.Repository;
 
 import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.*;
 import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusOverrideDto;
+import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusRunDto;
 import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusScheduleDto;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
@@ -29,7 +30,9 @@ public interface BusRepository {
     List<BusRun> getBusRunsForRoute(String busNumber, Long routeId);
     Long isBusRouteExists(String name);
     List<BusRun> getBusRunsByBusNumber(String busNumber);
-
+    String findBusFromBusRoute(String routeName);
+    BusRun getBusRunByBusAndRoute( BusRunDto busRunDto);
+    RouteStop getRouteStopByRouteIdAndLocationId(Long routeId, Long locationId);
     // BusRoute and RouteStop
     void saveBusRoute(BusRoute route);
     BusRoute getBusRouteByRouteId(Long routeId);

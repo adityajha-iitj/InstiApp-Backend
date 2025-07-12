@@ -15,7 +15,11 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "bus_run")
+@Table(name = "bus_run",
+uniqueConstraints = {
+@UniqueConstraint(columnNames = {"bus_schedule_id", "route_id"})
+    }
+)
 public class BusRun {
 
     @jakarta.persistence.Id
@@ -42,5 +46,4 @@ public class BusRun {
         this.startTime = startTime;
         this.scheduleType = scheduleType;
     }
-    
 }
