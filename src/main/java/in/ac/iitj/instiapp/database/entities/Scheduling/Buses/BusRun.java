@@ -15,30 +15,35 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "bus_run")
+@Table(name = "bus_run",
+uniqueConstraints = {
+@UniqueConstraint(columnNames = {"bus_schedule_id", "route_id"})
+    }
+)
 public class BusRun {
 
     @jakarta.persistence.Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
 
-    @Column(nullable = false,unique = true)
-    private String publicId;
-
     @ManyToOne
+    @JoinColumn(name = "bus_schedule_id")
     private BusSchedule busSchedule;
 
-    BusSnippet busSnippet;
+    @ManyToOne
+    @JoinColumn(name = "route_id")
+    private BusRoute route;
 
+    @Column(nullable = false)
+    private Time startTime;
 
     @Enumerated(EnumType.STRING)
     private ScheduleType scheduleType;
 
-
-   public BusRun(String publicId, BusSnippet busSnippet,ScheduleType scheduleType) {
-       this.publicId = publicId;
-       this.busSnippet = busSnippet;
-       this.scheduleType = scheduleType;
-   }
-
+    public BusRun(BusSchedule busSchedule, BusRoute route, Time startTime, ScheduleType scheduleType) {
+        this.busSchedule = busSchedule;
+        this.route = route;
+        this.startTime = startTime;
+        this.scheduleType = scheduleType;
+    }
 }
