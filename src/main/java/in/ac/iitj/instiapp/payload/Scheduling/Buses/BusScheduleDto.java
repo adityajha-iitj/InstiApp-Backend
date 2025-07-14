@@ -17,19 +17,15 @@ public class BusScheduleDto implements Serializable {
     String busNumber;
     Set<BusRunDto> runs;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    Set<BusOverrideDto> busOverrides;
+//    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+//    Set<BusOverrideDto> busOverrides;
 
-    public BusScheduleDto(String busNumber, Set<BusRunDto> busRunDtos, Optional<Set<BusOverrideDto>> busOverrides) {
+    public BusScheduleDto(String busNumber, Set<BusRunDto> busRunDtos) {
         this.busNumber = busNumber;
         this.runs = busRunDtos;
-        this.busOverrides = busOverrides.orElseGet(HashSet::new);
     }
     public BusScheduleDto() {
         this.runs = new HashSet<>();
-        this.busOverrides = new HashSet<>();
         this.busNumber = "";
     }
-
-
 }

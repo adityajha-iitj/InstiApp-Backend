@@ -28,7 +28,7 @@ public class BusOverride {
     private BusSchedule busSchedule;
 
 
-    BusSnippet busSnippet;
+    //BusSnippet busSnippet;
 
 
     private Date overrideDate;
@@ -36,9 +36,9 @@ public class BusOverride {
     private String description;
 
 
-    public BusOverride(String publicId,BusSnippet busSnippet, Date overrideDate, String description) {
+    public BusOverride(String publicId, Date overrideDate, String description) {
         this.publicId = publicId;
-        this.busSnippet = busSnippet;
+        //this.busSnippet = busSnippet;
         this.overrideDate = overrideDate;
         this.description = description;
     }

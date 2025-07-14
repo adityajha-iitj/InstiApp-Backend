@@ -17,17 +17,16 @@ public class BusSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long Id;
+    private Long Id;
 
     @Column( nullable = false, unique = true , name = "bus_number")
-    String busNumber;
+    private String busNumber;
 
     @OneToMany(mappedBy = "busSchedule",fetch = FetchType.EAGER)
-    Set<BusRun> runs;
+    private Set<BusRun> runs;
 
-    @OneToMany(mappedBy = "busSchedule", fetch = FetchType.LAZY)
-    Set<BusOverride> busOverrides;
-
+//    @OneToMany(mappedBy = "busSchedule", fetch = FetchType.LAZY)
+//    Set<BusOverride> busOverrides;
 
     public BusSchedule(String busNumber) {
         this.busNumber = busNumber;
