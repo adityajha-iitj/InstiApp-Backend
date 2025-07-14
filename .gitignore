@@ -99,3 +99,6 @@ release.properties
 **/application-test.properties
 
 ..bfg-report
+
+upload-ssm.sh
+upload-ssm.sh.save
