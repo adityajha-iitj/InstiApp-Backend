@@ -12,16 +12,14 @@ import lombok.*;
 @Table(name = "bus_location")
 public class BusLocation {
 
-
-    public BusLocation(String location) {
-        this.name = location;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
-
     @Column(nullable = false, unique = true)
     String name;
+
+    public BusLocation(Long id) {
+        this.Id = id;
+    }
 }

@@ -2,6 +2,7 @@ package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.Repository.BusRepository;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Buses.*;
+import in.ac.iitj.instiapp.mappers.Scheduling.Buses.BusRunDtoMapper;
 import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusOverrideDto;
 import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusRunDto;
 import in.ac.iitj.instiapp.payload.Scheduling.Buses.BusScheduleDto;
@@ -16,9 +17,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class BusRepositoryImpl implements BusRepository {
@@ -26,11 +28,15 @@ public class BusRepositoryImpl implements BusRepository {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BusRepositoryImpl.class);
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager entityManager;
+    private final BusRunDtoMapper busRunDtoMapper;
 
-    public BusRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManager) {
+    public BusRepositoryImpl(JdbcTemplate jdbcTemplate, EntityManager entityManager, BusRunDtoMapper busRunDtoMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.entityManager = entityManager;
+        this.busRunDtoMapper = busRunDtoMapper;
     }
+
+    // ------------------- Bus Location Operations -------------------
 
     @Override
     @Transactional
@@ -44,7 +50,7 @@ public class BusRepositoryImpl implements BusRepository {
 
     @Override
     public List<String> getListOfBusLocations(Pageable pageable) {
-        Query query = entityManager.createQuery("select name from BusLocation  t", String.class);
+        Query query = entityManager.createQuery("select name from BusLocation t", String.class);
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
         return query.getResultList();
@@ -59,7 +65,6 @@ public class BusRepositoryImpl implements BusRepository {
         }
     }
 
-
     @Override
     public void updateBusLocation(String oldName, String newName) {
         if (isBusLocationExists(oldName).equals(-1L)) {
@@ -68,7 +73,6 @@ public class BusRepositoryImpl implements BusRepository {
         if (isBusLocationExists(newName) != -1L) {
             throw new DataIntegrityViolationException("Bus location already exists with name " + newName);
         }
-
         jdbcTemplate.update("update bus_location set name=? where name=?", newName, oldName);
     }
 
@@ -77,17 +81,20 @@ public class BusRepositoryImpl implements BusRepository {
         if (isBusLocationExists(name).equals(-1L)) {
             throw new EmptyResultDataAccessException("Bus location does not exist", 1);
         }
-        List<String> idOfBusRuns = entityManager.createQuery("select publicId from BusRun  where busSnippet.fromLocation.name = :name or busSnippet.toLocation.name = :name", String.class)
-                .setParameter("name", name).getResultList();
-        deleteBusRuns(idOfBusRuns);
-        List<String> idOfBusOverrides = entityManager.createQuery("select publicId from BusOverride  where busSnippet.fromLocation.name = :name or busSnippet.toLocation.name = :name", String.class)
-                .setParameter("name", name).getResultList();
-        deleteBusOverride(idOfBusOverrides);
-
         jdbcTemplate.update("delete from bus_location where name=?", name);
     }
 
+    @Override
+    public BusLocation getLocationById(Long Id){
 
+        return entityManager.createQuery(
+                "select new in.ac.iitj.instiapp.database.entities.Scheduling.Buses.BusLocation" +
+                "(bu.id, bu.name) from BusLocation bu where bu.id = :id", BusLocation.class)
+                .setParameter("id", Id)
+                .getSingleResult();
+    }
+
+    // ------------------- BusSchedule Operations -------------------
     @Override
     @Transactional
     public void saveBusSchedule(String busNumber) {
@@ -100,17 +107,26 @@ public class BusRepositoryImpl implements BusRepository {
     @Override
     public BusScheduleDto getBusSchedule(String busNumber) {
         if (existsBusSchedule(busNumber) != -1L) {
-            List<BusRunDto> listOfBusRuns = entityManager.createQuery("select  " +
-                            "new in.ac.iitj.instiapp.payload.Scheduling.Buses.BusRunDto" +
-                            "(br.publicId,br.busSnippet.timeOfDeparture,br.busSnippet.fromLocation.name,br.busSnippet.toLocation.name,br.scheduleType) " +
-                            "from BusRun br where br.busSchedule.busNumber = :name", BusRunDto.class)
-                    .setParameter("name", busNumber)
-                    .getResultList();
-
-            return new BusScheduleDto(busNumber, new HashSet<>(listOfBusRuns), Optional.empty());
+            List<BusRun> busRuns = getBusRunsByBusNumber(busNumber);
+            Set<BusRunDto> busRunDtos = busRuns.stream()
+                    .map(busRunDtoMapper::toDto)
+                    .collect(Collectors.toSet());
+            // Return an empty schedule or fetch runs by route if needed
+            return new BusScheduleDto(busNumber, busRunDtos);
         }
-
         throw new EmptyResultDataAccessException("Bus Number" + busNumber + "Does not exists", 1);
+    }
+
+    @Override
+    public BusSchedule getBusScheduleByBusNumber(String busNumber) {
+        try {
+            return entityManager.createQuery(
+                            "SELECT b FROM BusSchedule b WHERE b.busNumber = :busNumber", BusSchedule.class)
+                    .setParameter("busNumber", busNumber)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     @Override
@@ -119,9 +135,7 @@ public class BusRepositoryImpl implements BusRepository {
                 .setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();
-
     }
-
 
     @Override
     public Long existsBusSchedule(String busNumber) {
@@ -132,7 +146,6 @@ public class BusRepositoryImpl implements BusRepository {
             return -1L;
         }
     }
-
 
     @Override
     public void updateBusSchedule(String oldBusNumber, String newBusNumber) {
@@ -145,255 +158,186 @@ public class BusRepositoryImpl implements BusRepository {
         jdbcTemplate.update("update bus_schedule set bus_number=? where bus_number=?", newBusNumber, oldBusNumber);
     }
 
-
     @Override
     @Transactional
     public void deleteBusSchedule(String busNumber) {
-
         if (existsBusSchedule(busNumber).equals(-1L)) {
             throw new EmptyResultDataAccessException("Bus schedule with bus_number " + busNumber + " not found", 1);
         }
-        // Step 1: Fetch the BusRuns by busNumber
-        List<String> busRunsId = entityManager.createQuery(
-                        "SELECT br.publicId FROM BusRun br WHERE br.busSchedule.busNumber = :busNumber", String.class)
-                .setParameter("busNumber", busNumber)
-                .getResultList();
-
-        deleteBusRuns(busRunsId);
-
-//       Step 2: Fetch the BusOverrides
-        List<String> busOverrides = entityManager.createQuery("select bo.publicId from BusOverride bo where bo.busSchedule.busNumber = :busNumber", String.class)
-                .setParameter("busNumber", busNumber).getResultList();
-
-        deleteBusOverride(busOverrides);
-
-        // Step 3: Delete the BusSchedule
         entityManager.createQuery("DELETE FROM BusSchedule bs WHERE bs.busNumber = :busNumber")
                 .setParameter("busNumber", busNumber)
                 .executeUpdate();
-
-        log.info("Successfully deleted BusSchedule, BusRun, and BusOverride records for busNumber: {}", busNumber);
-
+        log.info("Successfully deleted BusSchedule for busNumber: {}", busNumber);
     }
 
-    @Transactional
+    // ------------------- BusRun with Route Operations -------------------
     @Override
-    public void saveBusRun(BusRun busRun, String busNumber) {
-        Long id = existsBusSchedule(busNumber);
-        if (id.equals(-1L)) {
-            throw new EmptyResultDataAccessException("Bus number with name " + busNumber + " does not exist", 1);
-        }
-
-        busRun.setBusSchedule(new BusSchedule(id, busNumber, null, null));
-        if (existsBusRun(busRun).isPresent()) {
-            throw new DataIntegrityViolationException("Bus Run already exists");
-        }
-        Long fromLocationId = isBusLocationExists(busRun.getBusSnippet().getFromLocation().getName());
-        Long toLocationId = isBusLocationExists(busRun.getBusSnippet().getToLocation().getName());
-        if (fromLocationId.equals(-1L) || toLocationId.equals(-1L)) {
-            throw new EmptyResultDataAccessException("From location or To location do not exist", 1);
-        }
-        busRun.setBusSnippet(new BusSnippet(busRun.getBusSnippet().getTimeOfDeparture(),
-                entityManager.getReference(BusLocation.class, fromLocationId),
-                entityManager.getReference(BusLocation.class, toLocationId)
-        ));
+    @Transactional
+    public void saveBusRunWithRoute(BusRun busRun) {
         entityManager.persist(busRun);
     }
 
     @Override
-    public Boolean existsBusRunByPublicId(String publicId) {
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("select exists(select 1 from bus_run where public_id = ?)", Boolean.class, publicId));
-    }
-
-    /**
-     * BusNumber should not be null.
-     *
-     * @param busRun does take value of busNumber from BusSchedule.
-     * @return -1 if busRun  doesn't exists for particular Schedule
-     * @assumptions busNumber in busSchedule exists in database
-     */
-    @Transactional
-    protected Optional<String> existsBusRun(BusRun busRun) {
+    public Long isBusRouteExists(String name) {
         try {
-            return Optional.of(entityManager.createQuery("Select publicId from BusRun   where busSnippet.fromLocation.name = :fromLocation and busSnippet.toLocation.name = :toLocation and busSnippet.timeOfDeparture = :timeOfDeparture and busSchedule.busNumber = :busNumber and scheduleType = :scheduleType", String.class)
-                    .setParameter("fromLocation", busRun.getBusSnippet().getFromLocation().getName())
-                    .setParameter("toLocation", busRun.getBusSnippet().getToLocation().getName())
-                    .setParameter("timeOfDeparture", busRun.getBusSnippet().getTimeOfDeparture())
-                    .setParameter("busNumber", busRun.getBusSchedule().getBusNumber())
-                    .setParameter("scheduleType", busRun.getScheduleType())
-                    .getSingleResult());
-        } catch (NoResultException e) {
-            return Optional.empty();
-        }
-    }
-
-
-    /*
-     Doesn't Set ScheduleType.ScheduleType once set cannot be updated can only be deleted
-    */
-    @Override
-    public void updateBusScheduleRun(String publicId, BusRun newBusRun) {
-
-
-        if (!existsBusRunByPublicId(publicId)) {
-            throw new EmptyResultDataAccessException("Bus Run does not exist", 1);
-        }
-
-
-        //From data integrity in database busNumber would exist
-        String busNumber = entityManager.createQuery("select br.busSchedule.busNumber from BusRun br where br.publicId = :publicId", String.class)
-                .setParameter("publicId", publicId).getSingleResult();
-
-        newBusRun.setBusSchedule(new BusSchedule(busNumber));
-
-        Optional<String> otherPublicId = existsBusRun(newBusRun);
-        if (otherPublicId.isPresent() && !otherPublicId.get().equals(publicId)) {
-            throw new DataIntegrityViolationException("Bus Run already exists");
-        }
-
-        Long fromLocation = isBusLocationExists(newBusRun.getBusSnippet().getFromLocation().getName());
-        Long toLocation = isBusLocationExists(newBusRun.getBusSnippet().getToLocation().getName());
-        if (fromLocation.equals(-1L) || toLocation.equals(-1L)) {
-            throw new EmptyResultDataAccessException("From location or To location do not exist", 1);
-        }
-
-
-        entityManager.createQuery("update BusRun  br set br.busSnippet = :busSnippet,br.scheduleType  = :scheduleType where br.publicId = :publicId")
-                .setParameter("busSnippet",
-                        new BusSnippet(newBusRun.getBusSnippet().getTimeOfDeparture(),
-                                entityManager.getReference(BusLocation.class, fromLocation),
-                                entityManager.getReference(BusLocation.class, toLocation)
-                        )
-                )
-                .setParameter("scheduleType", newBusRun.getScheduleType())
-                .setParameter("publicId", publicId)
-                .executeUpdate();
-
-    }
-
-
-    @Override
-    public void deleteBusRuns(List<String> busRunIds) {
-        if (!busRunIds.isEmpty()) {
-            entityManager.createQuery("DELETE FROM BusRun  br where br.publicId IN :busRunIds")
-                    .setParameter("busRunIds", busRunIds)
-                    .executeUpdate();
+            return jdbcTemplate.queryForObject("SELECT id FROM bus_route WHERE route_name = ?", Long.class, name);
+        } catch (DataAccessException ignored) {
+            return -1L;
         }
     }
 
     @Override
-    @Transactional
-    public void saveBusOverride(String busNumber, BusOverride busOverride) {
-        Long id = existsBusSchedule(busNumber);
-        if (id.equals(-1L)) {
-            throw new EmptyResultDataAccessException("Bus number with name " + busNumber + " does not exist", 1);
-        }
-        busOverride.setBusSchedule(new BusSchedule(busNumber));
-        if (existsBusOverride(busOverride).isPresent()) {
-            throw new DataIntegrityViolationException("Bus Override record for bus_number " + busNumber + "already exist with same configuration");
-        }
-        BusSchedule busSchedule = entityManager.getReference(BusSchedule.class, id);
-        busOverride.setBusSchedule(busSchedule);
-        Long fromLocationId = isBusLocationExists(busOverride.getBusSnippet().getFromLocation().getName());
-        Long toLocationId = isBusLocationExists(busOverride.getBusSnippet().getToLocation().getName());
-        if (fromLocationId.equals(-1L) || toLocationId.equals(-1L)) {
-            throw new EmptyResultDataAccessException("From location or To location do not exist", 1);
-        }
-        busOverride.setBusSnippet(new BusSnippet(busOverride.getBusSnippet().getTimeOfDeparture(),
-                entityManager.getReference(BusLocation.class, fromLocationId),
-                entityManager.getReference(BusLocation.class, toLocationId)
-        ));
-
-        entityManager.persist(busOverride);
-    }
-
-
-    /**
-     * Doesn't check for publicId instead return publicId
-     *
-     * @param busOverride busNumber shouldNot be null
-     * @return publicId which matches the constraints
-     */
-    private Optional<String> existsBusOverride(BusOverride busOverride) {
-        try {
-            return Optional.of(entityManager.createQuery("select bo.publicId from BusOverride bo where bo.busSnippet.fromLocation.name = :fromLocation and busSnippet.toLocation.name = :toLocation and busSnippet.timeOfDeparture = :timeOfDeparture and bo.description = :description and bo.overrideDate = :overrideDate and bo.busSchedule.busNumber = :busNumber", String.class)
-                    .setParameter("fromLocation", busOverride.getBusSnippet().getFromLocation().getName())
-                    .setParameter("toLocation", busOverride.getBusSnippet().getToLocation().getName())
-                    .setParameter("timeOfDeparture", busOverride.getBusSnippet().getTimeOfDeparture())
-                    .setParameter("description", busOverride.getDescription())
-                    .setParameter("overrideDate", busOverride.getOverrideDate())
-                    .setParameter("busNumber", busOverride.getBusSchedule().getBusNumber())
-                    .getSingleResult());
-
-        } catch (NoResultException e) {
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public boolean existsBusOverrideByPublicId(String publicId) {
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("select exists(select 1 from bus_override where public_id = ?)", Boolean.class, publicId));
-    }
-
-    @Override
-    public List<BusOverrideDto> getBusOverrideForYearAndMonth(int year, int month) {
-        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.Scheduling.Buses.BusOverrideDto(bo.publicId,bo.busSchedule.busNumber, bo.busSnippet.timeOfDeparture, bo.busSnippet.fromLocation.name, bo.busSnippet.toLocation.name, bo.overrideDate, bo.description) from BusOverride bo where YEAR (bo.overrideDate) = :year and MONTH (bo.overrideDate) = :month", BusOverrideDto.class)
-                .setParameter("year", year)
-                .setParameter("month", month)
+    public List<BusRun> getBusRunsForRoute(String busNumber, Long routeId) {
+        return entityManager.createQuery("SELECT br FROM BusRun br WHERE br.busSchedule.busNumber = :busNumber AND br.route.routeId = :routeId", BusRun.class)
+                .setParameter("busNumber", busNumber)
+                .setParameter("routeId", routeId)
                 .getResultList();
     }
 
     @Override
-    public void updateBusOverride(String publicId, BusOverride newBusOverride) {
-        if (!existsBusOverrideByPublicId(publicId)) {
-            throw new EmptyResultDataAccessException("Bus Override does not exist", 1);
-        }
-
-
-        String busNumber = entityManager.createQuery("select bo.busSchedule.busNumber from BusOverride  bo where bo.publicId = :publicId", String.class)
-                .setParameter("publicId", publicId)
-                .getSingleResult();
-
-        newBusOverride.setBusSchedule(new BusSchedule(busNumber));
-
-
-        Optional<String> otherBusOverridePublicId = existsBusOverride(newBusOverride);
-        // If some other entry equals to the value we want to change
-        if (otherBusOverridePublicId.isPresent() && !otherBusOverridePublicId.get().equals(publicId)) {
-            throw new DataIntegrityViolationException("Bus Override already exists");
-        }
-
-        Long fromLocationId = isBusLocationExists(newBusOverride.getBusSnippet().getFromLocation().getName());
-        Long toLocationId = isBusLocationExists(newBusOverride.getBusSnippet().getToLocation().getName());
-        if (fromLocationId.equals(-1L) || toLocationId.equals(-1L)) {
-            throw new EmptyResultDataAccessException("From location or To location do not exist", 1);
-        }
-
-        // Could be optimised
-        entityManager.createQuery("update  BusOverride  bo set bo.description = :description, bo.busSnippet = :busSnippet, bo.overrideDate = :overrideDate where bo.publicId = :id")
-                .setParameter("description", newBusOverride.getDescription())
-                .setParameter("busSnippet",
-                        new BusSnippet(newBusOverride.getBusSnippet().getTimeOfDeparture(),
-                                entityManager.getReference(BusLocation.class, fromLocationId),
-                                entityManager.getReference(BusLocation.class, toLocationId)
-                        )
-                )
-                .setParameter("overrideDate", newBusOverride.getOverrideDate())
-                .setParameter("id", publicId)
-                .executeUpdate();
-
+    public List<BusRun> getBusRunsByBusNumber(String busNumber) {
+        return entityManager.createQuery(
+                        "SELECT br FROM BusRun br WHERE br.busSchedule.busNumber = :busNumber", BusRun.class)
+                .setParameter("busNumber", busNumber)
+                .getResultList();
     }
 
+    // ------------------- BusRoute and RouteStop Operations -------------------
+    @Override
+    @Transactional
+    public void saveBusRoute(BusRoute route) {
+        entityManager.persist(route);
+        entityManager.flush();
+        entityManager.refresh(route);
+    }
 
     @Override
-    public void deleteBusOverride(List<String> busOverridePublicIds) {
-        if (!busOverridePublicIds.isEmpty()) {
-            entityManager.createQuery("DELETE FROM BusOverride br where br.publicId IN :busOverrideIds")
-                    .setParameter("busOverrideIds", busOverridePublicIds)
-                    .executeUpdate();
+    public BusRoute getBusRouteByRouteId(Long routeId) {
+        return entityManager.createQuery("SELECT r FROM BusRoute r LEFT JOIN FETCH r.stops WHERE r.id = :routeId", BusRoute.class)
+                .setParameter("routeId", routeId)
+                .getSingleResult();
+    }
+
+    @Override
+    public List<BusRoute> getAllBusRoutes() {
+        return entityManager.createQuery("SELECT r FROM BusRoute r", BusRoute.class).getResultList();
+    }
+
+    @Override
+    @Transactional
+    public void saveRouteStop(RouteStop stop) {
+        BusLocation busLocation = getLocationById(stop.getLocation().getId());
+        stop.setLocation(busLocation);
+
+        BusRoute busRoute = getBusRouteByRouteId(stop.getRoute().getId());
+        stop.setRoute(busRoute);
+        entityManager.persist(stop);
+    }
+
+    @Override
+    public List<RouteStop> getRouteStopsByRouteId(Long routeId) {
+        return entityManager.createQuery("SELECT s FROM RouteStop s WHERE s.route.routeId = :routeId ORDER BY s.stopOrder ASC", RouteStop.class)
+                .setParameter("routeId", routeId)
+                .getResultList();
+    }
+
+    @Override
+    public BusRoute findBusRouteByRouteName(String routeName) {
+        try {
+            return entityManager.createQuery(
+                            "SELECT r FROM BusRoute r LEFT JOIN FETCH r.stops WHERE r.routeName = :routeName", BusRoute.class)
+                    .setParameter("routeName", routeName)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public String findBusFromBusRoute(String routeName){
+        try{
+            return entityManager.createQuery(
+                            "SELECT b.busNumber " +
+                                    "FROM BusSchedule b " +
+                                    "JOIN BusRoute r ON b.id = r.id " +
+                                    "WHERE r.routeName = :routeName",
+                            String.class
+                    )
+                    .setParameter("routeName", routeName)
+                    .getSingleResult();
+        }
+        catch (NoResultException e){
+            return null;
         }
 
     }
 
+    @Override
+    public BusRun getBusRunByBusAndRoute( BusRunDto busRunDto){
+        String jpql = """
+        SELECT br
+        FROM BusRun br
+        JOIN br.busSchedule bs
+        JOIN br.route r
+        WHERE bs.busNumber = :busNumber AND r.routeName = :routeName
+    """;
+        try {
+            return entityManager.createQuery(jpql, BusRun.class)
+                    .setParameter("busNumber", busRunDto.getBusNumber())
+                    .setParameter("routeName", busRunDto.getRoute().getRouteName())
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
 
+    }
+    @Override
+    public RouteStop getRouteStopByRouteIdAndLocationId(Long routeId, Long locationId) {
+        String jpql = """
+        SELECT rs FROM RouteStop rs 
+        WHERE rs.route.id = :routeId AND rs.location.id = :locationId
+    """;
+        try {
+            return entityManager.createQuery(jpql, RouteStop.class)
+                    .setParameter("routeId", routeId)
+                    .setParameter("locationId", locationId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+
+    // ------------------- BusOverride Operations (if still needed) -------------------
+    @Override
+    public void saveBusOverride(String busNumber, BusOverride busOverride) {
+        // Implement as needed for new structure
+        entityManager.persist(busOverride);
+    }
+
+    @Override
+    public boolean existsBusOverrideByPublicId(String publicId) {
+        // Implement as needed for new structure
+        return false;
+    }
+
+    @Override
+    public List<BusOverrideDto> getBusOverrideForYearAndMonth(int year, int month) {
+        // Implement as needed for new structure
+        return null;
+    }
+
+    @Override
+    public void updateBusOverride(String publicId, BusOverride newBusOverride) {
+        // Implement as needed for new structure
+    }
+
+    @Override
+    public void deleteBusOverride(List<String> busOverrideIds) {
+        // Implement as needed for new structure
+    }
+
+
+
+    // Remove all legacy BusSnippet, fromLocation, toLocation, and point-to-point logic.
 }
