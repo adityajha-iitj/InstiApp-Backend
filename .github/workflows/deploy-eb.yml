@@ -23,17 +23,18 @@ jobs:
       - name: Build JAR
         run: mvn clean package -DskipTests
 
-      - name: Prepare EB artifact (runtime‐only Dockerfile)
+      - name: Prepare EB artifact (runtime‑only Dockerfile)
         run: |
           mkdir eb-deploy
 
-          # Create a minimal Dockerfile that just runs the prebuilt JAR
+          # Create a minimal Dockerfile with shell‑form ENTRYPOINT
           cat > eb-deploy/Dockerfile << 'EOF'
           FROM eclipse-temurin:17-jdk-jammy
           WORKDIR /app
           COPY app.jar app.jar
+          COPY bootstrap.properties bootstrap.properties
           EXPOSE 8080
-          ENTRYPOINT ["sh","-c","java \$JAVA_OPTS -jar app.jar --spring.profiles.active=\${SPRING_PROFILES_ACTIVE:-dev}"]
+          ENTRYPOINT sh -c "java \$JAVA_OPTS -jar app.jar --spring.profiles.active=\${SPRING_PROFILES_ACTIVE:-dev}"
           EOF
 
           # Copy the built JAR and bootstrap config
@@ -65,13 +66,11 @@ jobs:
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v22
         with:
-          aws_access_key:    ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key:    ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          region:            ${{ secrets.AWS_REGION }}
-
-          application_name:  ${{ secrets.EB_APP_NAME }}
-          environment_name:  ${{ secrets.EB_ENV_NAME }}
-          version_label:     ${{ github.sha }}
-
-          deployment_package: eb-deploy.zip
+          aws_access_key:       ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key:       ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region:               ${{ secrets.AWS_REGION }}
+          application_name:     ${{ secrets.EB_APP_NAME }}
+          environment_name:     ${{ secrets.EB_ENV_NAME }}
+          version_label:        ${{ github.sha }}
+          deployment_package:   eb-deploy.zip
           existing_bucket_name: ${{ secrets.S3_BUCKET }}
