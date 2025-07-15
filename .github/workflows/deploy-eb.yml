@@ -1,3 +1,5 @@
+name: Build & Deploy to Elastic Beanstalk
+
 on:
   push:
     branches:
@@ -49,20 +51,23 @@ jobs:
           name: eb-artifact
           path: .
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v22
         with:
-          application_name: ${{ secrets.EB_APP_NAME }}
-          environment_name: ${{ secrets.EB_ENV_NAME }}
-          version_label: ${{ github.sha }}
-          region: ${{ secrets.AWS_REGION }}
-          bucket_name: ${{ secrets.S3_BUCKET }}
-          bucket_key: eb-deploy-${{ github.sha }}.zip
+          # AWS credentials (from your GitHub Secrets)
+          aws_access_key:    ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key:    ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region:            ${{ secrets.AWS_REGION }}
+
+          # Elastic Beanstalk application & environment
+          application_name:  ${{ secrets.EB_APP_NAME }}
+          environment_name:  ${{ secrets.EB_ENV_NAME }}
+
+          # Use commit SHA for version labeling
+          version_label:     ${{ github.sha }}
+
+          # Point at the ZIP we created
           deployment_package: eb-deploy.zip
+
+          # Specify your existing EB S3 bucket
+          existing_bucket_name: ${{ secrets.S3_BUCKET }}
