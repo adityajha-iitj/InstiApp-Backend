@@ -12,7 +12,8 @@ WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
 
-# At runtime rely on bootstrap.properties → AWS SSM Parameter Store
-# SPRING_PROFILES_ACTIVE defaults to 'dev' if you don’t set it in the environment
+# At runtime, load external config from /etc/secrets/ if present.
+# SPRING_PROFILES_ACTIVE can be set in Render to "dev" (or others).
 ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar \
-  --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-dev}"]
+  --spring.config.additional-location=file:/etc/secrets/ \
+  ${SPRING_PROFILES_ACTIVE:+--spring.profiles.active=${SPRING_PROFILES_ACTIVE}}"]
