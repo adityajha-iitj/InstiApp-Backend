@@ -2,13 +2,10 @@ package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.Repository.EventsRepository;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Events;
-import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
-import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Recurrence;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.payload.Scheduling.Calendar.EventsDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
-import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +67,7 @@ public class EventsRepositoryImpl implements EventsRepository {
                     .setParameter("user", user)
                     .getResultList();
         } catch (NoResultException e) {
-            log.error("No events found for user {}", user.getId());
+            //log.error("No events found for user {}", user.getId);
             return List.of();
         }
     }
@@ -239,7 +236,7 @@ public class EventsRepositoryImpl implements EventsRepository {
             "DELETE FROM Events e WHERE e.user = :user")
             .setParameter("user", user)
             .executeUpdate();
-        log.info("Deleted {} events for user {}", deletedEvents, user.getId());
+        //log.info("Deleted {} events for user {}", deletedEvents, user.getId());
     }
 
     @Override
