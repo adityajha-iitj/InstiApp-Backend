@@ -37,7 +37,17 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            echo "Stopping existing container if running..."
+            docker stop springboot-app || echo "Container not running."
+
+            echo "Removing existing container if exists..."
+            docker rm springboot-app || echo "Container does not exist."
+
+            echo "Pulling the latest image from Docker Hub..."
             docker pull adityajha1082/my-springboot-app:latest
-            docker stop springboot-app || true
-            docker rm springboot-app || true
+
+            echo "Running the latest image..."
             docker run -d -p 8080:8080 --name springboot-app adityajha1082/my-springboot-app:latest
+
+            echo "Deployment complete. Current running containers:"
+            docker ps
