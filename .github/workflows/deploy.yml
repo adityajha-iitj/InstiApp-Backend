@@ -22,16 +22,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Push Docker Image with Secrets
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: adityajha1082/my-springboot-app:latest
-          build-args: |
-            SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
-            SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
-            SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -50,11 +46,9 @@ jobs:
             echo "Pulling the latest image from Docker Hub..."
             docker pull adityajha1082/my-springboot-app:latest
 
-            echo "Running the latest image with DB env variables..."
-            docker run -d -p 8080:8080 \
-              -e SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }} \
-              -e SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }} \
-              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }} \
+            echo "Running the latest image with environment file..."
+            docker run -d --restart unless-stopped -p 8080:8080 \
+              --env-file ~/springboot.env \
               --name springboot-app adityajha1082/my-springboot-app:latest
 
             echo "Deployment complete. Current running containers:"
