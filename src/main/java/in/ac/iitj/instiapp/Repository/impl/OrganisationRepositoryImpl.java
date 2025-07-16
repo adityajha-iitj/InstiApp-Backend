@@ -113,20 +113,47 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
         entityManager.persist(organisation);
     }
 
+//    @Override
+//    public OrganisationBaseDto getOrganisation(String username) {
+//        if(existOrganisation(username) == -1L){
+//            throw new EmptyResultDataAccessException("No organisation type " + username + "exists",1);
+//        }
+//        else {
+//            return entityManager.createQuery(
+//                    "select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto( o.user.userName, " +
+//                            "case when o.parentOrganisation is null then null else o.parentOrganisation.user.userName end, o.type.name, o.Description, o.Website) from Organisation o left join o.parentOrganisation left join  o.parentOrganisation.user where o.user.userName = :username", OrganisationBaseDto.class)
+//                    .setParameter("username", username)
+//                    .getSingleResult();
+//
+//        }
+//    }
+
     @Override
     public OrganisationBaseDto getOrganisation(String username) {
-        if(existOrganisation(username) == -1L){
-            throw new EmptyResultDataAccessException("No organisation type " + username + "exists",1);
-        }
-        else {
+        try {
             return entityManager.createQuery(
-                    "select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto( o.user.userName, " +
-                            "case when o.parentOrganisation is null then null else o.parentOrganisation.user.userName end, o.type.name, o.Description, o.Website) from Organisation o left join o.parentOrganisation left join  o.parentOrganisation.user where o.user.userName = :username", OrganisationBaseDto.class)
+                            "select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto(" +
+                                    "  o.user.userName, " +
+                                    "  case when po is null then null else pu.userName end, " +
+                                    "  o.type.name, " +
+                                    "  o.Description, " +
+                                    "  o.Website" +
+                                    ") " +
+                                    "from Organisation o " +
+                                    "  left join o.parentOrganisation po " +
+                                    "  left join po.user pu " +
+                                    "where o.user.userName = :username",
+                            OrganisationBaseDto.class
+                    )
                     .setParameter("username", username)
                     .getSingleResult();
-
+        }
+        catch (NoResultException ex) {
+            throw new EmptyResultDataAccessException(
+                    "No organisation found for username " + username, 1);
         }
     }
+
 
     @Override
     public List<OrganisationBaseDto> getOrganisationByType(OrganisationType organisationType, Pageable pageable) {
@@ -246,6 +273,12 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
 
         return Optional.of(oldMediaPublicIds);
 
+    }
+
+    public Organisation getOrganisationByUsername(String username){
+        return entityManager.createQuery("SELECT o FROM Organisation o WHERE o.user.userName = :username",Organisation.class)
+                .setParameter("username",username)
+                .getSingleResult();
     }
 
     @Override
