@@ -116,23 +116,31 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public UserDetailedDto getUserDetailed(String username, boolean isPrivate) {
-
         Long id = usernameExists(username);
-        if(id == -1){
-            throw new EmptyResultDataAccessException("No user found with username " + username,1);
+        if (id == -1) {
+            throw new EmptyResultDataAccessException("No user found with username " + username, 1);
         }
-        if(isPrivate){
-            return
-                    entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.UserDetailedDto(u.name, u.userName,u.email,u.phoneNumber,u.userType.name, u.calendar.publicId,u.avatarUrl) from User  u where u.userName = :username",UserDetailedDto.class)
-                            .setParameter("username", username)
-                            .getSingleResult();
+
+        // choose the correct JPQL
+        String ql = isPrivate
+                ? "select new in.ac.iitj.instiapp.payload.User.UserDetailedDto(" +
+                "u.name, u.userName, u.email, u.password, u.phoneNumber, u.userType.name, u.calendar.publicId, u.avatarUrl) " +
+                "from User u where u.userName = :username"
+                : "select new in.ac.iitj.instiapp.payload.User.UserDetailedDto(" +
+                "u.name, u.userName, u.email, u.userType.name, u.avatarUrl) " +
+                "from User u where u.userName = :username";
+
+        List<UserDetailedDto> results = entityManager
+                .createQuery(ql, UserDetailedDto.class)
+                .setParameter("username", username)
+                .getResultList();
+
+        if (results.isEmpty()) {
+            throw new EmptyResultDataAccessException("No user detail found for username " + username, 1);
         }
-        else {
-            return entityManager.createQuery("select  new in.ac.iitj.instiapp.payload.User.UserDetailedDto(u.name, u.userName, u.email, u.userType.name, u.avatarUrl) from User u where u.userName = :username",UserDetailedDto.class)
-                    .setParameter("username",username)
-                    .getSingleResult();
-        }
+        return results.get(0);
     }
+
 
     @Override
     public UserDetailedDto getUserDetailed(String username) {
