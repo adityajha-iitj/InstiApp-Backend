@@ -1,4 +1,4 @@
-# Stage 1: build with Maven
+# Stage 1: Build
 FROM maven:3.9.0-eclipse-temurin-17 AS builder
 WORKDIR /app
 COPY pom.xml .
@@ -6,13 +6,13 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn clean package -DskipTests -B
 
-# Stage 2: runtime
+# Stage 2: Runtime
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
+
+# Port exposed by Spring Boot app
 EXPOSE 8080
 
-# At runtime rely on bootstrap.properties → AWS SSM Parameter Store
-# SPRING_PROFILES_ACTIVE defaults to 'dev' if you don’t set it in the environment
-ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar \
-  --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-dev}"]
+# Use runtime env vars (passed during docker run)
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --spring.profiles.active=dev"]

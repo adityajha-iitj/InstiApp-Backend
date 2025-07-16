@@ -46,7 +46,21 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/error", "/api/v1/auth/**", "/oauth2/**", "/login/**", "/api/users/**", "/api/**").permitAll()
+                        // permit these static and public endpoints
+                        .requestMatchers(
+                                "/",
+                                "/error",
+                                "/favicon.ico",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/webjars/**",
+                                "/api/v1/auth/**",
+                                "/oauth2/**",
+                                "/login/**",
+                                "/api/users/**",
+                                "/api/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> oauth
