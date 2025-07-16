@@ -3,7 +3,7 @@ name: Build and Deploy to EC2
 on:
   push:
     branches:
-      - main
+      - main   # or your production branch
 
 jobs:
   build-and-deploy:
@@ -46,10 +46,8 @@ jobs:
             echo "Pulling the latest image from Docker Hub..."
             docker pull adityajha1082/my-springboot-app:latest
 
-            echo "Running the latest image with environment file..."
-            docker run -d --restart unless-stopped -p 8080:8080 \
-              --env-file ~/springboot.env \
-              --name springboot-app adityajha1082/my-springboot-app:latest
+            echo "Running the latest image..."
+            docker run -d -p 8080:8080 --env-file ~/springboot.env --name springboot-app adityajha1082/my-springboot-app:latest
 
             echo "Deployment complete. Current running containers:"
             docker ps
