@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.stream.Location;
 import java.util.List;
@@ -388,6 +389,62 @@ public class LostnFoundController {
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "LOSTNFOUND_FETCH_ERROR",
                             "Error fetching lost and found items: " + e.getMessage(),
+                            null,
+                            null
+                    ));
+        }
+    }
+
+
+    @PostMapping("/{publicId}/image")
+    public ResponseEntity<ApiResponse<String>> uploadLostnFoundImage(
+            @PathVariable String publicId,
+            @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            String imageUrl = lostnFoundService.uploadLostnFoundImage(publicId, file);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponse<>(
+                            HttpStatus.CREATED.value(),
+                            null,
+                            "Image uploaded successfully",
+                            imageUrl,
+                            null
+                    ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "IMAGE_UPLOAD_ERROR",
+                            "Error uploading image: " + e.getMessage(),
+                            null,
+                            null
+                    ));
+        }
+    }
+
+
+    @GetMapping("/{publicId}/image")
+    public ResponseEntity<ApiResponse<String>> getLostnFoundImage(
+            @PathVariable String publicId
+    ) {
+        try {
+            String imageUrl = lostnFoundService.getLostnFoundImageUrl(publicId);
+            return ResponseEntity.ok(
+                    new ApiResponse<>(
+                            HttpStatus.OK.value(),
+                            null,
+                            "Image URL fetched successfully",
+                            imageUrl,
+                            null
+                    )
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(
+                            HttpStatus.NOT_FOUND.value(),
+                            "IMAGE_NOT_FOUND",
+                            "Image not found: " + e.getMessage(),
                             null,
                             null
                     ));

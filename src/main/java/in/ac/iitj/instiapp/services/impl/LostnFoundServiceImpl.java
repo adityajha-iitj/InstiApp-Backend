@@ -11,16 +11,21 @@ import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.mappers.LostnFoundDtoMapper;
 import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
+import in.ac.iitj.instiapp.services.BucketService;
 import in.ac.iitj.instiapp.services.LostnFoundService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
 @Service
@@ -31,6 +36,12 @@ public class LostnFoundServiceImpl implements LostnFoundService {
     private final MediaRepository mediaRepository;
     private final EntityManager entityManager;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LostnFoundServiceImpl.class);
+
+    @Autowired
+    private BucketService bucketService;
+
+    @Value("${aws.s3.bucket.name}")
+    private String bucketName;
 
     @Autowired
     public LostnFoundServiceImpl(LostnFoundRepository lostnFoundRepository, EntityManager entityManager, UserRepository userRepository, MediaRepository mediaRepository) {
@@ -205,5 +216,53 @@ public class LostnFoundServiceImpl implements LostnFoundService {
 
     public LostnFoundType findTypeByPublicId(String publicId){
         return lostnFoundRepository.findTypeByPublicId(publicId);
+    }
+
+
+    @Override
+    @Transactional
+    public String uploadLostnFoundImage(String publicId, MultipartFile file) throws Exception {
+        // 1. Find the LostnFound item
+        Long lostnFoundId = lostnFoundRepository.exsitLostnFound(publicId);
+        if (lostnFoundId == -1L) {
+            throw new IllegalArgumentException("LostnFound item not found for publicId: " + publicId);
+        }
+
+        // 2. Upload file to S3
+        String extension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.'));
+        String objectKey = "lostnfound/" + publicId + "/" + UUID.randomUUID() + extension;
+
+        File temp = File.createTempFile("lostnfound-", extension);
+        file.transferTo(temp);
+
+        bucketService.uploadFile(bucketName, objectKey, temp.getAbsolutePath());
+        String s3Url = bucketService.getFileUrl(bucketName, objectKey);
+
+        temp.delete();
+
+        // 3. Save Media entity
+        Media media = new Media();
+        media.setPublicUrl(s3Url);
+        mediaRepository.save(media);
+
+        // 4. Link Media to LostnFound
+        LostnFound lostnFound = entityManager.find(LostnFound.class, lostnFoundId);
+        lostnFound.setMedia(media);
+        entityManager.merge(lostnFound);
+
+        return s3Url;
+    }
+
+    @Override
+    public String getLostnFoundImageUrl(String publicId) throws Exception {
+        Long lostnFoundId = lostnFoundRepository.exsitLostnFound(publicId);
+        if (lostnFoundId == -1L) {
+            throw new IllegalArgumentException("LostnFound item not found for publicId: " + publicId);
+        }
+        LostnFound lostnFound = entityManager.find(LostnFound.class, lostnFoundId);
+        if (lostnFound.getMedia() == null) {
+            throw new IllegalArgumentException("No image associated with this LostnFound item.");
+        }
+        return lostnFound.getMedia().getPublicUrl();
     }
 }

@@ -8,13 +8,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel="spring")
 public interface MediaBaseDtoMapper {
 
-    @Mapping(source="type",target="type")
-    @Mapping(source="publicId",target="publicId")
     @Mapping(source="publicUrl",target="publicUrl")
     MediaBaseDto toMediaBaseDto(Media media);
 
-    @Mapping(source="type",target="type")
-    @Mapping(source="publicId",target="publicId")
     @Mapping(source="publicUrl",target="publicUrl")
     Media toMedia(MediaBaseDto mediaDto);
 }

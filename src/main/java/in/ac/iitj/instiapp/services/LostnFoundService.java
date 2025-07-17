@@ -4,6 +4,7 @@ import in.ac.iitj.instiapp.database.entities.LostnFound.Locations;
 import in.ac.iitj.instiapp.database.entities.LostnFound.LostnFoundType;
 import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,10 +29,7 @@ public interface LostnFoundService {
      */
     void deleteLocationByName(String locationName);
 
-    /**
-     * @param oldLocationName
-     * @param location
-     */
+
     void updateLocation(String oldLocationName ,String newLocationName);
 
 
@@ -65,5 +63,10 @@ public interface LostnFoundService {
     boolean isOwner(String userName, String publicId);
     boolean isFinder(String userName, String publicId);
     public LostnFoundType findTypeByPublicId(String publicId);
+
+
+    String uploadLostnFoundImage(String publicId, MultipartFile file) throws Exception;
+
+    String getLostnFoundImageUrl(String publicId) throws Exception;
 
 }
