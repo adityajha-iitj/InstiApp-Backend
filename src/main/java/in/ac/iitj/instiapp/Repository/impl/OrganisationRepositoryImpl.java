@@ -208,14 +208,14 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
                 .setParameter("id", organisationId)
                 .getSingleResult();
 
-        List<String> mediaPublicIds = entityManager.createQuery("select   m.publicId " + "from Organisation o left join o.media m where o.id = :id", String.class).setParameter("id", organisationId).getResultList();
+        List<String> mediaPublicUrls = entityManager.createQuery("select m.publicUrl " + "from Organisation o left join o.media m where o.id = :id", String.class).setParameter("id", organisationId).getResultList();
 
         OrganisationDetailedDto organisationDetailedDto = new OrganisationDetailedDto(
                 (String) result[0],              // username
                 (String) result[1],              // parentOrganisationUserName
                 (String) result[2],              // organisationTypeName
                 (String) result[3],              // Description
-                mediaPublicIds,                  // mediaPublicIds
+                mediaPublicUrls,                  // mediaPublicIds
                 (String) result[4]               // Website
         );
 
@@ -247,7 +247,7 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
 
         List<String> oldMediaPublicIds = new ArrayList<>();
         try{
-            oldMediaPublicIds = entityManager.createQuery("select m.publicId from Organisation o join o.media m where o.id = :id", String.class).setParameter("id", organisation.getId()).getResultList();
+            oldMediaPublicIds = entityManager.createQuery("select m.publicUrl from Organisation o join o.media m where o.id = :id", String.class).setParameter("id", organisation.getId()).getResultList();
         } catch(NoResultException ignored){}
 
         List<Long> newMediaIds = Optional.ofNullable(organisation.getMedia())

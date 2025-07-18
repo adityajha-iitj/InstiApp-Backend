@@ -5,6 +5,8 @@ import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 
 @Entity
 @Getter
@@ -17,9 +19,6 @@ public class LostnFound {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
-
-    @Column(nullable = false , unique = true )
-    String publicId;
 
     @ManyToOne
     @JoinColumn(name = "finder_id", nullable = true)
@@ -41,6 +40,9 @@ public class LostnFound {
 
     @Column( nullable = false)
     Boolean status;
+
+    @Column(name="time")
+    private LocalDateTime time;
 
     @ManyToOne
     @JoinColumn(name = "media_id", nullable = true)

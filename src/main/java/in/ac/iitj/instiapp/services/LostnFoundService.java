@@ -46,11 +46,6 @@ public interface LostnFoundService {
     void updateLostAndFound(LostnFoundDto lostnFoundDto);
 
     /**
-     * @param publicId
-     */
-    void deleteLostAndFound(String publicId);
-
-    /**
      * @param status
      * @param owner
      * @param finder
@@ -60,13 +55,16 @@ public interface LostnFoundService {
      */
     List<LostnFoundDto> getLostAndFoundByFilter(LostnFoundType type,Optional<Boolean> status , Optional<String> owner , Optional<String> finder, Optional<String> landmark , Pageable pageable);
 
-    boolean isOwner(String userName, String publicId);
-    boolean isFinder(String userName, String publicId);
-    public LostnFoundType findTypeByPublicId(String publicId);
 
+    String uploadLostnFoundImage(MultipartFile file) throws Exception;
 
-    String uploadLostnFoundImage(String publicId, MultipartFile file) throws Exception;
+    String getLostnFoundImageUrl(Long Id) throws Exception;
 
-    String getLostnFoundImageUrl(String publicId) throws Exception;
+    LostnFoundType findTypeById(Long Id);
 
+    boolean isOwnerById(String userName, Long Id);
+
+    boolean isFinderById(String userName, Long id);
+
+    void deleteLostAndFound(Long id);
 }

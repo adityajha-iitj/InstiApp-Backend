@@ -25,13 +25,13 @@ public class GrievanceDto implements Serializable {
     Boolean resolved;
     MediaBaseDto media;
 
-    public GrievanceDto(String publicId, String title, String description, String username, String orgUsername, String roleName, OrganisationPermission permission, Boolean resolved, String mediaPublicId) {
+    public GrievanceDto(String publicId, String title, String description, String username, String orgUsername, String roleName, OrganisationPermission permission, Boolean resolved, String mediaPublicUrl) {
         this.publicId = publicId;
         this.Title = title;
         this.Description = description;
         this.userFrom = new UserBaseDto(username);
         this.organisationRole = new OrganisationRoleDto(orgUsername,roleName,permission);
         this.resolved = resolved;
-        this.media = new MediaBaseDto(mediaPublicId);
+        this.media = new MediaBaseDto(mediaPublicUrl);
     }
 }

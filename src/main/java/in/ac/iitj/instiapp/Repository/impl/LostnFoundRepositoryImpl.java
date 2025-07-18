@@ -98,8 +98,8 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
     }
 
     @Override
-    public Long exsitLostnFound(String publicId) {
-        return jdbcTemplate.queryForObject("select coalesce(max(id), -1) from lostnfound where public_id= ?", Long.class, publicId);
+    public Long existLostnFound(Long id) {
+        return jdbcTemplate.queryForObject("select coalesce(count(*), 0) from lostnfound where id = ?", Long.class, id);
     }
 
     @Override
@@ -118,14 +118,14 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
         String ql =
                 "select new in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto(" +
-                        "l.publicId, " +
+                        "l.id, " +
                         "f.userName, " +            // alias for finder
                         "o.userName, " +            // alias for owner
                         "lm.name, " +               // alias for landmark
                         "l.type, " +
                         "l.extraInfo, " +
                         "l.status, " +
-                        "m.publicId" +              // alias for media
+                        "m.publicUrl" +              // alias for media
                         ") " +
                         "from LostnFound l " +
                         "left join l.finder f " +
@@ -154,87 +154,62 @@ public class LostnFoundRepositoryImpl implements in.ac.iitj.instiapp.Repository.
 
 
     @Override
-    public void updateLostnFound(LostnFound lostnFound, String publicId) {
-        if(exsitLostnFound(publicId) == -1L){
-            throw new EmptyResultDataAccessException("the lost and found with public id " + publicId +"does not exists" , 1);
+    public void updateLostnFound(LostnFound lostnFound, Long id) {
+        LostnFound existing = entityManager.find(LostnFound.class, id);
+        if (existing == null) {
+            throw new EmptyResultDataAccessException("the lost and found with id " + id + " does not exist", 1);
         }
-        else {
-            jdbcTemplate.update(
-                    "UPDATE lostnfound SET " +
-                            "finder_id = ?, " +
-                            "owner_id = ?, " +
-                            "landmark_id = CASE WHEN cast(? as integer) IS NULL THEN landmark_id ELSE ? END, " +
-                            "extra_info = CASE WHEN ? IS NULL THEN extra_info ELSE ? END, " +
-                            "status = CASE WHEN ? IS NULL THEN status ELSE ? END, " +
-                            "media_id = CASE WHEN cast(? as integer) IS NULL THEN media_id ELSE ? END " +
-                            "WHERE public_id = ?",
-                    // Parameters for query in order:
-                    Optional.ofNullable(lostnFound.getFinder())
-                            .map(User::getId).orElse(null),
-                    Optional.ofNullable(lostnFound.getOwner())
-                            .map(User::getId).orElse(null),
-
-                    Optional.ofNullable(lostnFound.getLandmark())
-                            .map(Locations::getId).orElse(null),
-                    Optional.ofNullable(lostnFound.getLandmark())
-                            .map(Locations::getId).orElse(null),
-
-                    lostnFound.getExtraInfo(),
-                    lostnFound.getExtraInfo(),
-
-                    lostnFound.getStatus(),
-                    lostnFound.getStatus(),
-
-                    Optional.ofNullable(lostnFound.getMedia())
-                            .map(Media::getId).orElse(null),
-                    Optional.ofNullable(lostnFound.getMedia())
-                            .map(Media::getId).orElse(null),
-
-                    publicId
-            );
-        }
+        jdbcTemplate.update(
+                "UPDATE lostnfound SET " +
+                        "finder_id = COALESCE(?, finder_id), " +
+                        "owner_id = COALESCE(?, owner_id), " +
+                        "landmark_id = COALESCE(?, landmark_id), " +
+                        "extra_info = COALESCE(?, extra_info), " +
+                        "status = COALESCE(?, status), " +
+                        "media_id = COALESCE(?, media_id), " +
+                        "time = COALESCE(?, time) " + // if you want to update time as well
+                        "WHERE id = ?",
+                Optional.ofNullable(lostnFound.getFinder()).map(User::getId).orElse(null),
+                Optional.ofNullable(lostnFound.getOwner()).map(User::getId).orElse(null),
+                Optional.ofNullable(lostnFound.getLandmark()).map(Locations::getId).orElse(null),
+                lostnFound.getExtraInfo(),
+                lostnFound.getStatus(),
+                Optional.ofNullable(lostnFound.getMedia()).map(Media::getId).orElse(null),
+                lostnFound.getTime(), // if you want to update time
+                id
+        );
     }
 
     @Override
-    public Optional<String> deleteLostnFound(String publicId) {
-        String sql = """
-            SELECT m.public_id
-            FROM media m
-            JOIN lostnfound l ON m.id = l.media_id
-            WHERE l.public_id = ?
-        """;
-        List<String> mediaPublicIds = jdbcTemplate.queryForList(sql, String.class, publicId);
-        String mediaPublicId = mediaPublicIds.isEmpty() ? null : mediaPublicIds.get(0);
-
-        String deleteSql = """
-                DELETE FROM lostnfound
-                WHERE public_id = ?
-            """;
-        int rowsAffected = jdbcTemplate.update(deleteSql, publicId);
-
-        if (rowsAffected == 0) {
-            throw new EmptyResultDataAccessException("No lost and found item with public id " + publicId, 1);
+    public Optional<String> deleteLostnFound(Long id) {
+        LostnFound lostnFound = entityManager.find(LostnFound.class, id);
+        if (lostnFound == null) {
+            throw new EmptyResultDataAccessException("No lost and found item with id " + id, 1);
         }
-
-        return Optional.ofNullable(mediaPublicId);
-
+        String mediaUrl = lostnFound.getMedia() != null ? lostnFound.getMedia().getPublicUrl() : null;
+        entityManager.remove(lostnFound);
+        return Optional.ofNullable(mediaUrl);
     }
 
-    public boolean isOwner(String userName, String publicId){
-        TypedQuery<String> query = entityManager.createQuery("SELECT l.owner.userName FROM LostnFound l WHERE l.publicId = :publicId", String.class)
-                                                .setParameter("publicId", publicId);
-        return query.getSingleResult().equals(userName);
-    }
-    public boolean isFinder(String userName, String publicId){
-        TypedQuery<String> query = entityManager.createQuery("SELECT l.finder.userName FROM LostnFound l WHERE l.publicId = :publicId", String.class)
-                .setParameter("publicId", publicId);
-        return query.getSingleResult().equals(userName);
+    @Override
+    public boolean isOwner(String userName, Long id) {
+        LostnFound lostnFound = entityManager.find(LostnFound.class, id);
+        return lostnFound != null && lostnFound.getOwner() != null && userName.equals(lostnFound.getOwner().getUserName());
     }
 
-    public LostnFoundType findTypeByPublicId(String publicId){
-        TypedQuery<LostnFoundType> Query = entityManager.createQuery("SELECT l.type FROM LostnFound l WHERE l.publicId = :publicId", LostnFoundType.class)
-                .setParameter("publicId", publicId);
-        return Query.getSingleResult();
+    @Override
+    public boolean isFinder(String userName, Long id) {
+        LostnFound lostnFound = entityManager.find(LostnFound.class, id);
+        return lostnFound != null && lostnFound.getFinder() != null && userName.equals(lostnFound.getFinder().getUserName());
+    }
+
+    @Override
+    public LostnFoundType findTypeById(Long id) {
+        LostnFound lostnFound = entityManager.find(LostnFound.class, id);
+        if (lostnFound == null) {
+            throw new EmptyResultDataAccessException("No lost and found item with id " + id, 1);
+        }
+        return lostnFound.getType();
     }
 
 

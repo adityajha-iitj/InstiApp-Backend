@@ -14,10 +14,12 @@ import in.ac.iitj.instiapp.payload.LostnFound.LostnFoundDto;
 import in.ac.iitj.instiapp.services.BucketService;
 import in.ac.iitj.instiapp.services.LostnFoundService;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -81,10 +83,11 @@ public class LostnFoundServiceImpl implements LostnFoundService {
     public void saveLostAndFound(LostnFoundDto lostnFoundDto) {
         LostnFound lostnFound = new LostnFound();
 
-        lostnFound.setPublicId(lostnFoundDto.getPublicId());
+        lostnFound.setId(lostnFoundDto.getId());
         lostnFound.setExtraInfo(lostnFoundDto.getExtraInfo());
         lostnFound.setStatus(lostnFoundDto.getStatus());
         lostnFound.setType(lostnFoundDto.getType());
+        lostnFound.setTime(lostnFoundDto.getTime());
 
 
         // Set managed User (finder)
@@ -121,13 +124,12 @@ public class LostnFoundServiceImpl implements LostnFoundService {
         }
 
         // Set managed Media (if present)
-        if (lostnFoundDto.getMedia() != null && lostnFoundDto.getMedia().getPublicId() != null) {
-            Long mediaId = mediaRepository.getIdByPublicId(lostnFoundDto.getMedia().getPublicId());
-            if (mediaId != null) {
-                Media media = entityManager.getReference(Media.class, mediaId);
+        if (lostnFoundDto.getMedia() != null && lostnFoundDto.getMedia().getPublicUrl() != null) {
+            Media media = mediaRepository.findByPublicUrl(lostnFoundDto.getMedia().getPublicUrl());
+            if (media != null) {
                 lostnFound.setMedia(media);
             } else {
-                throw new DataIntegrityViolationException("Media with publicId '" + lostnFoundDto.getMedia().getPublicId() + "' does not exist.");
+                throw new DataIntegrityViolationException("Media with publicUrl '" + lostnFoundDto.getMedia().getPublicUrl() + "' does not exist.");
             }
         } else {
             lostnFound.setMedia(null);
@@ -143,9 +145,10 @@ public class LostnFoundServiceImpl implements LostnFoundService {
 
         LostnFound lostnFound = new LostnFound();
 
-        lostnFound.setPublicId(lostnFoundDto.getPublicId());
+        lostnFound.setId(lostnFoundDto.getId());
         lostnFound.setExtraInfo(lostnFoundDto.getExtraInfo());
         lostnFound.setStatus(lostnFoundDto.getStatus());
+        lostnFound.setTime(lostnFoundDto.getTime());
 
 
         // Set managed User (finder)
@@ -153,8 +156,6 @@ public class LostnFoundServiceImpl implements LostnFoundService {
             Long finderId = userRepository.getUserIdFromUsername(lostnFoundDto.getFinder().getUserName());
             User finder = entityManager.getReference(User.class, finderId);
             lostnFound.setFinder(finder);
-        } else {
-            lostnFound.setFinder(null);
         }
 
         // Set managed User (owner)
@@ -162,8 +163,6 @@ public class LostnFoundServiceImpl implements LostnFoundService {
             Long ownerId = userRepository.getUserIdFromUsername(lostnFoundDto.getOwner().getUserName());
             User owner = entityManager.getReference(User.class, ownerId);
             lostnFound.setOwner(owner);
-        } else {
-            lostnFound.setOwner(null);
         }
 
         // Set managed Locations (landmark)
@@ -175,62 +174,35 @@ public class LostnFoundServiceImpl implements LostnFoundService {
             } else {
                 throw new DataIntegrityViolationException("Location with name '" + lostnFoundDto.getLandmarkName() + "' does not exist.");
             }
-        } else {
-            lostnFound.setLandmark(null);
         }
 
         // Set managed Media (if present)
-        if (lostnFoundDto.getMedia() != null && lostnFoundDto.getMedia().getPublicId() != null) {
-            Long mediaId = mediaRepository.getIdByPublicId(lostnFoundDto.getMedia().getPublicId());
+        if (lostnFoundDto.getMedia() != null && lostnFoundDto.getMedia().getPublicUrl() != null) {
+            Long mediaId = mediaRepository.getIdByPublicUrl(lostnFoundDto.getMedia().getPublicUrl());
             if (mediaId != null) {
                 Media media = entityManager.getReference(Media.class, mediaId);
                 lostnFound.setMedia(media);
             } else {
-                throw new DataIntegrityViolationException("Media with publicId '" + lostnFoundDto.getMedia().getPublicId() + "' does not exist.");
+                throw new DataIntegrityViolationException("Media with publicUrl '" + lostnFoundDto.getMedia().getPublicUrl() + "' does not exist.");
             }
-        } else {
-            lostnFound.setMedia(null);
         }
 
         //LostnFound lostnFound = LostnFoundDtoMapper.INSTANCE.toEntity(lostnFoundDto);
-        lostnFoundRepository.updateLostnFound(lostnFound , lostnFound.getPublicId());
+        lostnFoundRepository.updateLostnFound(lostnFound , lostnFound.getId());
     }
 
-    @Override
-    @Transactional
-    public void deleteLostAndFound(String publicId) {
-        lostnFoundRepository.deleteLostnFound(publicId);
-    }
 
     @Override
     public List<LostnFoundDto> getLostAndFoundByFilter(LostnFoundType type, Optional<Boolean> status, Optional<String> owner, Optional<String> finder, Optional<String> landmark, Pageable pageable) {
         return lostnFoundRepository.getLostnFoundByFilter(type, status, owner, finder, landmark, pageable);
     }
 
-    public boolean isOwner(String userName, String publicId){
-        return lostnFoundRepository.isOwner(userName,publicId);
-    }
-    public boolean isFinder(String userName, String publicId){
-        return lostnFoundRepository.isFinder(userName,publicId);
-    }
-
-    public LostnFoundType findTypeByPublicId(String publicId){
-        return lostnFoundRepository.findTypeByPublicId(publicId);
-    }
-
 
     @Override
     @Transactional
-    public String uploadLostnFoundImage(String publicId, MultipartFile file) throws Exception {
-        // 1. Find the LostnFound item
-        Long lostnFoundId = lostnFoundRepository.exsitLostnFound(publicId);
-        if (lostnFoundId == -1L) {
-            throw new IllegalArgumentException("LostnFound item not found for publicId: " + publicId);
-        }
-
-        // 2. Upload file to S3
+    public String uploadLostnFoundImage(MultipartFile file) throws Exception {
         String extension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.'));
-        String objectKey = "lostnfound/" + publicId + "/" + UUID.randomUUID() + extension;
+        String objectKey = "lostnfound/" + UUID.randomUUID() + extension;
 
         File temp = File.createTempFile("lostnfound-", extension);
         file.transferTo(temp);
@@ -240,29 +212,56 @@ public class LostnFoundServiceImpl implements LostnFoundService {
 
         temp.delete();
 
-        // 3. Save Media entity
+        // Save Media entity
         Media media = new Media();
         media.setPublicUrl(s3Url);
         mediaRepository.save(media);
-
-        // 4. Link Media to LostnFound
-        LostnFound lostnFound = entityManager.find(LostnFound.class, lostnFoundId);
-        lostnFound.setMedia(media);
-        entityManager.merge(lostnFound);
 
         return s3Url;
     }
 
     @Override
-    public String getLostnFoundImageUrl(String publicId) throws Exception {
-        Long lostnFoundId = lostnFoundRepository.exsitLostnFound(publicId);
-        if (lostnFoundId == -1L) {
-            throw new IllegalArgumentException("LostnFound item not found for publicId: " + publicId);
+    public String getLostnFoundImageUrl(Long id) throws Exception {
+        LostnFound lostnFound = entityManager.find(LostnFound.class, id);
+        if (lostnFound == null) {
+            throw new IllegalArgumentException("LostnFound item not found for id: " + id);
         }
-        LostnFound lostnFound = entityManager.find(LostnFound.class, lostnFoundId);
         if (lostnFound.getMedia() == null) {
             throw new IllegalArgumentException("No image associated with this LostnFound item.");
         }
         return lostnFound.getMedia().getPublicUrl();
+    }
+
+    public LostnFoundType findTypeById(Long id) {
+        LostnFound lostnFound = entityManager.find(LostnFound.class, id);
+        if (lostnFound == null) {
+            throw new EntityNotFoundException("LostnFound item not found for id: " + id);
+        }
+        return lostnFound.getType();
+    }
+
+    public boolean isOwnerById(String userName, Long id) {
+        LostnFound lostnFound = entityManager.find(LostnFound.class, id);
+        if (lostnFound == null || lostnFound.getOwner() == null) {
+            return false;
+        }
+        return userName.equals(lostnFound.getOwner().getUserName());
+    }
+
+    public boolean isFinderById(String userName, Long id) {
+        LostnFound lostnFound = entityManager.find(LostnFound.class, id);
+        if (lostnFound == null || lostnFound.getFinder() == null) {
+            return false;
+        }
+        return userName.equals(lostnFound.getFinder().getUserName());
+    }
+
+    @Transactional
+    public void deleteLostAndFound(Long id) {
+        LostnFound lostnFound = entityManager.find(LostnFound.class, id);
+        if (lostnFound == null) {
+            throw new EmptyResultDataAccessException("No lost and found item with id " + id, 1);
+        }
+        entityManager.remove(lostnFound);
     }
 }

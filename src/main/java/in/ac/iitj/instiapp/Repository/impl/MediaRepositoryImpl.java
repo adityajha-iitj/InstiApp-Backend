@@ -55,5 +55,19 @@ public class MediaRepositoryImpl implements MediaRepository {
                 .setParameter("publicId" , publicId)
                 .getSingleResult();
     }
+
+    @Override
+    public Media findByPublicUrl(String publicUrl) {
+        return entityManager.createQuery(
+                        "SELECT m FROM Media m WHERE m.publicUrl = :publicUrl", Media.class)
+                .setParameter("publicUrl", publicUrl)
+                .getSingleResult();
+    }
+
+    @Override
+    public Long getIdByPublicUrl(String publicUrl) {
+        return jdbcTemplate.queryForObject(
+                "select coalesce(max(m.id), -1) from media m where m.public_url = ?", Long.class, publicUrl);
+    }
 }
 

@@ -68,7 +68,7 @@ public class GrievanceServiceImpl implements GrievanceService {
     public GrievanceDto getGrievance(String publicId){
         GrievanceDto grievanceDto = grievanceRepository.getGrievance(publicId);
         UserBaseDto userBaseDto = userRepository.getUserLimited(grievanceDto.getUserFrom().getUserName());
-        MediaBaseDto mediaBaseDto = mediaRepository.findByPublicId(grievanceDto.getMedia().getPublicId());
+        MediaBaseDto mediaBaseDto = mediaRepository.findByPublicId(grievanceDto.getMedia().getPublicUrl());
 
         grievanceDto.setUserFrom(userBaseDto);
         grievanceDto.setMedia(mediaBaseDto);
