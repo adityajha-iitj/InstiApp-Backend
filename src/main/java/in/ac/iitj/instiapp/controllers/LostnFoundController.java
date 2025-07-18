@@ -221,23 +221,25 @@ public class LostnFoundController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<ApiResponse<Void>> updateLostAndFound(@RequestHeader("Authorization") String jwt,@Valid @RequestBody LostnFoundDto lostnFoundDto) {
-
-        LostnFoundType lostnFoundType = lostnFoundService.findTypeByPublicId(lostnFoundDto.getPublicId());
-        boolean isOwner=false,isFinder=false;
+    public ResponseEntity<ApiResponse<Void>> updateLostAndFound(
+            @RequestHeader("Authorization") String jwt,
+            @Valid @RequestBody LostnFoundDto lostnFoundDto
+    ) {
+        LostnFoundType lostnFoundType = lostnFoundService.findTypeById(lostnFoundDto.getId());
+        boolean isOwner = false, isFinder = false;
         try {
             String userName = jwtProvider.getUsernameFromToken(jwt);
-            System.out.println("User trying to access : "+userName);
+            System.out.println("User trying to access : " + userName);
             UserBaseDto userBaseDto = new UserBaseDto();
             userBaseDto.setUserName(userName);
 
-            if(lostnFoundType == LostnFoundType.FOUND){
-                isFinder = lostnFoundService.isFinder(userName, lostnFoundDto.getPublicId());
+            if (lostnFoundType == LostnFoundType.FOUND) {
+                isFinder = lostnFoundService.isFinderById(userName, lostnFoundDto.getId());
                 lostnFoundDto.setFinder(userBaseDto);
                 lostnFoundDto.setOwner(lostnFoundDto.getOwner());
             }
-            if(lostnFoundType == LostnFoundType.LOST){
-                isOwner = lostnFoundService.isOwner(userName, lostnFoundDto.getPublicId());
+            if (lostnFoundType == LostnFoundType.LOST) {
+                isOwner = lostnFoundService.isOwnerById(userName, lostnFoundDto.getId());
                 lostnFoundDto.setOwner(userBaseDto);
                 lostnFoundDto.setFinder(lostnFoundDto.getFinder());
             }
@@ -258,7 +260,7 @@ public class LostnFoundController {
                     .body(new ApiResponse<>(
                             HttpStatus.FORBIDDEN.value(),
                             "FORBIDDEN",
-                            "You are not authorized to delete this item",
+                            "You are not authorized to update this item",
                             null,
                             null
                     ));
@@ -304,12 +306,12 @@ public class LostnFoundController {
         }
     }
 
-    @DeleteMapping("/{publicId}")
-    public ResponseEntity<ApiResponse<Void>> deleteLostAndFound(@RequestHeader("Authorization") String jwt, @PathVariable String publicId) {
+    @DeleteMapping("/{Id}")
+    public ResponseEntity<ApiResponse<Void>> deleteLostAndFound(@RequestHeader("Authorization") String jwt, @PathVariable Long Id) {
             String userName = jwtProvider.getUsernameFromToken(jwt);
         boolean isOwner;
         try {
-            isOwner = lostnFoundService.isOwner(userName, publicId);
+            isOwner = lostnFoundService.isOwnerById(userName, Id);
         } catch (Exception ex) {
             // If service throws something unexpected during check (e.g., DB error), treat as bad request or internal error
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -333,7 +335,7 @@ public class LostnFoundController {
         }
 
         try {
-            lostnFoundService.deleteLostAndFound(publicId);
+            lostnFoundService.deleteLostAndFound(Id);
             return ResponseEntity.ok(
                     new ApiResponse<>(
                             HttpStatus.OK.value(),
@@ -396,13 +398,12 @@ public class LostnFoundController {
     }
 
 
-    @PostMapping("/{publicId}/image")
+    @PostMapping("/image")
     public ResponseEntity<ApiResponse<String>> uploadLostnFoundImage(
-            @PathVariable String publicId,
             @RequestParam("file") MultipartFile file
     ) {
         try {
-            String imageUrl = lostnFoundService.uploadLostnFoundImage(publicId, file);
+            String imageUrl = lostnFoundService.uploadLostnFoundImage(file);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(
                             HttpStatus.CREATED.value(),
@@ -424,12 +425,12 @@ public class LostnFoundController {
     }
 
 
-    @GetMapping("/{publicId}/image")
+    @GetMapping("/{Id}/image")
     public ResponseEntity<ApiResponse<String>> getLostnFoundImage(
-            @PathVariable String publicId
+            @PathVariable Long Id
     ) {
         try {
-            String imageUrl = lostnFoundService.getLostnFoundImageUrl(publicId);
+            String imageUrl = lostnFoundService.getLostnFoundImageUrl(Id);
             return ResponseEntity.ok(
                     new ApiResponse<>(
                             HttpStatus.OK.value(),

@@ -6,6 +6,7 @@ import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 
 /* DTO for {@link in.ac.iitj.instiapp.database.entities.LostnFound.LostnFound} */
@@ -16,7 +17,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LostnFoundDto implements Serializable {
-    String publicId;
+    Long id;
     UserBaseDto finder;
     UserBaseDto owner;
     String landmarkName;
@@ -24,16 +25,17 @@ public class LostnFoundDto implements Serializable {
     String extraInfo;
     Boolean status;
     MediaBaseDto media;
+    LocalDateTime time;
 
-public LostnFoundDto(String publicId , String finder_username , String owner_username , String landmark_name,LostnFoundType type, String extra_info, Boolean status, String media_publicId) {
-    this.publicId = publicId;
+public LostnFoundDto(Long id, String finder_username , String owner_username , String landmark_name,LostnFoundType type, String extra_info, Boolean status, String media_publicUrl) {
+    this.id = id;
     this.finder = new UserBaseDto(finder_username);
     this.owner = new UserBaseDto(owner_username);
     this.landmarkName = landmark_name;
     this.type = type;
     this.extraInfo = extra_info;
     this.status = status;
-    this.media = new MediaBaseDto(media_publicId);
+    this.media = new MediaBaseDto(media_publicUrl);
 
 }
 }

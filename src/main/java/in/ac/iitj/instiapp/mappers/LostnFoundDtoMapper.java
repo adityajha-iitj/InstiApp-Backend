@@ -11,12 +11,12 @@ public interface LostnFoundDtoMapper {
 
     LostnFoundDtoMapper INSTANCE = Mappers.getMapper(LostnFoundDtoMapper.class);
     @Mapping(source = "media", target = "media")
-    @Mapping(source = "publicId", target = "publicId")
     @Mapping(source = "owner", target = "owner")
     @Mapping(source = "finder", target = "finder")
     @Mapping(source = "landmarkName", target = "landmark.name")
     @Mapping(source = "extraInfo", target = "extraInfo")
     @Mapping(source = "status", target = "status")
+    @Mapping(source = "time", target = "time")
     LostnFound toEntity(LostnFoundDto lostnFoundDto);
 
     @InheritInverseConfiguration(name = "toEntity")

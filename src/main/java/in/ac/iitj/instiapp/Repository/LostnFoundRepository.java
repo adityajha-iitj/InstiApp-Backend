@@ -54,7 +54,7 @@ public interface LostnFoundRepository {
     * @param publicId
     * @return id of the lost and found else return -1L
     */
-   Long exsitLostnFound(String publicId);
+   Long existLostnFound(Long Id);
    /**
     * @param lostnFound
     */
@@ -77,18 +77,18 @@ public interface LostnFoundRepository {
     * @param publicId
     * @throws org.springframework.dao.EmptyResultDataAccessException when no last and found is present in the database of the given public id
     */
-   void updateLostnFound(LostnFound lostnFound , String publicId);
+   void updateLostnFound(LostnFound lostnFound , Long Id);
 
    /**
     * @param publicId
     * @return String publicId of media or return Optional.empty()
     */
-   Optional<String> deleteLostnFound(String publicId);
+   Optional<String> deleteLostnFound(Long Id);
 
-   boolean isOwner(String userName, String publicId);
-   boolean isFinder(String userName, String publicId);
+   boolean isOwner(String userName, Long Id);
+   boolean isFinder(String userName, Long Id);
 
-   LostnFoundType findTypeByPublicId(String publicId);
+   LostnFoundType findTypeById(Long Id);
 
 
 }

@@ -34,12 +34,12 @@ public class OrganisationDetailedDto implements Serializable {
 
 
     public OrganisationDetailedDto(String username,String parentOrganisationUserName, String organisationTypeName,
-                                   String Description, List<String> mediaPublicId, String website) {
+                                   String Description, List<String> mediaPublicUrl, String website) {
         this.user = new UserDetailedDto(username);
         this.parentOrganisation = new OrganisationBaseDto(parentOrganisationUserName);
         this.typeName = organisationTypeName;
         this.Description = Description;
-        this.media = mediaPublicId != null ? mediaPublicId.stream().map(MediaBaseDto::new).toList() : new ArrayList<>();
+        this.media = mediaPublicUrl != null ? mediaPublicUrl.stream().map(MediaBaseDto::new).toList() : new ArrayList<>();
         this.Website = website;
         this.usersWithPORs = new ArrayList<>();
     }

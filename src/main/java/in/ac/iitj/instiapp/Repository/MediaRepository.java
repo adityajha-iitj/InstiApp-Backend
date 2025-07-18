@@ -11,6 +11,9 @@ public interface MediaRepository {
 
     Long getIdByPublicId(String publicId);
 
+    Media findByPublicUrl(String publicUrl);
+    Long getIdByPublicUrl(String publicUrl);
+
 
 
 }

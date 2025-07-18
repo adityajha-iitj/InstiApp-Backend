@@ -12,20 +12,13 @@ import java.io.Serializable;
  */
 @Setter
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 public class MediaBaseDto implements Serializable {
 
-    Mediatype type;
-
-    String publicId;
-
     String publicUrl;
 
-    public MediaBaseDto(String publicId){
-        this.type = null;
-        this.publicId = publicId;
-        this.publicUrl = null;
+    public MediaBaseDto(String publicUrl){
+        this.publicUrl = publicUrl;
     }
 
 }
