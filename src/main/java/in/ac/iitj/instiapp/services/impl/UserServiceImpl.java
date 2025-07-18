@@ -1,6 +1,8 @@
 package in.ac.iitj.instiapp.services.impl;
 
 import in.ac.iitj.instiapp.Repository.CalendarRepository;
+import in.ac.iitj.instiapp.Repository.MediaRepository;
+import in.ac.iitj.instiapp.database.entities.Media.Media;
 import jakarta.persistence.EntityManager;
 import in.ac.iitj.instiapp.Repository.OAuth2TokenRepository;
 import in.ac.iitj.instiapp.Repository.User.Organisation.OrganisationRoleRepository;
@@ -47,10 +49,11 @@ public class UserServiceImpl implements UserService {
     private final  ValidationUtil  validationUtil ;
     private final OAuth2TokenRepository oAuth2TokenRepository;
     private final EntityManager entityManager;
+    private final MediaRepository mediaRepository;
 
     public UserServiceImpl(UserRepository userRepository, UserBaseDtoMapper userBaseDtoMapper, UserDetailedDtoMapper userDetailedDtoMapper,
                            OrganisationRoleRepository organisationRoleRepository, UtilitiesService utilitiesService, ValidationUtil validationUtil, CalendarRepository calendarRepository,
-                           OAuth2TokenRepository oAuth2TokenRepository, EntityManager entityManager) {
+                           OAuth2TokenRepository oAuth2TokenRepository, EntityManager entityManager, MediaRepository mediaRepository) {
         this.userRepository = userRepository;
         this.userBaseDtoMapper = userBaseDtoMapper;
         this.userDetailedDtoMapper = userDetailedDtoMapper;
@@ -60,6 +63,7 @@ public class UserServiceImpl implements UserService {
         this.calendarRepository = calendarRepository;
         this.oAuth2TokenRepository = oAuth2TokenRepository;
         this.entityManager = entityManager;
+        this.mediaRepository = mediaRepository;
     }
 
     public Long save(UserBaseDto userBaseDto) {
@@ -225,6 +229,10 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.getUserFromUsername(userDetailedDto.getUserName());
 
         updatedUser.setUserType(user.getUserType());
+
+        Media media = new Media();
+        media.setPublicUrl(userDetailedDto.getAvatarUrl());
+        mediaRepository.save(media);
 
         return userRepository.save(updatedUser);
     }

@@ -3,6 +3,7 @@ package in.ac.iitj.instiapp.controllers;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import in.ac.iitj.instiapp.config.JwtProvider;
+import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.payload.Auth.SignupDto;
 import in.ac.iitj.instiapp.payload.Auth.UpdateUserDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;

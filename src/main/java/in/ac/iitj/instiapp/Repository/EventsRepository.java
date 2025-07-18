@@ -28,4 +28,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
 
     @Query("SELECT e FROM Events e WHERE e.publicId = :publicId")
     public Events findByEventByPublicId(Long publicId);
+
+    @Query("SELECT m.publicUrl FROM Events e JOIN e.media m WHERE e.publicId = :publicId")
+    public List<String> getEventMediaUrl(Long publicId);
 }

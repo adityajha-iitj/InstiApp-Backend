@@ -8,6 +8,7 @@ import lombok.Value;
 import java.io.Serializable;
 import java.sql.Time;
 import java.util.Date;
+import java.util.List;
 
 /**
  * DTO for {@link in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Events}
@@ -25,5 +26,6 @@ public class EventsDto implements Serializable {
     Boolean isAllDay;
     Boolean isRecurring;
     Boolean isHide;
+    List<String> eventsMediauRL;
 
 }

@@ -1,13 +1,16 @@
 package in.ac.iitj.instiapp.database.entities.Scheduling.Calendar;
 
 import com.nimbusds.openid.connect.sdk.assurance.evidences.Organization;
+import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.Organisation;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Date;
 import java.sql.Time;
+import java.util.HashSet;
 import java.util.UUID;
+import java.util.Set;
 
 
 @Entity
@@ -58,6 +61,15 @@ public class Events {
     Recurrence recurrence;
 
     Boolean isHide;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "event_media",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "media_id")
+    )
+    private Set<Media> media = new HashSet<>();
+
 
     @PrePersist
     @PreUpdate

@@ -13,7 +13,13 @@ import in.ac.iitj.instiapp.services.OrganisationService;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/events")
@@ -34,38 +40,106 @@ public class EventsController {
         this.organisationBaseDtoMapper = organisationBaseDtoMapper;
     }
 
-    @PostMapping("/save")
-    public ApiResponse<EventsDto> saveEvent(@RequestHeader("Authorization") String jwt, @RequestBody EventsDto eventsDto) {
+    @PostMapping(
+            path     = "/save",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<ApiResponse<EventsDto>> saveEvent(@RequestHeader("Authorization") String jwt, @RequestPart("eventsDto") EventsDto eventsDto,
+                                               @RequestPart(value = "media", required = false) List<MultipartFile> files) throws IOException {
         String username = jwtProvider.getUsernameFromToken(jwt);
         //String username = "IITJ_OFFICIAL";
 
 
-        Long publicId = eventsService.save(eventsDto, username);
+        Long publicId = eventsService.save(eventsDto, username, files);
         eventsDto.setPublicId(publicId);
 
-        return new ApiResponse<>(
-                HttpStatus.CREATED.value(),
-                null,
-                "Events Created Successfully",
-                eventsDto,
-                null
+        List<String> mediaUrls = eventsService.getMediaUrlsOfEvent(publicId);
+        eventsDto.setEventsMediauRL(mediaUrls);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.CREATED.value(),
+                        null,
+                        "Events Saved Successfully",
+                        eventsDto,
+                        null
+                )
         );
 
     }
 
-    @PutMapping("/update")
-    public ApiResponse<EventsDto> updateEvent(@RequestHeader("Authorization") String jwt, @RequestBody EventsDto eventsDto) {
+    @PutMapping(
+            path     = "/update",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<ApiResponse<EventsDto>> updateEvent(
+            @RequestHeader("Authorization")     String jwt,
+            @RequestPart("eventsDto")           EventsDto           eventsDto,
+            @RequestPart(value = "media", required = false)
+            List<MultipartFile> newFiles
+    ) throws IOException {
         String username = jwtProvider.getUsernameFromToken(jwt);
 
-        eventsService.update(eventsDto, username);
+        // call your updated service method that merges existing URLs + new files
+        eventsService.update(eventsDto, username, newFiles);
 
-        return new ApiResponse<>(
-                HttpStatus.CREATED.value(),
-                null,
-                "Events Updated Successfully",
-                eventsDto,
-                null
+        // fetch the post‑update list of URLs and set on DTO
+        List<String> updatedUrls = eventsService.getMediaUrlsOfEvent(eventsDto.getPublicId());
+        eventsDto.setEventsMediauRL(updatedUrls);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        null,
+                        "Events updated Successfully",
+                        eventsDto,
+                        null
+                )
         );
+    }
+
+    @GetMapping("/getAllEvents")
+    public ResponseEntity<ApiResponse<List<EventsDto>>> getAllEvents(@RequestHeader("Authorization") String jwt) throws IOException {
+        try{
+            String username = jwtProvider.getUsernameFromToken(jwt);
+            List<EventsDto> events = eventsService.getAllEvents();
+
+            return ResponseEntity.ok(
+                    new ApiResponse<>(
+                            HttpStatus.OK.value(),
+                            null,
+                            "Events updated Successfully",
+                            events,
+                            null
+                    )
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "EVENTS_FETCH_ERROR",
+                            "Error fetching the events " + e.getMessage(),
+                            null,
+                            null
+                    ));
+        }
+
+
+    }
+
+    @DeleteMapping("/delete/{publicId}")
+    public ResponseEntity<String> deleteEvent(@RequestHeader("Authorization") String jwt ,@PathVariable("publicId") Long publicId) {
+        String username = jwtProvider.getUsernameFromToken(jwt);
+
+        try{
+            eventsService.delete(publicId, username);
+            return ResponseEntity.ok("Event deleted Successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("ERROR DELETING EVENT");
+        }
+
+
 
     }
 }
