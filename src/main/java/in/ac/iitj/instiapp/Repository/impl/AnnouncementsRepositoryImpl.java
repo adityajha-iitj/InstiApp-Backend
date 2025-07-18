@@ -2,6 +2,7 @@ package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.Repository.AnnouncementsRepository;
 import in.ac.iitj.instiapp.database.entities.Announcements;
+import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.payload.AnnouncementsDto;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +38,8 @@ public class AnnouncementsRepositoryImpl implements in.ac.iitj.instiapp.Reposito
                     an.getTitle(),
                     an.getDescription(),
                     an.getDateOfAnnouncement(),
-                    an.getMedia() != null ? 
-                        an.getMedia().stream().map(m -> m.getPublicId()).collect(java.util.stream.Collectors.toSet()) : 
+                    an.getMedia() != null ?
+                        an.getMedia().stream().map(Media::getPublicUrl).collect(java.util.stream.Collectors.toSet()) :
                         new java.util.HashSet<>(),
                     an.getPublicId()
                 ))

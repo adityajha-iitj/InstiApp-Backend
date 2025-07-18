@@ -111,9 +111,7 @@ public class GrievanceRepositoryImpl implements GrievanceRepository {
         //grievance.setOrganisationRole(entityManager.getReference(OrganisationRole.class,grievance.getOrganisationRole().getId()));
         //grievance.setMedia(entityManager.getReference(Media.class,grievance.getMedia().getId()));
         Media media = new Media();
-        media.setType(grievance.getMedia().getType());
         media.setPublicUrl(grievance.getMedia().getPublicUrl());
-        media.setAssetId(UUID.randomUUID().toString());
         mediaRepository.save(media);
 
         grievance.setMedia(media);
