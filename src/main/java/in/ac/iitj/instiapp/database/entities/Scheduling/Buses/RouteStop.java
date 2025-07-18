@@ -27,10 +27,10 @@ public class RouteStop {
     @Column(nullable = false)
     private Integer stopOrder; // 1, 2, 3, etc.
     
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Time arrivalTime;
     
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Time departureTime;
     
     public RouteStop(BusRoute route, BusLocation location, Integer stopOrder, Time arrivalTime, Time departureTime) {

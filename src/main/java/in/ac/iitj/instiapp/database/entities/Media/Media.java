@@ -17,34 +17,14 @@ public class Media {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
-    @Enumerated(EnumType.STRING)
-    @Column( nullable = false)
-    Mediatype type;
-
-    @Column(name = "public_id", unique = true, nullable = false, updatable = false, length = 36)
-    private String publicId;
-
-    @Column( nullable = false)
-    String assetId;
-
     @Column( nullable = false)
     String publicUrl ;
 
-    public Media(String publicId, String publicUrl, String assetId, Mediatype mediatype) {
-        this.publicId = publicId;
+    public Media(String publicId) {
         this.publicUrl = publicUrl;
-        this.assetId = assetId;
-        this.type = mediatype;
     }
 
     public Media(Long mediaId) {
         this.Id = mediaId;
-    }
-
-    @PrePersist
-    private void ensurePublicId() {
-        if (publicId == null) {
-            publicId = UUID.randomUUID().toString();
-        }
     }
 }
