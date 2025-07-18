@@ -133,11 +133,17 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
         try {
             return entityManager.createQuery(
                             "select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto(" +
-                                    "  o.user.userName, " +
+                                    "  new in.ac.iitj.instiapp.payload.User.UserBaseDto(" +
+                                    "    o.user.name, " +
+                                    "    o.user.userName, " +
+                                    "    o.user.email, " +
+                                    "    o.user.userType.name, " +
+                                    "    o.user.avatarUrl" +
+                                    "  ), " +
                                     "  case when po is null then null else pu.userName end, " +
                                     "  o.type.name, " +
-                                    "  o.Description, " +
-                                    "  o.Website" +
+                                    "  o.Description, " +   // ← property name must match exactly
+                                    "  o.Website" +         // ← likewise here
                                     ") " +
                                     "from Organisation o " +
                                     "  left join o.parentOrganisation po " +
@@ -147,18 +153,32 @@ public class OrganisationRepositoryImpl implements OrganisationRepository {
                     )
                     .setParameter("username", username)
                     .getSingleResult();
-        }
-        catch (NoResultException ex) {
+        } catch (NoResultException ex) {
             throw new EmptyResultDataAccessException(
                     "No organisation found for username " + username, 1);
         }
     }
 
 
+
+
     @Override
     public List<OrganisationBaseDto> getOrganisationByType(OrganisationType organisationType, Pageable pageable) {
-        return entityManager.createQuery("select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto(o.user.userName,o.parentOrganisation.user.userName,o.type.name,o.Description,o.Website) from Organisation o left join o.parentOrganisation left join o.parentOrganisation.user where o.type.name = :typeName",OrganisationBaseDto.class)
-                .setParameter("typeName",organisationType.getName())
+        return entityManager.createQuery(
+                        "select new in.ac.iitj.instiapp.payload.User.Organisation.OrganisationBaseDto(" +
+                                "  new in.ac.iitj.instiapp.payload.User.UserBaseDto(" +
+                                "    o.user.name, o.user.userName, o.user.email, o.user.userType.name, o.user.avatarUrl" +
+                                "  ), " +
+                                "  case when o.parentOrganisation is null then null else o.parentOrganisation.user.userName end, " +
+                                "  o.type.name, " +
+                                "  o.Description, " +
+                                "  o.Website" +
+                                ") " +
+                                "from Organisation o " +
+                                "where o.type.name = :typeName",
+                        OrganisationBaseDto.class
+                )
+                .setParameter("typeName", organisationType.getName())
                 .setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();
