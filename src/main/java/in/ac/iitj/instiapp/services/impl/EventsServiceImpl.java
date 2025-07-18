@@ -155,6 +155,7 @@ public class EventsServiceImpl implements EventsService {
         for (Events event : eventsList) {
             EventsDto eventsDto = eventsMapper.toDto(event);
             eventsDto.setEventsMediauRL(eventsRepository.getEventMediaUrl(event.getPublicId()));
+            eventsDto.setOwnerUsername(event.getOrganisation().getUser().getUserName());
             eventsDtoList.add(eventsDto);
         }
         return eventsDtoList;

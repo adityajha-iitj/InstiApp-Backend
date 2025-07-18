@@ -18,6 +18,7 @@ import java.util.List;
 @Setter
 public class EventsDto implements Serializable {
     Long publicId;
+    String ownerUsername;
     String title;
     String description;
     java.util.Date date;
