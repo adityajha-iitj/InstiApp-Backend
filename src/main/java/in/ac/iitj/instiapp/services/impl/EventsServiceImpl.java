@@ -41,6 +41,7 @@ public class EventsServiceImpl implements EventsService {
 
     @Transactional
     public Long save(EventsDto eventsDto, String username, List<MultipartFile> files) throws IOException {
+        try {
         Events events = eventsMapper.toEntity(eventsDto);
         events.setOrganisation(organisationRepositoryImpl.getOrganisationByUsername(username));
 
@@ -77,7 +78,6 @@ public class EventsServiceImpl implements EventsService {
 
         events.setMedia(mediaSet);
 
-        try {
             Events e = eventsRepository.save(events);
             return e.getPublicId();
         }

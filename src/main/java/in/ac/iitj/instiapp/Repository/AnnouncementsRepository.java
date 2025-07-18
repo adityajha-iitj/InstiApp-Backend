@@ -1,42 +1,31 @@
 package in.ac.iitj.instiapp.Repository;
 
 import in.ac.iitj.instiapp.database.entities.Announcements;
+import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Events;
 import in.ac.iitj.instiapp.payload.AnnouncementsDto;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 
 /**
  * Repository interface for Announcements-related operations.
  */
-public interface AnnouncementsRepository {
+@Repository
+public interface AnnouncementsRepository extends JpaRepository<Announcements, Integer> {
 
-    /**
-     * Creates a new announcement in the database.
-     *
-     * @param announcements userId shouldn't be null
-     *                      groupId shouldn't be null
-     *                      If Media media Id's shouldn't be null else it should be empty list
-     */
-    void createAnnouncement(Announcements announcements);
+    @Query("SELECT a FROM Announcements a WHERE a.publicId = :publicId")
+    public Announcements findByAnnouncementByPublicId(Long publicId);
+
+    @Query("SELECT m.publicUrl FROM Announcements a JOIN a.media m WHERE a.publicId = :publicId")
+    public List<String> getAnnouncementMediaUrl(Long publicId);
 
 
-    List<AnnouncementsDto> getByGroupIds(List<Long> groupIds);
 
-    /**
-     * Edits an existing announcement in the database.
-    */
-    void updateAnnouncement(String publicId, Announcements announcements);
-
-    /**
-     * Deletes an announcement from the database.
-     */
-    void deleteAnnouncement(String publicId);
-    /**
-     * Gets all the latest versions of the announcemnts
-     */
-    List<AnnouncementsDto> getAllAnnouncements(Pageable pageable);
 }

@@ -1,5 +1,6 @@
 package in.ac.iitj.instiapp.services;
 
+import java.io.InputStream;
 import java.util.List;
 
 public interface BucketService {
@@ -12,4 +13,5 @@ public interface BucketService {
 
     public String getFileUrl(String bucketName, String objectName);
     void deleteFile(String bucketName, String objectKey);
+
 }
