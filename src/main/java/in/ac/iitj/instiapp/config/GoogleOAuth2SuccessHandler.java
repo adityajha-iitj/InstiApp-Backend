@@ -2,7 +2,6 @@ package in.ac.iitj.instiapp.config;
 
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.payload.Auth.SignupDto;
-import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
 import in.ac.iitj.instiapp.services.UserService;
 import io.jsonwebtoken.io.IOException;
@@ -10,6 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,11 +38,13 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Value("${app.oauth2.web-redirect-url:/}")
+    private String webRedirectUrl;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, java.io.IOException {
-
 
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         String email = oauthUser.getAttribute("email");
@@ -113,57 +116,50 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         SecurityContextHolder.getContext().setAuthentication(newAuth);
         System.out.println("[OAuth2] Spring Security context updated with new authentication.");
 
-        String accessToken = null;
-        String refreshToken = null;
+        // --- Conditional redirect based on 'state' parameter ---
+        String state = request.getParameter("state");
+        String accessToken = jwtProvider.generateAccessToken(newAuth);
+        System.out.println("[OAuth2] JWT generated for user: " + username);
 
-        // FIXED: Proper token extraction with type-specific validation
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("accessToken".equals(cookie.getName()) && jwtProvider.validateAccessToken(cookie.getValue())) {
-                    accessToken = cookie.getValue();
-                }
-                if ("refreshToken".equals(cookie.getName()) && jwtProvider.validateRefreshToken(cookie.getValue())) {
-                    refreshToken = cookie.getValue();
-                }
-            }
+        if ("mobile".equals(state)) {
+            // Mobile App Flow: Redirect with token in URL
+            String targetUrl = UriComponentsBuilder.fromUriString("instiapp://callback")
+                    .queryParam("token", accessToken)
+                    .build().toUriString();
+
+            System.out.println("[OAuth2] Mobile client detected. Redirecting to: " + targetUrl);
+            response.sendRedirect(targetUrl);
+
+        } else {
+            // Web App Flow: Set HttpOnly cookies and return JSON payload
+            String refreshToken = jwtProvider.generateRefreshToken(newAuth);
+
+            Cookie accessCookie = new Cookie("accessToken", accessToken);
+            accessCookie.setHttpOnly(true);
+            accessCookie.setSecure(true);
+            accessCookie.setPath("/");
+            accessCookie.setMaxAge(3 * 24 * 60 * 60); // 3 days
+            response.addCookie(accessCookie);
+
+            Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setSecure(true);
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge(15 * 24 * 60 * 60); // 15 days
+            response.addCookie(refreshCookie);
+
+            System.out.println("[OAuth2] Web client detected. Returning JSON payload.");
+            String message = isNew
+                    ? "Auto-signup via Google successful"
+                    : "Google login successful";
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(
+                    String.format(
+                            "{\"username\":\"%s\",\"message\":\"%s\",\"accessToken\":\"%s\",\"refreshToken\":\"%s\"}",
+                            username, message, accessToken, refreshToken
+                    )
+            );
         }
-
-        // FIXED: Only generate new access token if refresh token is valid
-        if (accessToken == null && refreshToken != null) {
-            accessToken = jwtProvider.generateAccessToken(newAuth);
-        }
-
-        // FIXED: Only generate new tokens when necessary
-        if (accessToken == null) {
-            accessToken = jwtProvider.generateAccessToken(newAuth);
-        }
-        if (refreshToken == null) {
-            refreshToken = jwtProvider.generateRefreshToken(newAuth);
-        }
-
-        // Set cookies
-        Cookie accessCookie = new Cookie("accessToken", accessToken);
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(true);
-        accessCookie.setPath("/");
-        accessCookie.setMaxAge(3 * 24 * 60 * 60); // 3 days
-        response.addCookie(accessCookie);
-
-        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(true);
-        refreshCookie.setPath("/");
-        // FIXED: Align cookie expiration with token expiration (15 days)
-        refreshCookie.setMaxAge(15 * 24 * 60 * 60); // 15 days
-        response.addCookie(refreshCookie);
-
-        String message = isNew ? "Auto-signup via Google successful" : "Google login successful";
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(
-                String.format("{\"username\":\"%s\", \"message\":\"%s\", \"accessToken\":\"%s\", \"refreshToken\":\"%s\"}",
-                        username, message, accessToken, refreshToken)
-        );
-        System.out.println("[OAuth2] Cookie tokens written to response.");
     }
 }
