@@ -102,3 +102,6 @@ release.properties
 
 upload-ssm.sh
 upload-ssm.sh.save
+
+# Secret credentials
+src/main/resources/firebase_key.json
