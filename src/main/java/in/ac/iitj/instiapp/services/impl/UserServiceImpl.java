@@ -237,6 +237,28 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(updatedUser);
     }
 
+    @Override
+    @Transactional
+    public User findOrCreateGoogleUser(String googleId, String email, String name, String pictureUrl) {
+        // Try to find user by Google ID (assuming you have a googleId field in your User entity)
+        User user = userRepository.findByGoogleId(googleId);
+        if (user != null) {
+            return user;
+        }
+        // If not found, create a new user
+        user = new User();
+        user.setGoogleId(googleId);
+        user.setEmail(email);
+        user.setName(name);
+        user.setAvatarUrl(pictureUrl);
+        // Set a username (you may want to generate one)
+        user.setUserName(createUsername(name, "", email));
+        // Set a default user type if needed
+        Usertype userType = entityManager.find(Usertype.class, 1L); // or your default user type logic
+        user.setUserType(userType);
+        userRepository.save(user);
+        return user;
+    }
 
 
 }

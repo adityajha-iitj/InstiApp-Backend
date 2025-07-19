@@ -173,6 +173,5 @@ public interface UserRepository {
     public Long getUserIdFromUsername(String username);
     public User getUserFromUsername(String username);
 
-
-
+    User findByGoogleId(String googleId);
 }

@@ -55,6 +55,9 @@ public class User{
     @OneToMany
     Set<OrganisationRole> organisationRoleSet;
 
+    @Column(unique = true)
+    private String googleId;
+
     public  User(String name, String userName, String email, String phoneNumber, String avatarUrl){
         this.name = name;
         this.userName = userName;

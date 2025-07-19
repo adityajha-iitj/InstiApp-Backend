@@ -1,5 +1,6 @@
 package in.ac.iitj.instiapp.services;
 
+import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.payload.Auth.SignupDto;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
@@ -58,4 +59,6 @@ public interface UserService {
     public void delete(String userTypeName);
 
     public String getUsernameFromEmail(String email);
+
+    User findOrCreateGoogleUser(String googleId, String email, String name, String pictureUrl);
 }

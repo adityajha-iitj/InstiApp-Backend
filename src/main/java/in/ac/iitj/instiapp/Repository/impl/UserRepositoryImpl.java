@@ -278,6 +278,17 @@ public class UserRepositoryImpl implements UserRepository {
                 .getSingleResult();
     }
 
+    @Override
+    public User findByGoogleId(String googleId) {
+        try {
+            return entityManager.createQuery("SELECT u FROM User u WHERE u.googleId = :googleId", User.class)
+                    .setParameter("googleId", googleId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
 
 
 
