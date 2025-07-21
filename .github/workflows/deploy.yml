@@ -48,7 +48,12 @@ jobs:
             docker pull adityajha1082/my-springboot-app:latest
 
             echo "Running the latest image..."
-            docker run -d -p 8080:8080 --env-file ~/springboot.env --name springboot-app adityajha1082/my-springboot-app:latest
+            docker run -d \
+              -p 8080:8080 \
+              --name springboot-app \
+              --env-file ~/springboot.env \
+              -v /home/ec2-user/firebase_key.json:/app/config/firebase_key.json \
+              adityajha1082/my-springboot-app:latest
 
             echo "Deployment complete. Current running containers:"
             docker ps
