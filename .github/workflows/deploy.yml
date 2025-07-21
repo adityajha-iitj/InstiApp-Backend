@@ -3,7 +3,7 @@ name: Build and Deploy to EC2
 on:
   push:
     branches:
-      - main   # or your production branch
+      - main   # Or your production branch
 
 jobs:
   build-and-deploy:
@@ -45,15 +45,20 @@ jobs:
             echo "Removing existing container if exists..."
             docker rm springboot-app || echo "Container does not exist."
 
+            # Set correct file permissions for the Firebase key on the host
+            echo "Setting permissions for Firebase key..."
+            chmod 644 ~/firebase_key.json
+
             echo "Pulling the latest image from Docker Hub..."
             docker pull adityajha1082/my-springboot-app:latest
 
             echo "Running the latest image..."
+            # Added the ":z" flag to the volume mount for SELinux compatibility
             docker run -d \
               -p 8080:8080 \
               --name springboot-app \
               --env-file ~/springboot.env \
-              -v /home/ec2-user/firebase_key.json:/app/config/firebase_key.json \
+              -v /home/ec2-user/firebase_key.json:/app/config/firebase_key.json:z \
               adityajha1082/my-springboot-app:latest
 
             echo "Deployment complete. Current running containers:"
