@@ -7,9 +7,9 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource; // Import Spring's Resource class
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -18,16 +18,16 @@ public class FCMIntializer {
 
     private static final Logger logger = LoggerFactory.getLogger(FCMIntializer.class);
 
+    // --- FIX 1: Inject a Resource object, not just a String path ---
     @Value("${app.firebase-configuration-file}")
-    private String firebaseConfigPath; // This will be "/app/config/firebase_key.json"
+    private Resource firebaseConfigFile;
 
     @PostConstruct
     public void initialize() {
         try {
-            // --- THIS IS THE FIX ---
-            // We now use FileInputStream to read from a direct filesystem path,
-            // not ClassPathResource which only checks the classpath.
-            InputStream serviceAccountStream = new FileInputStream(firebaseConfigPath);
+            // --- FIX 2: Get the InputStream directly from the Resource object ---
+            // This single line works for both "classpath:" and "file:" paths.
+            InputStream serviceAccountStream = firebaseConfigFile.getInputStream();
 
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
@@ -38,8 +38,7 @@ public class FCMIntializer {
                 logger.info("Firebase application has been initialized successfully.");
             }
         } catch (IOException e) {
-            // This will now correctly report an error if the volume mount fails.
-            logger.error("Error initializing Firebase. Could not find file at filesystem path: " + firebaseConfigPath, e);
+            logger.error("Error initializing Firebase. Could not load resource: " + firebaseConfigFile, e);
             throw new RuntimeException("Could not initialize Firebase.", e);
         }
     }

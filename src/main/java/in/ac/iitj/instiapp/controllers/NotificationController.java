@@ -163,7 +163,7 @@ public class NotificationController {
     }
 
 
-    @PostMapping(value ="/notify-all", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value ="/notifyAll", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> sendToAll(@RequestPart(value = "file", required = false)MultipartFile file,
                                                          @RequestPart("request") NotificationRequestAll request) {
         Map<String, Object> response = new HashMap<>();
