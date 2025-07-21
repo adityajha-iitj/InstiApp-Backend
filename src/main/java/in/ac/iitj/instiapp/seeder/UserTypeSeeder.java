@@ -16,16 +16,25 @@ public class UserTypeSeeder implements CommandLineRunner {
         this.userTypeRepository = userTypeRepository;
     }
 
-
     @Override
     public void run(String... args) {
+        // We will now check for each user type individually before saving.
+        seedUserTypeIfNotExists("Student");
+        seedUserTypeIfNotExists("Faculty");
+        seedUserTypeIfNotExists("Alumni");
+    }
 
-        try {
-            userTypeRepository.save(new Usertype(null, "Student"));
-            userTypeRepository.save(new Usertype(null, "Faculty"));
-            userTypeRepository.save(new Usertype(null, "Alumni"));
-        }catch (Exception e){
-            System.out.println("UserTypeSeeder: Error while seeding data");
+    private void seedUserTypeIfNotExists(String name) {
+        // Use the new repository method to check if a Usertype with this name already exists.
+        // The .isEmpty() check is more robust than counting.
+        if (userTypeRepository.findByName(name).isEmpty()) {
+            try {
+                userTypeRepository.save(new Usertype(null, name));
+                System.out.println("UserTypeSeeder: Successfully seeded '" + name + "'.");
+            } catch (Exception e) {
+                // This catch is a fallback for other potential database issues.
+                System.err.println("UserTypeSeeder: Error while seeding '" + name + "': " + e.getMessage());
+            }
         }
     }
 }

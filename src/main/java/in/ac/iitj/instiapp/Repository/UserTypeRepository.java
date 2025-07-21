@@ -5,6 +5,7 @@ import org.hibernate.usertype.UserType;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserTypeRepository {
 
@@ -21,4 +22,5 @@ public interface UserTypeRepository {
     boolean exists(String name);
 
     List<String> getAllUserTypes(Pageable pageable);
+    Optional<Usertype> findByName(String name);
 }
