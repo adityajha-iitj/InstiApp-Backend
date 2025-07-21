@@ -7,10 +7,11 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Service
 public class FCMIntializer {
@@ -18,21 +19,18 @@ public class FCMIntializer {
     private static final Logger logger = LoggerFactory.getLogger(FCMIntializer.class);
 
     @Value("${app.firebase-configuration-file}")
-    private String firebaseConfigPath;
+    private String firebaseConfigPath; // This will be "/app/config/firebase_key.json"
 
     @PostConstruct
     public void initialize() {
         try {
-            // Make sure the file is in src/main/resources/
-            ClassPathResource resource = new ClassPathResource(firebaseConfigPath);
-
-            if (!resource.exists()) {
-                // Throw an exception with a very clear message
-                throw new IOException("Firebase config file not found at path: " + firebaseConfigPath);
-            }
+            // --- THIS IS THE FIX ---
+            // We now use FileInputStream to read from a direct filesystem path,
+            // not ClassPathResource which only checks the classpath.
+            InputStream serviceAccountStream = new FileInputStream(firebaseConfigPath);
 
             FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
                     .build();
 
             if (FirebaseApp.getApps().isEmpty()) {
@@ -40,8 +38,8 @@ public class FCMIntializer {
                 logger.info("Firebase application has been initialized successfully.");
             }
         } catch (IOException e) {
-            // Log the error and re-throw it to stop the application startup
-            logger.error("Error initializing Firebase.", e);
+            // This will now correctly report an error if the volume mount fails.
+            logger.error("Error initializing Firebase. Could not find file at filesystem path: " + firebaseConfigPath, e);
             throw new RuntimeException("Could not initialize Firebase.", e);
         }
     }
