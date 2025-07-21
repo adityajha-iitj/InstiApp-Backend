@@ -5,6 +5,7 @@ import in.ac.iitj.instiapp.database.entities.Notification;
 import in.ac.iitj.instiapp.mappers.Notification.NotificationMapper;
 import in.ac.iitj.instiapp.payload.Notification.NotificationDto;
 import in.ac.iitj.instiapp.services.NotificationService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +24,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
 
+    @Transactional
     public void saveNotification(Notification notification){
         Notification notification1 = notificationRepository.save(notification);
         notificationMapper.toDto(notification1);
     }
 
+    @Transactional
     public void updateNotification(Notification notification){
         Notification notification1 = notificationRepository.save(notification);
         notificationMapper.toDto(notification1);
@@ -42,10 +45,12 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional
     public void deleteNotification(Long id) {
         notificationRepository.deleteById(id);
     }
 
+    @Transactional
     public int updateReadStatus(Long notificationId){
         return notificationRepository.updateReadStatus(notificationId);
     }
