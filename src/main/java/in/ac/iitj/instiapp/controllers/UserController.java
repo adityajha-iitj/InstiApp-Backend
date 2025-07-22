@@ -1,5 +1,6 @@
 package in.ac.iitj.instiapp.controllers;
 
+import com.cloudinary.Api;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import in.ac.iitj.instiapp.config.JwtProvider;
@@ -8,6 +9,7 @@ import in.ac.iitj.instiapp.payload.Auth.SignupDto;
 import in.ac.iitj.instiapp.payload.Auth.UpdateUserDto;
 import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
+import in.ac.iitj.instiapp.payload.common.ApiResponse;
 import in.ac.iitj.instiapp.services.BucketService;
 import in.ac.iitj.instiapp.services.UserService;
 import io.jsonwebtoken.io.IOException;
@@ -124,8 +126,35 @@ public class UserController {
         }
     }
 
+    @DeleteMapping("/delete")
+    public ResponseEntity<ApiResponse<UserBaseDto>> deleteUser(@RequestHeader("Authorization") String jwt){
+        String userName = jwtProvider.getUsernameFromToken(jwt);
 
+        try{
+            UserBaseDto dto = userService.deleteUser(userName);
+            return ResponseEntity.ok(
+                    new ApiResponse<>(
+                            HttpStatus.OK.value(),
+                            null,
+                            "User Deleted successfully",
+                            dto,
+                            null
+                    )
+            );
 
+        } catch (Exception e){
+            e.printStackTrace();
 
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "USER_DELETION_ERROR",
+                            "Error deleting User: " + e.getMessage(),
+                            null,
+                            null
+                    ));
+        }
+    }
 
 }
+

@@ -1,7 +1,6 @@
 package in.ac.iitj.instiapp.Repository.impl;
 
 import in.ac.iitj.instiapp.Repository.UserRepository;
-import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import in.ac.iitj.instiapp.database.entities.User.Usertype;
 import in.ac.iitj.instiapp.payload.User.Organisation.OrganisationRoleDto;
@@ -9,6 +8,7 @@ import in.ac.iitj.instiapp.payload.User.UserBaseDto;
 import in.ac.iitj.instiapp.payload.User.UserDetailedDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -287,6 +287,27 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (NoResultException e) {
             return null;
         }
+    }
+    @Transactional
+    public UserBaseDto deleteUser(String username) {
+        User user = getUserFromUsername(username); // You already have this helper method.
+
+        if (user == null) {
+            throw new RuntimeException("User not found with username: " + username);
+        }
+        UserBaseDto userBaseDto = new UserBaseDto();
+        userBaseDto.setUserName(user.getUserName());
+        userBaseDto.setUserTypeName(user.getUserType().getName());
+        userBaseDto.setName(user.getName());
+        userBaseDto.setEmail(user.getEmail());
+        userBaseDto.setAvatarUrl(user.getAvatarUrl());
+
+        // 3. Use entityManager.remove() to delete the entity.
+        // This will correctly trigger the CascadeType.ALL on its relationships.
+        entityManager.remove(user);
+
+        // 4. Return the DTO of the user that was just deleted.
+        return userBaseDto;
     }
 
 

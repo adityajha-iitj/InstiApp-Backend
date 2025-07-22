@@ -1,6 +1,6 @@
 package in.ac.iitj.instiapp.database.entities.User;
 
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import in.ac.iitj.instiapp.database.entities.Scheduling.Calendar.Calendar;
 import in.ac.iitj.instiapp.database.entities.User.Organisation.OrganisationRole;
 import jakarta.persistence.*;
@@ -13,51 +13,52 @@ import lombok.Setter;
 
 import java.util.Set;
 
-
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
-public class User{
+public class User {
 
-    @jakarta.persistence.Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long Id;
+    private Long id;
 
     @Column(nullable = false)
-    String name;
+    private String name;
 
-    @Column(nullable = false)
-    String userName;
+    @Column(nullable = false, unique = true)
+    private String userName;
 
-    @Column(nullable = false)
-    String email;
+    @Column(nullable = false, unique = true)
+    private String email;
 
     @Column(nullable = true)
-    String password;
+    private String password;
 
     @Column(nullable = true)
-    String phoneNumber;
+    private String phoneNumber;
 
     @ManyToOne
-    Usertype userType;
+    @JoinColumn(name = "usertype_id")
+    private Usertype userType;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(nullable = true)
-    Calendar calendar;
+    private Calendar calendar;
 
     @Column(nullable = true)
-    String avatarUrl;
+    private String avatarUrl;
 
-    @OneToMany
-    Set<OrganisationRole> organisationRoleSet;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private Set<OrganisationRole> organisationRoleSet;
 
     @Column(unique = true)
     private String googleId;
 
-    public  User(String name, String userName, String email, String phoneNumber, String avatarUrl){
+    public User(String name, String userName, String email, String phoneNumber, String avatarUrl) {
         this.name = name;
         this.userName = userName;
         this.email = email;
@@ -66,11 +67,10 @@ public class User{
     }
 
     public User(Long userId) {
-        this.Id = userId;
+        this.id = userId;
     }
 
     public User(String userName) {
         this.userName = userName;
     }
 }
-

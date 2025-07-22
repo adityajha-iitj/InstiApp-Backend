@@ -174,4 +174,6 @@ public interface UserRepository {
     public User getUserFromUsername(String username);
 
     User findByGoogleId(String googleId);
+
+    public UserBaseDto deleteUser(String username);
 }

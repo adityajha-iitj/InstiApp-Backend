@@ -1,5 +1,7 @@
 package in.ac.iitj.instiapp.database.entities.User.Organisation;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,6 +27,13 @@ public class OrganisationRole {
 
     @Enumerated(EnumType.STRING)
     OrganisationPermission permission;
+
+    // In your OrganisationRole entity class
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false) // This creates the foreign key column in the organisation_roles table
+    @JsonBackReference
+    private User user;
 
 
     public OrganisationRole(Long userId) {

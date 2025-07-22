@@ -260,5 +260,10 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    @Transactional
+    public UserBaseDto deleteUser(String username){
+        return userRepository.deleteUser(username);
+    }
+
 
 }

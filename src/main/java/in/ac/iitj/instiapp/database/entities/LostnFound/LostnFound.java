@@ -4,6 +4,8 @@ import in.ac.iitj.instiapp.database.entities.Media.Media;
 import in.ac.iitj.instiapp.database.entities.User.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -21,10 +23,12 @@ public class LostnFound {
     Long Id;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "finder_id", nullable = true)
     User finder;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "owner_id", nullable = true)
     User owner;
 

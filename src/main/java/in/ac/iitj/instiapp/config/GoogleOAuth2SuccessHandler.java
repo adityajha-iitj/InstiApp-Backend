@@ -103,10 +103,11 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         List<GrantedAuthority> authorities = Collections.singletonList(
                 new SimpleGrantedAuthority(userDetailedDto.getUserTypeName())
         );
+        String password = userDetailedDto.getPassword() != null ? userDetailedDto.getPassword() : "";
 
         var userDetails = User.builder()
                 .username(username)
-                .password(userDetailedDto.getPassword())
+                .password(password)
                 .authorities(authorities)
                 .build();
 

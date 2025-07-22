@@ -198,47 +198,40 @@ public class NotificationController {
             }
         }
 
-        try {
-            // 1️⃣ send to all and get back every DeviceToken entity
-            List<DeviceToken> allDeviceTokens = fcmService.sendNotificationToAll(request, fileUrl);
+        // 1️⃣ send to all and get back every DeviceToken entity
+        List<DeviceToken> allDeviceTokens = fcmService.sendNotificationToAll(request, fileUrl);
 
-            // prepare a flat list of (username, token) pairs
-            List<DeviceTokenRequest> deviceTokens = new ArrayList<>();
-            List<String> users = new ArrayList<>();
+        // prepare a flat list of (username, token) pairs
+        List<DeviceTokenRequest> deviceTokens = new ArrayList<>();
+        List<String> users = new ArrayList<>();
 
-            // 2️⃣ persist one Notification per actual token
-            for (DeviceToken entity : allDeviceTokens) {
-                String username = entity.getUsername();
+        // 2️⃣ persist one Notification per actual token
+        for (DeviceToken entity : allDeviceTokens) {
+            String username = entity.getUsername();
 
-                for (String token : entity.getToken()) {
-                    // persist a Notification per device token
-                    Notification notification = new Notification();
-                    notification.setTitle(request.getTitle());
-                    notification.setBody(request.getBody());
-                    notification.setRead(false);
-                    notification.setTopic("All");
-                    notification.setUsername(username);
-                    notification.setCreatedAt(LocalDateTime.now());
-                    notification.setImageUrl(fileUrl);
+            for (String token : entity.getToken()) {
+                // persist a Notification per device token
+                Notification notification = new Notification();
+                notification.setTitle(request.getTitle());
+                notification.setBody(request.getBody());
+                notification.setRead(false);
+                notification.setTopic("All");
+                notification.setUsername(username);
+                notification.setCreatedAt(LocalDateTime.now());
+                notification.setImageUrl(fileUrl);
 
-                    notificationService.saveNotification(notification);
+                notificationService.saveNotification(notification);
 
-                    // collect for response
-                    deviceTokens.add(new DeviceTokenRequest(token));
-                    users.add(username);
-                }
+                // collect for response
+                deviceTokens.add(new DeviceTokenRequest(token));
+                users.add(username);
             }
-
-            response.put("message", "Notification sent to " + deviceTokens.size() + " devices");
-            response.put("deviceTokens", deviceTokens);
-            response.put("users", users);
-            return ResponseEntity.ok(response);
-
-        } catch (FirebaseMessagingException e) {
-            response.put("error", "Failed to send notification");
-            response.put("details", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+
+        response.put("message", "Notification sent to " + deviceTokens.size() + " devices");
+        response.put("deviceTokens", deviceTokens);
+        response.put("users", users);
+        return ResponseEntity.ok(response);
 
     }
 

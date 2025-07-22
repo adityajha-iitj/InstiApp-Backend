@@ -61,4 +61,6 @@ public interface UserService {
     public String getUsernameFromEmail(String email);
 
     User findOrCreateGoogleUser(String googleId, String email, String name, String pictureUrl);
+
+    public UserBaseDto deleteUser(String username);
 }

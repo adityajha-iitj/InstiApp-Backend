@@ -12,6 +12,7 @@ import in.ac.iitj.instiapp.database.entities.DeviceToken;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -71,30 +72,55 @@ public class FCMServiceImpl {
 
 
 
-    public List<DeviceToken> sendNotificationToAll(NotificationRequestAll req, String fileUrl) throws FirebaseMessagingException {
-        List<DeviceToken> allTokens = deviceTokenRepository.findAll();
+    public List<DeviceToken> sendNotificationToAll(NotificationRequestAll req, String fileUrl) {
 
-        for (DeviceToken tokenEntity : allTokens) {
-            // Assume tokenEntity.getTokens() returns a Collection<String> of all device tokens for this user
-            for (String token : tokenEntity.getToken()) {
-                com.google.firebase.messaging.Notification.Builder notificationBuilder =
-                        com.google.firebase.messaging.Notification.builder()
-                                .setTitle(req.getTitle())
-                                .setBody(req.getBody());
-                if (fileUrl != null && !fileUrl.isEmpty()) {
-                    notificationBuilder.setImage(fileUrl);
-                }
+        // --- ACCURATE MODIFICATION ---
+        // 1. Get the original list of entities first, as we need it for the return statement.
+        List<DeviceToken> allTokenEntities = deviceTokenRepository.findAll();
 
-                Message message = Message.builder()
-                        .setToken(token)
-                        .setNotification(notificationBuilder.build())
-                        .putData("fileUrl", fileUrl == null ? "" : fileUrl)
-                        .build();
+        // 2. Get a flat list of every single device token string from the entities.
+        List<String> allDeviceTokens = allTokenEntities
+                .stream()
+                .flatMap(deviceToken -> deviceToken.getToken().stream())
+                .collect(Collectors.toList()); // Use .collect(Collectors.toList()) for broader Java compatibility
 
+        if (allDeviceTokens.isEmpty()) {
+            System.out.println("No registered device tokens found in the system to broadcast to.");
+            return allTokenEntities; // Return the empty list
+        }
+
+        // Initialize success and failure counters for logging (optional but good practice)
+        int successCount = 0;
+        int failureCount = 0;
+
+        // 3. Loop through every token and attempt to send.
+        for (String token : allDeviceTokens) {
+            // Build a DATA-ONLY message.
+            Message message = Message.builder()
+                    .setToken(token)
+                    .putData("title", req.getTitle())
+                    .putData("body", req.getBody())
+                    .putData("image", fileUrl == null ? "" : fileUrl)
+                    .build();
+
+            // Use a try-catch block inside the loop for robust error handling.
+            try {
                 FirebaseMessaging.getInstance().send(message);
+                successCount++;
+            } catch (FirebaseMessagingException e) {
+                System.err.println("Failed to send broadcast to token: " + token + ". Error: " + e.getMessage());
+                failureCount++;
             }
         }
-        return allTokens;
+
+        // Log the summary of the operation.
+        System.out.printf(
+                "Broadcast attempted for %d tokens: %d succeeded, %d failed.%n",
+                allDeviceTokens.size(), successCount, failureCount
+        );
+
+        // 4. Return the original list of entities as requested.
+        return allTokenEntities;
     }
 
 
