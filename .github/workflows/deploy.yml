@@ -37,7 +37,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          command_timeout: 10m
+          command_timeout: 100m
           script: |
             echo "Stopping existing container if running..."
             docker stop springboot-app || echo "Container not running."
